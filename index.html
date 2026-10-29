@@ -1,0 +1,3040 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RoadSense Overdrive // Neural Interceptor</title>
+    <script>
+        (function() {
+            const origWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                origWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@500;600;700;800&display=swap');
+
+        :root {
+            --bg-canvas: #05070b;
+            --surface-primary: #12151c;
+            --surface-recessed: #0b0d13;
+            --border-subtle: #232836;
+            --border-highlight: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            background: var(--bg-canvas);
+            color: #e2e8f0;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            touch-action: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hide cursor strictly during active driving on PC; visible in all menus */
+        body.is-pc.gameplay-active,
+        body.is-pc.gameplay-active * {
+            cursor: none !important;
+        }
+
+        /* Strict Device-Specific Visibility Rules (Works across all phone landscape widths) */
+        body.is-pc .mobile-only-ui {
+            display: none !important;
+        }
+        body.is-mobile .pc-only-ui {
+            display: none !important;
+        }
+
+        .mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .title-cinzel {
+            font-family: 'Cinzel Decorative', serif;
+        }
+
+        .hardware-panel {
+            background-color: rgba(15, 18, 26, 0.94);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-subtle);
+            border-top-color: var(--border-highlight);
+            box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.9);
+        }
+
+        .recessed-well {
+            background-color: var(--surface-recessed);
+            border: 1px solid #1b202b;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #0284c7 100%);
+            color: #03150e;
+            font-weight: 800;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 22px rgba(16, 185, 129, 0.35);
+            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+        }
+        .btn-launch:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+
+        /* =========================================================
+           FORCED LANDSCAPE VIEWPORT FOR MOBILE & FULLSCREEN PC
+           ========================================================= */
+        #gameViewportWrapper {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            background: #05070b;
+        }
+
+        @media screen and (max-width: 960px) and (orientation: portrait) {
+            #gameViewportWrapper {
+                top: 0;
+                left: 100vw;
+                width: 100dvh;
+                height: 100vw;
+                transform-origin: top left;
+                transform: rotate(90deg);
+            }
+        }
+
+        canvas#gameCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 1;
+        }
+
+        /* =========================================================
+           ATMOSPHERIC VISUAL FILTERS (RE REQUIEM / DYING LIGHT 2)
+           ========================================================= */
+        .filter-standard { filter: none; }
+        .filter-requiem-noir { filter: grayscale(100%) contrast(160%) brightness(92%); }
+        .filter-requiem-ash { filter: grayscale(78%) contrast(145%) brightness(88%) sepia(14%) hue-rotate(175deg); }
+        .filter-dl2-grit { filter: saturate(46%) sepia(25%) contrast(138%) brightness(94%); }
+        .filter-dl2-darkzone { filter: saturate(58%) contrast(155%) brightness(84%); }
+        .filter-stark-mono { filter: grayscale(95%) contrast(180%) brightness(95%); }
+
+        #atmosphereOverlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            background: radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.68) 100%);
+        }
+        #atmosphereOverlay.scanlines-active::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 0, 0, 0.22) 3px
+            );
+        }
+
+        /* =========================================================
+           VOID PRISMATIC GLOW & CORE MEMBER LEADERBOARD AURAS
+           ========================================================= */
+        @keyframes voidPrismaticShift {
+            0% { background-position: 0% 50%; box-shadow: 0 0 16px rgba(0, 245, 212, 0.5); border-color: #00f5d4; }
+            50% { background-position: 100% 50%; box-shadow: 0 0 22px rgba(255, 0, 127, 0.6); border-color: #ff007f; }
+            100% { background-position: 0% 50%; box-shadow: 0 0 16px rgba(0, 245, 212, 0.5); border-color: #00f5d4; }
+        }
+        .void-leaderboard-card {
+            background: linear-gradient(120deg, rgba(10, 14, 26, 0.95) 0%, rgba(36, 12, 58, 0.85) 35%, rgba(8, 45, 62, 0.85) 70%, rgba(10, 14, 26, 0.95) 100%);
+            background-size: 240% 240%;
+            border: 1.5px solid #00f5d4;
+            animation: voidPrismaticShift 3.5s ease-in-out infinite;
+        }
+        .void-name-glow {
+            background: linear-gradient(90deg, #00f5d4, #00bbf9, #c77dff, #ff007f, #ffbe0b, #00f5d4);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: voidPrismaticShift 3s linear infinite;
+            font-weight: 800;
+        }
+
+        .core-glow-ritam { border: 1px solid rgba(245, 158, 11, 0.7); box-shadow: 0 0 14px rgba(245, 158, 11, 0.25); }
+        .core-glow-meraj { border: 1px solid rgba(239, 68, 68, 0.7); box-shadow: 0 0 14px rgba(239, 68, 68, 0.25); }
+        .core-glow-sourajita { border: 1px solid rgba(16, 185, 129, 0.7); box-shadow: 0 0 14px rgba(16, 185, 129, 0.25); }
+        .core-glow-debankita { border: 1px solid rgba(168, 85, 247, 0.7); box-shadow: 0 0 14px rgba(168, 85, 247, 0.25); }
+
+        @keyframes eqBounce {
+            0%, 100% { height: 4px; }
+            50% { height: 13px; }
+        }
+        .eq-1 { animation: eqBounce 0.48s ease-in-out infinite; }
+        .eq-2 { animation: eqBounce 0.35s ease-in-out infinite 0.12s; }
+        .eq-3 { animation: eqBounce 0.58s ease-in-out infinite 0.24s; }
+        .eq-paused { animation: none !important; height: 4px !important; }
+
+        .touch-paddle {
+            background: rgba(14, 18, 26, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
+            transition: transform 0.06s ease, background-color 0.06s ease;
+        }
+        .touch-paddle:active, .touch-paddle.active-press {
+            transform: scale(0.92);
+            background: rgba(56, 189, 248, 0.3);
+            border-color: #38bdf8;
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.96) translateY(5px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-anim {
+            animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #263044 #090b10;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #090b10; }
+        ::-webkit-scrollbar-thumb { background: #263044; border-radius: 4px; }
+    </style>
+</head>
+<body class="is-pc">
+
+    <div id="gameViewportWrapper">
+
+        <!-- PROCEDURAL 3D ADAS HIGHWAY CANVAS -->
+        <canvas id="gameCanvas" class="filter-standard"></canvas>
+        <div id="atmosphereOverlay"></div>
+
+        <!-- =====================================================
+             1. MAIN MENU / CONFIDENTIAL PILOT LOGIN OVERLAY (z-[50])
+             ===================================================== -->
+        <div id="startModal" style="display: flex;" class="absolute inset-0 bg-[#04060a]/90 z-[50] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+            <div class="hardware-panel modal-anim p-3.5 sm:p-5 rounded-2xl max-w-xl w-full space-y-2.5 border border-[#2d364a] shadow-2xl max-h-[94%] overflow-y-auto">
+                
+                <!-- Top Header & Live #1 Leader Banner -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#232836] pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 text-[9px] mono-num font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full">
+                            NEURAL INTERCEPTOR // OVERDRIVE
+                        </span>
+                        <h1 class="title-cinzel text-sm sm:text-lg font-bold text-white tracking-wider">
+                            ROADSENSE: OVERDRIVE
+                        </h1>
+                    </div>
+                    <div class="recessed-well px-2.5 py-1 rounded-lg text-[10px] mono-num flex items-center gap-1.5">
+                        <span>👑 #1:</span>
+                        <strong id="bootTopLeaderName" class="text-amber-300">Unclaimed</strong>
+                        <span id="bootTopLeaderScore" class="text-emerald-400 font-bold"></span>
+                    </div>
+                </div>
+
+                <!-- Confidential Pilot ID Authentication & Guest Callsign Bar -->
+                <div class="recessed-well p-2.5 sm:p-3 rounded-xl border border-[#232b3e] space-y-2">
+                    <div id="pilotLoginInputRow" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[10px] mono-num font-bold uppercase text-sky-400">
+                                🔑 PILOT AUTHENTICATION (CORE LIVERY &amp; ACCOUNT SYNC)
+                            </div>
+                            <p class="text-[11px] text-gray-400">
+                                Enter your confidential 4-digit Pilot ID for your custom Interceptor livery, or enter a Guest Callsign:
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <input type="password" id="pilotIdInput" maxlength="4" inputmode="numeric" placeholder="4-Digit ID" onkeydown="if(event.key==='Enter') loginPilotById()" class="bg-[#07090e] border border-[#2e384f] focus:border-sky-400 rounded-lg px-2 py-1.5 text-xs mono-num text-white tracking-widest w-24 text-center focus:outline-none">
+                            <button type="button" onclick="loginPilotById()" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs transition cursor-pointer">
+                                Login ID
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Guest Name Row (Only when in Guest Mode) -->
+                    <div id="guestNameInputRow" class="flex items-center justify-between gap-2 pt-1 border-t border-[#181d29]">
+                        <span class="text-[10px] mono-num text-gray-400">GUEST CALLSIGN:</span>
+                        <div class="flex items-center gap-1.5 flex-1 max-w-xs">
+                            <input type="text" id="guestCallsignInput" maxlength="16" placeholder="Guest Pilot Name" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Active Account Status + Logout Button -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-[#181d29] text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span id="activePilotColorDot" class="w-3 h-3 rounded-full bg-sky-400 inline-block shrink-0 shadow"></span>
+                            <span class="text-gray-300 truncate">Pilot: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
+                            <span id="activeLiveryBadge" class="px-2 py-0.5 text-[10px] mono-num rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">Tactical Steel</span>
+                        </div>
+                        <button type="button" id="logoutAccountBtn" onclick="logoutCurrentPilot()" class="hidden px-2.5 py-1 rounded-lg bg-red-950/80 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-[10px] mono-num font-bold transition cursor-pointer shrink-0">
+                            ⇄ Logout / Switch ID
+                        </button>
+                    </div>
+                    <div id="loginFeedbackBanner" class="hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"></div>
+                </div>
+
+                <!-- Account Personal Telemetry Summary -->
+                <div class="grid grid-cols-3 gap-2 text-left text-[11px] mono-num">
+                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[9px]">ACCOUNT BEST SCORE</div>
+                        <div id="bootHighScore" class="text-emerald-400 font-extrabold text-sm">0</div>
+                    </div>
+                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[9px]">MAX EPOCH REACHED</div>
+                        <div id="bootBestEpoch" class="text-sky-300 font-extrabold text-sm">Epoch 1</div>
+                    </div>
+                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[9px]">PHANTOM FLASHES</div>
+                        <div id="bootTotalFlashes" class="text-purple-300 font-extrabold text-sm">0</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Launch, Ranks, Settings & Exit Portal Buttons -->
+                <div class="flex flex-wrap items-center gap-2 pt-0.5">
+                    <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm uppercase tracking-widest cursor-pointer">
+                        ▶ Engage Interceptor
+                    </button>
+                    <button type="button" onclick="openLeaderboardModal()" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-amber-300 border border-amber-500/40 text-xs font-bold transition cursor-pointer">
+                        🏆 Ranks
+                    </button>
+                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-sky-300 border border-sky-500/40 text-xs font-bold transition cursor-pointer">
+                        ⚙️ Settings
+                    </button>
+                    <button type="button" onclick="exitGamePortal()" class="px-3 py-2.5 rounded-xl bg-red-600/85 hover:bg-red-500 text-white border border-red-400/40 text-xs font-bold transition cursor-pointer" title="Exit Game Portal">
+                        🚪 Exit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             2. GAME OVER / TELEMETRY DEBRIEF MODAL (z-[55])
+             ===================================================== -->
+        <div id="gameOverModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[55] flex items-center justify-center p-2.5 sm:p-5 backdrop-blur-md">
+            <div class="hardware-panel modal-anim p-4 sm:p-5 rounded-2xl max-w-md w-full space-y-3 border border-red-500/40 shadow-2xl text-center">
+                <span class="px-2.5 py-0.5 text-[10px] mono-num font-bold uppercase bg-red-500/20 text-red-300 border border-red-500/40 rounded-full">
+                    CRITICAL COLLISION // HULL INTEGRITY 0%
+                </span>
+                <h2 class="title-cinzel text-base sm:text-xl font-bold text-white">
+                    TELEMETRY DEBRIEF
+                </h2>
+
+                <div class="grid grid-cols-2 gap-2 text-left mono-num text-xs">
+                    <div class="recessed-well p-2.5 rounded-xl">
+                        <div class="text-[10px] text-gray-400">RUN SCORE</div>
+                        <div id="finalScoreVal" class="text-base sm:text-lg font-extrabold text-emerald-400">0</div>
+                    </div>
+                    <div class="recessed-well p-2.5 rounded-xl">
+                        <div class="text-[10px] text-gray-400">ACCOUNT BEST</div>
+                        <div id="finalBestVal" class="text-base sm:text-lg font-extrabold text-amber-300">0</div>
+                    </div>
+                    <div class="recessed-well p-2.5 rounded-xl">
+                        <div class="text-[10px] text-gray-400">EPOCH &amp; BIOME</div>
+                        <div id="finalEpochVal" class="text-xs font-bold text-sky-300 truncate">Epoch 1</div>
+                    </div>
+                    <div class="recessed-well p-2.5 rounded-xl">
+                        <div class="text-[10px] text-gray-400">PHANTOM FLASHES</div>
+                        <div id="finalNearMissVal" class="text-sm font-bold text-purple-300">0</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                    <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider cursor-pointer">
+                        ↻ Reboot
+                    </button>
+                    <button type="button" onclick="openLeaderboardModal()" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-amber-300 border border-amber-500/40 text-xs font-bold cursor-pointer">
+                        🏆 Ranks
+                    </button>
+                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/40 text-xs font-bold cursor-pointer" title="Open Settings">
+                        ⚙️
+                    </button>
+                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-2.5 rounded-xl bg-red-600/85 hover:bg-red-500 text-white text-xs font-bold cursor-pointer" title="Exit to Main Menu">
+                        🏠 Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             3. ESC / PAUSE & MODULAR SETTINGS HUB MODAL (z-[65])
+                (Game Settings | Sounds | Controls | Graphics)
+             ===================================================== -->
+        <div id="pauseSettingsModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[65] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+            <div class="hardware-panel modal-anim w-full max-w-2xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[94%] overflow-hidden">
+                
+                <!-- Modal Header -->
+                <div class="px-3.5 py-2 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                        <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                            SYSTEM PAUSE &amp; SETTINGS HUB
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="openLeaderboardModal()" class="px-2.5 py-1 rounded-lg bg-[#171d2b] hover:bg-[#222b3e] text-amber-300 border border-amber-500/30 text-[11px] font-bold cursor-pointer">
+                            🏆 Ranks
+                        </button>
+                        <button type="button" id="resumeOrCloseSettingsBtn" onclick="resumeFromSettings()" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-extrabold cursor-pointer">
+                            ▶ Resume
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4-Tab Settings Navigation Bar -->
+                <div class="px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-4 gap-1.5 shrink-0">
+                    <button type="button" id="setTabBtn_game" onclick="switchSettingsTab('game')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate">
+                        🎮 Game Settings
+                    </button>
+                    <button type="button" id="setTabBtn_sounds" onclick="switchSettingsTab('sounds')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
+                        🔊 Sounds &amp; OST
+                    </button>
+                    <button type="button" id="setTabBtn_controls" onclick="switchSettingsTab('controls')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
+                        🕹️ Controls
+                    </button>
+                    <button type="button" id="setTabBtn_graphics" onclick="switchSettingsTab('graphics')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
+                        🖥️ Graphics
+                    </button>
+                </div>
+
+                <!-- Tab Content Area -->
+                <div class="flex-1 p-3 sm:p-4 overflow-y-auto space-y-2.5 text-xs">
+
+                    <!-- TAB 1: GAME SETTINGS (DIFFICULTY + 13 INTERCHANGEABLE BIOMES + INDIVIDUAL RESET) -->
+                    <div id="setTab_game" class="space-y-2.5">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Configure Difficulty &amp; Biome Cycling</span>
+                            <button type="button" onclick="resetGameSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
+                                ↺ Reset Game Settings
+                            </button>
+                        </div>
+
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty &amp; Progressive Epoch Scaling</span>
+                                <span id="diffCurrentLabel" class="text-[10px] mono-num text-emerald-400 font-bold">🟢 Assisted Easy</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                                <button type="button" onclick="setDifficulty('easy')" id="diffBtn_easy" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-emerald-500 text-black cursor-pointer">
+                                    🟢 Easy (Smooth)
+                                </button>
+                                <button type="button" onclick="setDifficulty('normal')" id="diffBtn_normal" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🔵 Normal (1.2x)
+                                </button>
+                                <button type="button" onclick="setDifficulty('hard')" id="diffBtn_hard" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🟠 Overdrive (1.6x)
+                                </button>
+                                <button type="button" onclick="setDifficulty('void')" id="diffBtn_void" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🔮 Void Max (2.2x)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">🌍 Highway Biome Selector (13 Biomes)</span>
+                                <button type="button" id="autoBiomeToggleBtn" onclick="toggleAutoBiomeCycle()" class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
+                                    🔄 Auto-Interchange: ON
+                                </button>
+                            </div>
+                            <div id="biomeGridSelector" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-32 overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: SOUNDS & OST (4 VOLUME SLIDERS + MITADRU.M4A SWITCHER + INDIVIDUAL RESET) -->
+                    <div id="setTab_sounds" class="hidden space-y-2.5">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Audio Mixer &amp; OST Engine</span>
+                            <button type="button" onclick="resetSoundSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
+                                ↺ Reset Sound Settings
+                            </button>
+                        </div>
+
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">🎵 Soundtrack / OST Selection</span>
+                                <span id="ostLockStatus" class="text-[10px] mono-num text-sky-400">Procedural Synth Active</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" id="ostBtn_synth" onclick="selectOstMode('synth')" class="p-2 rounded-xl text-left border bg-sky-500/20 border-sky-400 text-white cursor-pointer">
+                                    <div class="font-bold text-xs">🎹 Procedural Cyber-Synth OST</div>
+                                    <div class="text-[10px] text-gray-300 mt-0.5">128 BPM D-Minor WebAudio Engine (Default)</div>
+                                </button>
+                                <button type="button" id="ostBtn_mitadru" onclick="selectOstMode('mitadru')" class="p-2 rounded-xl text-left border bg-[#141824] border-[#262f45] text-gray-300 cursor-pointer">
+                                    <div class="font-bold text-xs flex items-center justify-between">
+                                        <span>🎧 Mitadru.m4a (Architect OST)</span>
+                                        <span id="mitadruOstBadge" class="px-1.5 py-0.5 text-[9px] mono-num rounded bg-purple-500/20 text-purple-300">ID 1117</span>
+                                    </div>
+                                    <div class="text-[10px] text-gray-400 mt-0.5">Personal track loop for Mitadru (Void)</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4 Volume Sliders -->
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2 mono-num">
+                            <div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-gray-300">🔊 Master Volume</span>
+                                    <span id="volLabel_master" class="text-emerald-400 font-bold">90%</span>
+                                </div>
+                                <input type="range" id="volSlider_master" min="0" max="100" value="90" oninput="updateVolumeSetting('master', this.value)" class="w-full accent-emerald-400 cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-gray-300">🎵 Music &amp; OST Volume</span>
+                                    <span id="volLabel_music" class="text-sky-400 font-bold">85%</span>
+                                </div>
+                                <input type="range" id="volSlider_music" min="0" max="100" value="85" oninput="updateVolumeSetting('music', this.value)" class="w-full accent-sky-400 cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-gray-300">🏎️ Car Engine, Turbo &amp; Exhaust</span>
+                                    <span id="volLabel_engine" class="text-amber-400 font-bold">75%</span>
+                                </div>
+                                <input type="range" id="volSlider_engine" min="0" max="100" value="75" oninput="updateVolumeSetting('engine', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-gray-300">⚡ ADAS Telemetry, Phantom Flash &amp; EMP SFX</span>
+                                    <span id="volLabel_sfx" class="text-purple-400 font-bold">90%</span>
+                                </div>
+                                <input type="range" id="volSlider_sfx" min="0" max="100" value="90" oninput="updateVolumeSetting('sfx', this.value)" class="w-full accent-purple-400 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CONTROLS (STRICTLY SEPARATED: MOBILE-ONLY ON PHONE, PC-ONLY ON PC + INDIVIDUAL RESET) -->
+                    <div id="setTab_controls" class="hidden space-y-2.5">
+                        <div class="flex items-center justify-between px-1">
+                            <span id="ctrlPlatformHeaderLabel" class="text-[10px] mono-num uppercase text-gray-400 font-bold">Active Platform Controls</span>
+                            <button type="button" onclick="resetControlSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
+                                ↺ Reset Controls
+                            </button>
+                        </div>
+
+                        <!-- PHONE / ANDROID CONTROLS SECTION (Hidden on PC via .mobile-only-ui) -->
+                        <div class="mobile-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">📱 Mobile / Android Steering Mode</span>
+                                <button type="button" onclick="calibrateTiltSensor()" class="px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] mono-num font-bold cursor-pointer">
+                                    🧭 Calibrate Tilt Center
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button type="button" id="mobCtrl_buttons" onclick="setMobileControlMode('buttons')" class="p-2.5 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center">
+                                    ◀▶ Arrow Paddles
+                                </button>
+                                <button type="button" id="mobCtrl_drag" onclick="setMobileControlMode('drag')" class="p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
+                                    👆 Finger Drag
+                                </button>
+                                <button type="button" id="mobCtrl_tilt" onclick="setMobileControlMode('tilt')" class="p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
+                                    📲 Phone Tilt (Gyro)
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 border-t border-[#1b2230] text-[11px]">
+                                <span class="text-gray-300">Double-Tap Screen for Nitro Overdrive:</span>
+                                <button type="button" id="doubleTapNitroBtn" onclick="toggleDoubleTapNitro()" class="px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
+                                    ENABLED
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PC KEYBOARD CONTROLS SECTION (Hidden on Phone via .pc-only-ui) -->
+                        <div class="pc-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⌨️ PC Keyboard Remapper (Click Any Box to Rebind)</span>
+                                <span class="text-[10px] mono-num text-gray-400">ESC = Pause / Menu</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mono-num text-[11px]">
+                                <button type="button" onclick="startKeyRebind('left')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-sky-400 text-left cursor-pointer">
+                                    <div class="text-[9px] text-gray-400">STEER LEFT</div>
+                                    <div class="text-sky-300 font-bold mt-0.5" id="bindVal_left">A / ARROWLEFT</div>
+                                </button>
+                                <button type="button" onclick="startKeyRebind('right')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-sky-400 text-left cursor-pointer">
+                                    <div class="text-[9px] text-gray-400">STEER RIGHT</div>
+                                    <div class="text-sky-300 font-bold mt-0.5" id="bindVal_right">D / ARROWRIGHT</div>
+                                </button>
+                                <button type="button" onclick="startKeyRebind('nitro')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-amber-400 text-left cursor-pointer">
+                                    <div class="text-[9px] text-gray-400">NITRO ACCEL</div>
+                                    <div class="text-amber-300 font-bold mt-0.5" id="bindVal_nitro">SHIFT / W</div>
+                                </button>
+                                <button type="button" onclick="startKeyRebind('brake')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-red-400 text-left cursor-pointer">
+                                    <div class="text-[9px] text-gray-400">AEB BRAKE</div>
+                                    <div class="text-red-300 font-bold mt-0.5" id="bindVal_brake">S / ARROWDOWN</div>
+                                </button>
+                                <button type="button" onclick="startKeyRebind('emp')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-emerald-400 text-left cursor-pointer col-span-2 sm:col-span-2">
+                                    <div class="text-[9px] text-gray-400">NEURAL EMP PULSE</div>
+                                    <div class="text-emerald-300 font-bold mt-0.5" id="bindVal_emp">SPACE / E</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: GRAPHICS & ATMOSPHERIC FILTERS (RE REQUIEM / DYING LIGHT 2 + INDIVIDUAL RESET) -->
+                    <div id="setTab_graphics" class="hidden space-y-2.5">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Post-Processing &amp; Performance</span>
+                            <button type="button" onclick="resetGraphicsSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
+                                ↺ Reset Graphics
+                            </button>
+                        </div>
+
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
+                            <div class="font-bold text-white uppercase text-[11px] mono-num">
+                                🎬 Atmospheric Filters (Resident Evil Requiem &amp; Dying Light 2 Style)
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                                <button type="button" onclick="setVisualFilter('filter-standard')" id="flt_filter-standard" class="p-2 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer">
+                                    ✨ Standard Optic
+                                </button>
+                                <button type="button" onclick="setVisualFilter('filter-requiem-noir')" id="flt_filter-requiem-noir" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🖤 RE: Requiem Noir
+                                </button>
+                                <button type="button" onclick="setVisualFilter('filter-requiem-ash')" id="flt_filter-requiem-ash" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🌫️ RE: Requiem Ash
+                                </button>
+                                <button type="button" onclick="setVisualFilter('filter-dl2-grit')" id="flt_filter-dl2-grit" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🌇 DL2: Harran Grit
+                                </button>
+                                <button type="button" onclick="setVisualFilter('filter-dl2-darkzone')" id="flt_filter-dl2-darkzone" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    🌑 DL2: Darkzone
+                                </button>
+                                <button type="button" onclick="setVisualFilter('filter-stark-mono')" id="flt_filter-stark-mono" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
+                                    ⚡ High-Contrast B&amp;W
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Graphics Scalability & Effects -->
+                        <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2 mono-num">
+                            <div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-gray-300">✨ Particle, Starfield &amp; Weather Scale</span>
+                                    <span id="gfxParticleLabel" class="text-sky-400 font-bold">100%</span>
+                                </div>
+                                <input type="range" id="gfxParticleSlider" min="0" max="100" value="100" oninput="updateGfxParticles(this.value)" class="w-full accent-sky-400 cursor-pointer">
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                                <button type="button" id="gfxToggle_bloom" onclick="toggleGfxOption('bloom')" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer">
+                                    💡 Glow: ON
+                                </button>
+                                <button type="button" id="gfxToggle_shake" onclick="toggleGfxOption('shake')" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer">
+                                    📳 Shake: ON
+                                </button>
+                                <button type="button" id="gfxToggle_transitions" onclick="toggleGfxOption('transitions')" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer">
+                                    🌀 FX Anim: ON
+                                </button>
+                                <button type="button" id="gfxToggle_scanlines" onclick="toggleGfxOption('scanlines')" class="p-1.5 rounded-lg bg-[#151a26] text-gray-400 border border-[#262f45] text-[10px] font-bold cursor-pointer">
+                                    📺 Scanline: OFF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer (Switch Account, Restart Run, Exit to Main Menu) -->
+                <div class="px-3.5 py-2 bg-[#0c0f16] border-t border-[#232836] flex items-center justify-between gap-2 shrink-0">
+                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-1.5 rounded-lg bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/30 text-xs font-semibold cursor-pointer">
+                        🔑 Switch Pilot ID
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="startGameSession()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold cursor-pointer">
+                            ↻ Restart Run
+                        </button>
+                        <button type="button" onclick="returnToMainMenu()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer">
+                            🏠 Main Menu
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- =====================================================
+             4. REAL-TIME CROSS-DEVICE LEADERBOARD MODAL (z-[75] — TOP LAYER)
+             ===================================================== -->
+        <div id="leaderboardModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[75] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+            <div class="hardware-panel modal-anim w-full max-w-xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[92%] overflow-hidden">
+                <div class="px-4 py-2.5 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
+                                🏆 GLOBAL REAL-TIME TELEMETRY LEADERBOARD
+                            </h2>
+                        </div>
+                        <p class="text-[10px] mono-num text-gray-400 mt-0.5">
+                            Only verified runs (&gt;0 pts) are ranked &bull; Instant Persistent Sync
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <!-- Admin Reset Button (Visible ONLY when logged in as Mitadru 1117) -->
+                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
+                            🔄 Reset Scores (1117)
+                        </button>
+                        <button type="button" onclick="closeLeaderboardModal()" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer">
+                            ✕ Close
+                        </button>
+                    </div>
+                </div>
+
+                <div id="leaderboardListContainer" class="flex-1 p-3 overflow-y-auto space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             5. TOP ADAS TELEMETRY HUD BAR
+                (PC: [ESC] Menu only | Phone: Dedicated ⏸ Pause button only)
+             ===================================================== -->
+        <header class="absolute top-0 inset-x-0 z-30 p-2 sm:p-2.5 pointer-events-none">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5">
+
+                <!-- Left Telemetry Cluster -->
+                <div class="hardware-panel px-2.5 py-1 rounded-2xl flex items-center gap-2 pointer-events-auto">
+                    <div class="flex items-center gap-1.5">
+                        <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="hudPilotCallsign" class="text-[10px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[85px] sm:max-w-[130px]">GUEST</span>
+                    </div>
+
+                    <div class="recessed-well px-2 py-0.5 rounded-lg mono-num text-[11px]">
+                        <strong id="hudScore" class="text-emerald-400">000000</strong>
+                    </div>
+
+                    <div class="recessed-well px-2 py-0.5 rounded-lg mono-num text-[10px] sm:text-[11px]">
+                        <span id="hudEpoch" class="text-sky-300 font-bold">EPOCH 1</span>
+                    </div>
+
+                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[10px] sm:text-[11px]">
+                        <span id="hudCombo" class="text-amber-300 font-bold">1.0x</span>
+                    </div>
+
+                    <div class="hidden sm:flex items-center gap-1.5 recessed-well px-2 py-0.5 rounded-lg">
+                        <span class="text-[9px] mono-num text-gray-400">HULL</span>
+                        <div class="w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
+                            <div id="hudArmorBar" class="h-full bg-emerald-400 transition-all duration-150" style="width: 100%;"></div>
+                        </div>
+                        <span id="hudArmorPct" class="text-[10px] mono-num font-bold text-emerald-400">100%</span>
+                    </div>
+                </div>
+
+                <!-- Center Biome, Warning & Live #1 Leader Pill -->
+                <div class="hardware-panel px-3 py-1 rounded-2xl hidden lg:flex items-center gap-2.5 pointer-events-auto text-[11px] mono-num">
+                    <span id="hudBiomeName" class="text-sky-300 font-bold">🌌 Cyber Void</span>
+                    <span class="text-gray-600">|</span>
+                    <span id="hudWarningBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
+                        NO WARNING
+                    </span>
+                    <span class="text-gray-600">|</span>
+                    <span class="text-amber-300">👑 #1: <strong id="hudLeaderMini">Unclaimed</strong></span>
+                </div>
+
+                <!-- Right Cluster: Equalizer + Strict PC vs Mobile Pause/ESC UI -->
+                <div class="hardware-panel px-2.5 py-1 rounded-2xl flex items-center gap-2 pointer-events-auto">
+                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg recessed-well">
+                        <div class="flex items-end gap-0.5 h-3">
+                            <span class="eq-bar w-0.5 sm:w-1 bg-emerald-400 eq-1 eq-paused rounded-full"></span>
+                            <span class="eq-bar w-0.5 sm:w-1 bg-sky-400 eq-2 eq-paused rounded-full"></span>
+                            <span class="eq-bar w-0.5 sm:w-1 bg-amber-400 eq-3 eq-paused rounded-full"></span>
+                        </div>
+                        <span id="hudOstShortLabel" class="mono-num text-[10px] text-gray-300">SYNTH</span>
+                    </div>
+
+                    <!-- PC ONLY HINT (Hidden on Phones) -->
+                    <span class="pc-only-ui px-2 py-0.5 rounded-lg recessed-well text-[10px] mono-num text-gray-400">
+                        [ESC] Menu
+                    </span>
+
+                    <!-- MOBILE ONLY PAUSE BUTTON (Hidden on PC) -->
+                    <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="mobile-only-ui px-2.5 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[11px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
+                        ⏸ Pause
+                    </button>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- =====================================================
+             6. LIVE 30M RADAR + NITRO ACCELERATION & EMP METERS
+             ===================================================== -->
+        <div class="absolute top-12 left-2 sm:left-3 z-20 pointer-events-none flex flex-col gap-1.5">
+            <div class="hardware-panel p-1.5 rounded-2xl flex flex-col items-center w-22 sm:w-26">
+                <div class="w-full flex items-center justify-between px-1 mb-0.5">
+                    <span class="text-[8px] mono-num font-bold text-gray-400">RADAR</span>
+                    <span id="hudSpeedKmh" class="text-[9px] mono-num font-bold text-emerald-400">100 km/h</span>
+                </div>
+                <div class="recessed-well rounded-xl overflow-hidden w-18 h-18 sm:w-22 sm:h-22 flex items-center justify-center">
+                    <canvas id="miniRadarCanvas" width="88" height="88" class="w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <div class="hardware-panel px-2 py-1.5 rounded-xl flex flex-col gap-1 w-22 sm:w-26">
+                <div>
+                    <div class="flex items-center justify-between text-[8.5px] mono-num">
+                        <span class="text-amber-300 font-bold">🔥 NITRO</span>
+                        <span id="hudNitroPct" class="text-amber-300 font-bold">100%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-[#090b10] rounded-full overflow-hidden mt-0.5">
+                        <div id="hudNitroBar" class="h-full bg-amber-400 transition-all duration-100" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between text-[8.5px] mono-num">
+                        <span class="text-sky-300 font-bold">⚡ EMP</span>
+                        <span id="hudEmpPct" class="text-sky-300 font-bold">100%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-[#090b10] rounded-full overflow-hidden mt-0.5">
+                        <div id="hudEmpBar" class="h-full bg-sky-400 transition-all duration-100" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             7. STRICTLY SEPARATED MOBILE TOUCH PADDLES & PC BAR
+             ===================================================== -->
+        <footer class="absolute bottom-0 inset-x-0 z-30 p-2 sm:p-3.5 pointer-events-none flex items-end justify-between">
+
+            <!-- Left Thumb (Strictly Mobile Only) -->
+            <div id="mobileLeftTouchGroup" class="mobile-only-ui flex items-center gap-2 pointer-events-auto">
+                <button type="button" id="btnLeftLane"
+                    onpointerdown="steerLane(-1); this.classList.add('active-press')"
+                    onpointerup="this.classList.remove('active-press')"
+                    onpointerleave="this.classList.remove('active-press')"
+                    class="touch-paddle px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-lg font-black text-sky-300">◀</span>
+                    <span class="text-[8px] mono-num font-bold text-gray-300">LEFT</span>
+                </button>
+
+                <button type="button" id="btnRightLane"
+                    onpointerdown="steerLane(1); this.classList.add('active-press')"
+                    onpointerup="this.classList.remove('active-press')"
+                    onpointerleave="this.classList.remove('active-press')"
+                    class="touch-paddle px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-lg font-black text-sky-300">▶</span>
+                    <span class="text-[8px] mono-num font-bold text-gray-300">RIGHT</span>
+                </button>
+            </div>
+
+            <!-- Center Telemetry Readout -->
+            <div class="hidden sm:flex hardware-panel px-3.5 py-1 rounded-xl items-center gap-3 text-[11px] mono-num mx-auto">
+                <span>LEAD: <strong id="hudLeadName" class="text-white">CLEAR</strong></span>
+                <span class="text-gray-600">|</span>
+                <span>TTC: <strong id="hudLeadTtc" class="text-emerald-400">STABLE</strong></span>
+                <span class="text-gray-600">|</span>
+                <span>DGI: <strong id="hudLeadDgi" class="text-sky-300">0.00</strong></span>
+            </div>
+
+            <!-- Right Thumb (Strictly Mobile Only) -->
+            <div id="mobileRightTouchGroup" class="mobile-only-ui flex items-center gap-1.5 pointer-events-auto">
+                <button type="button" id="btnBrake"
+                    onpointerdown="setBraking(true); this.classList.add('active-press')"
+                    onpointerup="setBraking(false); this.classList.remove('active-press')"
+                    onpointerleave="setBraking(false); this.classList.remove('active-press')"
+                    class="touch-paddle px-3 py-2.5 rounded-2xl flex flex-col items-center justify-center border-red-500/40 cursor-pointer">
+                    <span class="text-sm font-extrabold text-red-400">🛑</span>
+                    <span class="text-[8px] mono-num font-bold text-red-300">BRAKE</span>
+                </button>
+
+                <button type="button" id="btnBoost"
+                    onpointerdown="setBoosting(true); this.classList.add('active-press')"
+                    onpointerup="setBoosting(false); this.classList.remove('active-press')"
+                    onpointerleave="setBoosting(false); this.classList.remove('active-press')"
+                    class="touch-paddle px-3 py-2.5 rounded-2xl flex flex-col items-center justify-center border-amber-400/50 bg-amber-500/15 cursor-pointer">
+                    <span class="text-sm font-extrabold text-amber-300">🔥</span>
+                    <span class="text-[8px] mono-num font-bold text-amber-200">NITRO</span>
+                </button>
+
+                <button type="button" id="btnEmpPulse"
+                    onpointerdown="triggerNeuralEmp()"
+                    class="touch-paddle px-3.5 py-2.5 rounded-2xl flex flex-col items-center justify-center border-sky-400/60 bg-sky-500/20 cursor-pointer">
+                    <span class="text-sm font-black text-sky-300">⚡</span>
+                    <span class="text-[8px] mono-num font-extrabold text-sky-200">EMP</span>
+                </button>
+            </div>
+
+        </footer>
+
+    </div>
+
+<script>
+    // =========================================================================
+    // MODULE 0: HARDWARE DETECTION & CORE STATE INITIALIZATION
+    // =========================================================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const radarCanvas = document.getElementById('miniRadarCanvas');
+    const rCtx = radarCanvas.getContext('2d');
+
+    const LANES = [-2, -1, 0, 1, 2];
+    const LANE_WIDTH_M = 3.5;
+
+    let isMobileHardware = false;
+
+    function detectDeviceHardware() {
+        const uaMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        isMobileHardware = Boolean(uaMobile || coarsePointer);
+
+        if (isMobileHardware) {
+            document.body.classList.remove('is-pc');
+            document.body.classList.add('is-mobile');
+        } else {
+            document.body.classList.remove('is-mobile');
+            document.body.classList.add('is-pc');
+        }
+
+        const ctrlHeader = document.getElementById('ctrlPlatformHeaderLabel');
+        if (ctrlHeader) {
+            ctrlHeader.innerText = isMobileHardware
+                ? "📱 Mobile / Android Touch & Gyro Controls"
+                : "⌨️ PC Keyboard Controls & Keybinds";
+        }
+    }
+
+    const gameState = {
+        running: false,
+        paused: false,
+        score: 0,
+        epoch: 1,
+        combo: 1.0,
+        nearMisses: 0,
+        armor: 100,
+        nitroFuel: 100,
+        empCharge: 100,
+        distanceM: 0,
+        speedMps: 28,
+        targetLane: 0,
+        egoLaneX: 0,
+        egoRoll: 0,
+        boosting: false,
+        braking: false,
+        slowMoTimer: 0,
+        empWaveRadius: 0,
+        screenShake: 0,
+        viewW: window.innerWidth,
+        viewH: window.innerHeight,
+        hazards: [],
+        pickups: [],
+        FloatingTexts: [],
+        stars: []
+    };
+
+    for (let i = 0; i < 75; i++) {
+        gameState.stars.push({
+            x: Math.random(),
+            y: Math.random() * 0.42,
+            s: Math.random() * 1.8 + 0.5,
+            sp: Math.random() * 0.3 + 0.1
+        });
+    }
+
+    let spawnAccumulator = 0;
+    let pickupAccumulator = 0;
+    let radarAngle = Math.PI;
+    let lastRawTilt = 0;
+    let awaitingRebindAction = null;
+
+    // =========================================================================
+    // MODULE 1: CONFIDENTIAL CORE PILOT PROFILES & PER-ACCOUNT STORAGE
+    // =========================================================================
+    const PILOT_PROFILES = {
+        "1117": {
+            id: "1117",
+            name: "Mitadru Karmakar (Void)",
+            callsign: "VOID // ARCHITECT",
+            liveryName: "Dark-Matter Prismatic Chroma",
+            isVoidChroma: true,
+            isCore: true,
+            dotColor: "#00f5d4",
+            chassisBase: "#070911",
+            chassisAccent: "#00f5d4",
+            canopyColor: "#c77dff",
+            thrusterColor: "#ff007f",
+            railColor: "#00f5d4",
+            lbClass: "void-leaderboard-card",
+            nameClass: "void-name-glow"
+        },
+        "1183": {
+            id: "1183",
+            name: "Ritam Chatterjee",
+            callsign: "RITAM // DATASET",
+            liveryName: "Solar Gold Telemetry",
+            isVoidChroma: false,
+            isCore: true,
+            dotColor: "#f59e0b",
+            chassisBase: "#1c1306",
+            chassisAccent: "#fbbf24",
+            canopyColor: "#fde68a",
+            thrusterColor: "#f97316",
+            railColor: "#f59e0b",
+            lbClass: "core-glow-ritam bg-[#16120a]",
+            nameClass: "text-amber-300 font-extrabold"
+        },
+        "1134": {
+            id: "1134",
+            name: "Syed Meraj Ahmed",
+            callsign: "MERAJ // FIELD QA",
+            liveryName: "Crimson Phantom Carbon",
+            isVoidChroma: false,
+            isCore: true,
+            dotColor: "#ef4444",
+            chassisBase: "#1a080c",
+            chassisAccent: "#f43f5e",
+            canopyColor: "#fda4af",
+            thrusterColor: "#ef4444",
+            railColor: "#f43f5e",
+            lbClass: "core-glow-meraj bg-[#180b0e]",
+            nameClass: "text-red-400 font-extrabold"
+        },
+        "1075": {
+            id: "1075",
+            name: "Sourajita Choudhury",
+            callsign: "SOURAJITA // IEEE",
+            liveryName: "Emerald Matrix Jade",
+            isVoidChroma: false,
+            isCore: true,
+            dotColor: "#10b981",
+            chassisBase: "#061a14",
+            chassisAccent: "#34d399",
+            canopyColor: "#a7f3d0",
+            thrusterColor: "#10b981",
+            railColor: "#10b981",
+            lbClass: "core-glow-sourajita bg-[#091814]",
+            nameClass: "text-emerald-300 font-extrabold"
+        },
+        "1174": {
+            id: "1174",
+            name: "Debankita Das",
+            callsign: "DEBANKITA // RISK",
+            liveryName: "Amethyst Pulsar",
+            isVoidChroma: false,
+            isCore: true,
+            dotColor: "#a855f7",
+            chassisBase: "#140924",
+            chassisAccent: "#c084fc",
+            canopyColor: "#e9d5ff",
+            thrusterColor: "#a855f7",
+            railColor: "#c084fc",
+            lbClass: "core-glow-debankita bg-[#130b1c]",
+            nameClass: "text-purple-300 font-extrabold"
+        },
+        "GUEST": {
+            id: "GUEST",
+            name: "Guest Pilot",
+            callsign: "EGO-01 // GUEST",
+            liveryName: "Tactical Steel",
+            isVoidChroma: false,
+            isCore: false,
+            dotColor: "#38bdf8",
+            chassisBase: "#111827",
+            chassisAccent: "#38bdf8",
+            canopyColor: "#0ea5e9",
+            thrusterColor: "#38bdf8",
+            railColor: "#38bdf8",
+            lbClass: "bg-[#111520] border border-[#232938]",
+            nameClass: "text-gray-200 font-semibold"
+        }
+    };
+
+    const ACCOUNTS_DB_KEY = 'roadSense_overdrive_accounts_db_v5';
+    const DELETED_GUESTS_KEY = 'roadSense_overdrive_deleted_guests_v5';
+
+    let currentPilot = PILOT_PROFILES["GUEST"];
+    let customGuestName = localStorage.getItem('roadSense_overdrive_guestName') || "Guest Pilot";
+
+    function getAccountsDatabase() {
+        try {
+            const raw = localStorage.getItem(ACCOUNTS_DB_KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveAccountsDatabase(db) {
+        localStorage.setItem(ACCOUNTS_DB_KEY, JSON.stringify(db));
+    }
+
+    function getDeletedGuestKeys() {
+        try {
+            const raw = localStorage.getItem(DELETED_GUESTS_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveDeletedGuestKeys(arr) {
+        localStorage.setItem(DELETED_GUESTS_KEY, JSON.stringify(arr));
+    }
+
+    function getActiveAccountStorageKey() {
+        if (currentPilot.isCore) return currentPilot.id;
+        const cleanGuest = (customGuestName || "Guest Pilot").trim().replace(/\s+/g, '_').toUpperCase();
+        return `GUEST_${cleanGuest}`;
+    }
+
+    function getActiveAccountStats() {
+        const db = getAccountsDatabase();
+        const key = getActiveAccountStorageKey();
+        return db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0 };
+    }
+
+    function saveActiveAccountStats(scoreVal, epochVal, flashesVal) {
+        const db = getAccountsDatabase();
+        const key = getActiveAccountStorageKey();
+        const prev = db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0 };
+        db[key] = {
+            id: currentPilot.isCore ? currentPilot.id : key,
+            name: currentPilot.isCore ? currentPilot.name : customGuestName,
+            isCore: currentPilot.isCore,
+            bestScore: Math.max(prev.bestScore || 0, scoreVal),
+            bestEpoch: Math.max(prev.bestEpoch || 1, epochVal),
+            totalFlashes: (prev.totalFlashes || 0) + flashesVal,
+            updatedAt: Date.now()
+        };
+        saveAccountsDatabase(db);
+        refreshAccountStatsUI();
+    }
+
+    function refreshAccountStatsUI() {
+        const st = getActiveAccountStats();
+        const hsEl = document.getElementById('bootHighScore');
+        const epEl = document.getElementById('bootBestEpoch');
+        const flEl = document.getElementById('bootTotalFlashes');
+        if (hsEl) hsEl.innerText = (st.bestScore || 0).toLocaleString();
+        if (epEl) epEl.innerText = `Epoch ${st.bestEpoch || 1}`;
+        if (flEl) flEl.innerText = (st.totalFlashes || 0).toLocaleString();
+    }
+
+    function showLoginBanner(msg, isSuccess = true) {
+        const banner = document.getElementById('loginFeedbackBanner');
+        if (!banner) return;
+        banner.className = isSuccess
+            ? "text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 block"
+            : "text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-red-950/90 text-red-300 border border-red-500/40 block";
+        banner.innerText = msg;
+    }
+
+    function loginPilotById() {
+        const input = document.getElementById('pilotIdInput');
+        const raw = (input ? input.value : '').trim();
+        if (PILOT_PROFILES[raw] && raw !== "GUEST") {
+            applyPilotProfile(raw);
+            if (input) input.value = '';
+            showLoginBanner(`✓ Authenticated: ${currentPilot.name} — ${currentPilot.liveryName} Livery Active`, true);
+            playGameSfx('pickup');
+        } else {
+            showLoginBanner("✕ Unrecognized 4-digit Pilot ID. Verify your credentials or launch as Guest.", false);
+            playGameSfx('hit');
+        }
+    }
+
+    function logoutCurrentPilot() {
+        applyPilotProfile("GUEST");
+        showLoginBanner("⇄ Switched to Guest Pilot session. Your previous account telemetry is safely saved.", true);
+    }
+
+    function updateGuestCallsign(val) {
+        const clean = (val || "").trim();
+        customGuestName = clean || "Guest Pilot";
+        localStorage.setItem('roadSense_overdrive_guestName', customGuestName);
+        if (!currentPilot.isCore) {
+            document.getElementById('activePilotLabel').innerText = customGuestName;
+            document.getElementById('hudPilotCallsign').innerText = customGuestName.toUpperCase();
+            refreshAccountStatsUI();
+        }
+    }
+
+    function applyPilotProfile(idKey) {
+        currentPilot = PILOT_PROFILES[idKey] || PILOT_PROFILES["GUEST"];
+        localStorage.setItem('roadSense_overdrive_pilotId', currentPilot.id);
+
+        const displayName = currentPilot.isCore ? currentPilot.name : customGuestName;
+        const displayCallsign = currentPilot.isCore ? currentPilot.callsign : customGuestName.toUpperCase();
+
+        document.getElementById('activePilotLabel').innerText = displayName;
+        document.getElementById('activeLiveryBadge').innerText = currentPilot.liveryName;
+        document.getElementById('activePilotColorDot').style.backgroundColor = currentPilot.dotColor;
+
+        document.getElementById('hudPilotCallsign').innerText = displayCallsign;
+        document.getElementById('hudPilotDot').style.backgroundColor = currentPilot.dotColor;
+
+        const loginRow = document.getElementById('pilotLoginInputRow');
+        const guestRow = document.getElementById('guestNameInputRow');
+        const logoutBtn = document.getElementById('logoutAccountBtn');
+
+        if (currentPilot.isCore) {
+            if (loginRow) loginRow.classList.add('hidden');
+            if (guestRow) guestRow.classList.add('hidden');
+            if (logoutBtn) logoutBtn.classList.remove('hidden');
+        } else {
+            if (loginRow) loginRow.classList.remove('hidden');
+            if (guestRow) guestRow.classList.remove('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            const gInput = document.getElementById('guestCallsignInput');
+            if (gInput) gInput.value = customGuestName === "Guest Pilot" ? "" : customGuestName;
+        }
+
+        if (currentPilot.id !== "1117" && audioSettings.ostMode === 'mitadru') {
+            selectOstMode('synth');
+        }
+
+        const adminBtn = document.getElementById('adminResetLbBtn');
+        if (adminBtn) {
+            if (currentPilot.id === "1117") adminBtn.classList.remove('hidden');
+            else adminBtn.classList.add('hidden');
+        }
+
+        const ostBadge = document.getElementById('mitadruOstBadge');
+        if (ostBadge) {
+            ostBadge.innerText = currentPilot.id === "1117" ? "UNLOCKED" : "ID 1117 ONLY";
+        }
+
+        refreshAccountStatsUI();
+    }
+
+    // =========================================================================
+    // MODULE 2: 13 INTERCHANGEABLE BIOMES (3 CORE + 10 NEW)
+    // =========================================================================
+    const BIOME_THEMES = [
+        { label: "🌌 Cyber Void",          skyTop: "#03050a", skyBot: "#0d1b38", roadDark: "#0b0e17", roadLight: "#111624", curb: "#38bdf8", sun: "#38bdf8", weather: "none" },
+        { label: "🌧️ Monsoon Glare",       skyTop: "#04080e", skyBot: "#132a2e", roadDark: "#080d12", roadLight: "#0e161f", curb: "#10b981", sun: "#10b981", weather: "rain" },
+        { label: "🔥 Solar Overdrive",     skyTop: "#14040d", skyBot: "#3b0d24", roadDark: "#140914", roadLight: "#1d0e1e", curb: "#f59e0b", sun: "#f97316", weather: "embers" },
+        { label: "❄️ Cryo-Singularity",    skyTop: "#020b18", skyBot: "#0c3559", roadDark: "#0a1626", roadLight: "#102138", curb: "#7dd3fc", sun: "#e0f2fe", weather: "snow" },
+        { label: "☣️ Bio-Luminescent",     skyTop: "#021008", skyBot: "#0a2e1c", roadDark: "#07140e", roadLight: "#0c2117", curb: "#4ade80", sun: "#22c55e", weather: "spores" },
+        { label: "🩸 Crimson Eclipse",     skyTop: "#090204", skyBot: "#2d0610", roadDark: "#120508", roadLight: "#1c090e", curb: "#f43f5e", sun: "#e11d48", weather: "embers" },
+        { label: "⚡ Tachyon Storm",       skyTop: "#090418", skyBot: "#261054", roadDark: "#0e081c", roadLight: "#160d2b", curb: "#c084fc", sun: "#eab308", weather: "rain" },
+        { label: "🏜️ Dune Mirage 2077",    skyTop: "#1c0d02", skyBot: "#452108", roadDark: "#1a1109", roadLight: "#26190d", curb: "#fbbf24", sun: "#f59e0b", weather: "spores" },
+        { label: "🌸 Neo-Tokyo Sakura",    skyTop: "#0d0417", skyBot: "#2e0c38", roadDark: "#12091c", roadLight: "#1b0e29", curb: "#f472b6", sun: "#ec4899", weather: "petals" },
+        { label: "🟢 Matrix Kernel",       skyTop: "#000802", skyBot: "#03220a", roadDark: "#020d05", roadLight: "#05180a", curb: "#22c55e", sun: "#4ade80", weather: "matrix" },
+        { label: "🪐 Saturn Rings Orbit",  skyTop: "#020308", skyBot: "#111833", roadDark: "#080b14", roadLight: "#101526", curb: "#818cf8", sun: "#6366f1", weather: "none", rings: true },
+        { label: "🌋 Magma Caldera",       skyTop: "#140300", skyBot: "#3d0e02", roadDark: "#170704", roadLight: "#240c06", curb: "#fb923c", sun: "#ef4444", weather: "embers" },
+        { label: "⚪ Astral Monolith",     skyTop: "#090b10", skyBot: "#1e2433", roadDark: "#0e1117", roadLight: "#171b24", curb: "#e2e8f0", sun: "#f8fafc", weather: "snow" }
+    ];
+
+    let biomeIdx = 0;
+    let autoCycleBiomes = true;
+
+    function buildBiomeSelectorGrid() {
+        const container = document.getElementById('biomeGridSelector');
+        if (!container) return;
+        container.innerHTML = BIOME_THEMES.map((b, idx) => `
+            <button type="button" onclick="selectManualBiome(${idx})" class="biome-btn px-2 py-1.5 rounded-lg text-[10px] font-semibold text-left truncate cursor-pointer border ${idx === biomeIdx ? 'bg-sky-500/25 border-sky-400 text-white' : 'bg-[#121621] border-[#22293a] text-gray-400 hover:text-white'}">
+                ${b.label}
+            </button>
+        `).join('');
+    }
+
+    function selectManualBiome(idx) {
+        biomeIdx = idx % BIOME_THEMES.length;
+        autoCycleBiomes = false;
+        const btn = document.getElementById('autoBiomeToggleBtn');
+        if (btn) {
+            btn.innerText = "🔄 Auto-Interchange: OFF";
+            btn.className = "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
+        }
+        const hudBiome = document.getElementById('hudBiomeName');
+        if (hudBiome) hudBiome.innerText = BIOME_THEMES[biomeIdx].label;
+        buildBiomeSelectorGrid();
+    }
+
+    function toggleAutoBiomeCycle() {
+        autoCycleBiomes = !autoCycleBiomes;
+        const btn = document.getElementById('autoBiomeToggleBtn');
+        if (btn) {
+            btn.innerText = autoCycleBiomes ? "🔄 Auto-Interchange: ON" : "🔄 Auto-Interchange: OFF";
+            btn.className = autoCycleBiomes
+                ? "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer"
+                : "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
+        }
+    }
+
+    // =========================================================================
+    // MODULE 3: OPTIMIZED WEB AUDIO SYNTHWAVE OST + DYNAMIC CAR ENGINE + MITADRU.M4A
+    // =========================================================================
+    const audioSettings = {
+        master: 0.90,
+        music: 0.85,
+        engine: 0.75,
+        sfx: 0.90,
+        ostMode: 'synth'
+    };
+
+    let audioCtx = null;
+    let masterGainNode = null;
+    let compressorNode = null;
+    let engineOsc1 = null;
+    let engineOsc2 = null;
+    let engineGain = null;
+    let synthLoopTimer = null;
+    let synthStep = 0;
+
+    const mitadruAudio = new Audio();
+    mitadruAudio.preload = 'none';
+    mitadruAudio.loop = true;
+    const mitadruCandidates = ["Mitadru.m4a", "./Mitadru.m4a", "/media/Mitadru.m4a", "mitadru.m4a", "Mitadru.mp3", "Mitadru.mpeg"];
+    let mitadruIdx = 0;
+    mitadruAudio.addEventListener('error', () => {
+        if (audioSettings.ostMode !== 'mitadru') return;
+        mitadruIdx++;
+        if (mitadruIdx < mitadruCandidates.length) {
+            mitadruAudio.src = mitadruCandidates[mitadruIdx];
+            mitadruAudio.play().catch(() => {});
+        }
+    });
+
+    function ensureAudioEngine() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            compressorNode = audioCtx.createDynamicsCompressor();
+            compressorNode.threshold.setValueAtTime(-14, audioCtx.currentTime);
+            compressorNode.knee.setValueAtTime(20, audioCtx.currentTime);
+            compressorNode.ratio.setValueAtTime(6, audioCtx.currentTime);
+            compressorNode.attack.setValueAtTime(0.005, audioCtx.currentTime);
+            compressorNode.release.setValueAtTime(0.18, audioCtx.currentTime);
+
+            masterGainNode = audioCtx.createGain();
+            masterGainNode.gain.setValueAtTime(audioSettings.master, audioCtx.currentTime);
+
+            masterGainNode.connect(compressorNode);
+            compressorNode.connect(audioCtx.destination);
+
+            engineOsc1 = audioCtx.createOscillator();
+            engineOsc2 = audioCtx.createOscillator();
+            const engineFilter = audioCtx.createBiquadFilter();
+            engineGain = audioCtx.createGain();
+
+            engineOsc1.type = 'sawtooth';
+            engineOsc2.type = 'triangle';
+            engineOsc1.frequency.setValueAtTime(56, audioCtx.currentTime);
+            engineOsc2.frequency.setValueAtTime(112, audioCtx.currentTime);
+
+            engineFilter.type = 'lowpass';
+            engineFilter.frequency.setValueAtTime(230, audioCtx.currentTime);
+            engineGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+
+            engineOsc1.connect(engineFilter);
+            engineOsc2.connect(engineFilter);
+            engineFilter.connect(engineGain);
+            engineGain.connect(masterGainNode);
+
+            engineOsc1.start();
+            engineOsc2.start();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function updateEngineSoundPitch() {
+        if (!audioCtx || !engineOsc1 || !engineGain) return;
+        const now = audioCtx.currentTime;
+        if (!gameState.running || gameState.paused || document.hidden) {
+            engineGain.gain.setTargetAtTime(0.0001, now, 0.08);
+            return;
+        }
+        const speedRatio = Math.max(0.5, Math.min(2.2, gameState.speedMps / 30));
+        const baseFreq = 50 * speedRatio + (gameState.boosting ? 24 : 0);
+        engineOsc1.frequency.setTargetAtTime(baseFreq, now, 0.05);
+        engineOsc2.frequency.setTargetAtTime(baseFreq * 2.02, now, 0.05);
+
+        const targetVol = 0.085 * audioSettings.engine * (gameState.boosting ? 1.35 : 0.9);
+        engineGain.gain.setTargetAtTime(Math.max(0.0001, targetVol), now, 0.06);
+    }
+
+    function startProceduralSynthLoop() {
+        if (synthLoopTimer) clearInterval(synthLoopTimer);
+        const bassNotes = [73.42, 73.42, 146.83, 73.42, 87.31, 87.31, 98.00, 110.00, 73.42, 73.42, 146.83, 73.42, 116.54, 116.54, 110.00, 98.00];
+        const arpNotes  = [293.66, 349.23, 440.00, 587.33, 523.25, 440.00, 349.23, 440.00, 293.66, 349.23, 466.16, 587.33, 659.25, 587.33, 440.00, 349.23];
+
+        synthLoopTimer = setInterval(() => {
+            if (!gameState.running || gameState.paused || document.hidden) return;
+            if (audioSettings.ostMode === 'mitadru') return;
+            if (audioSettings.music <= 0.01 || audioSettings.master <= 0.01) return;
+
+            try {
+                const actx = ensureAudioEngine();
+                const now = actx.currentTime;
+                const mVol = audioSettings.music;
+                const step16 = synthStep % 16;
+
+                if (step16 % 4 === 0) {
+                    const kOsc = actx.createOscillator();
+                    const kGain = actx.createGain();
+                    kOsc.type = 'sine';
+                    kOsc.frequency.setValueAtTime(135, now);
+                    kOsc.frequency.exponentialRampToValueAtTime(34, now + 0.13);
+                    kGain.gain.setValueAtTime(0.30 * mVol, now);
+                    kGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                    kOsc.connect(kGain);
+                    kGain.connect(masterGainNode);
+                    kOsc.start(now);
+                    kOsc.stop(now + 0.14);
+                }
+
+                if (step16 === 4 || step16 === 12) {
+                    const sOsc = actx.createOscillator();
+                    const sGain = actx.createGain();
+                    sOsc.type = 'triangle';
+                    sOsc.frequency.setValueAtTime(240, now);
+                    sOsc.frequency.exponentialRampToValueAtTime(95, now + 0.09);
+                    sGain.gain.setValueAtTime(0.15 * mVol, now);
+                    sGain.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
+                    sOsc.connect(sGain);
+                    sGain.connect(masterGainNode);
+                    sOsc.start(now);
+                    sOsc.stop(now + 0.10);
+                }
+
+                const bOsc = actx.createOscillator();
+                const bFilter = actx.createBiquadFilter();
+                const bGain = actx.createGain();
+                bOsc.type = 'sawtooth';
+                bOsc.frequency.setValueAtTime(bassNotes[step16], now);
+                bFilter.type = 'lowpass';
+                bFilter.frequency.setValueAtTime(520, now);
+                bGain.gain.setValueAtTime(0.13 * mVol, now);
+                bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                bOsc.connect(bFilter);
+                bFilter.connect(bGain);
+                bGain.connect(masterGainNode);
+                bOsc.start(now);
+                bOsc.stop(now + 0.11);
+
+                const lOsc = actx.createOscillator();
+                const lGain = actx.createGain();
+                lOsc.type = 'triangle';
+                lOsc.frequency.setValueAtTime(arpNotes[step16], now);
+                lGain.gain.setValueAtTime(0.08 * mVol, now);
+                lGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                lOsc.connect(lGain);
+                lGain.connect(masterGainNode);
+                lOsc.start(now);
+                lOsc.stop(now + 0.15);
+
+                synthStep++;
+            } catch (e) {}
+        }, 117);
+    }
+
+    function selectOstMode(mode) {
+        if (mode === 'mitadru' && currentPilot.id !== '1117') {
+            spawnFloatingText("🔒 LOGIN AS ID 1117 (VOID) TO UNLOCK MITADRU.M4A", "#f59e0b", 0, -25);
+            return;
+        }
+        audioSettings.ostMode = mode;
+        const btnSynth = document.getElementById('ostBtn_synth');
+        const btnMit = document.getElementById('ostBtn_mitadru');
+        const shortLabel = document.getElementById('hudOstShortLabel');
+        const statusEl = document.getElementById('ostLockStatus');
+
+        if (mode === 'mitadru') {
+            if (btnMit) btnMit.className = "p-2 rounded-xl text-left border bg-sky-500/20 border-sky-400 text-white cursor-pointer";
+            if (btnSynth) btnSynth.className = "p-2 rounded-xl text-left border bg-[#141824] border-[#262f45] text-gray-300 cursor-pointer";
+            if (shortLabel) shortLabel.innerText = "MITADRU.M4A";
+            if (statusEl) statusEl.innerText = "Mitadru.m4a Active";
+            if (!mitadruAudio.src || mitadruAudio.src === window.location.href) {
+                mitadruIdx = 0;
+                mitadruAudio.src = mitadruCandidates[0];
+            }
+            mitadruAudio.volume = audioSettings.master * audioSettings.music;
+            if (gameState.running && !gameState.paused) {
+                mitadruAudio.play().catch(() => {});
+            }
+        } else {
+            if (btnSynth) btnSynth.className = "p-2 rounded-xl text-left border bg-sky-500/20 border-sky-400 text-white cursor-pointer";
+            if (btnMit) btnMit.className = "p-2 rounded-xl text-left border bg-[#141824] border-[#262f45] text-gray-300 cursor-pointer";
+            if (shortLabel) shortLabel.innerText = "SYNTH";
+            if (statusEl) statusEl.innerText = "Procedural Synth Active";
+            mitadruAudio.pause();
+        }
+    }
+
+    function updateVolumeSetting(channel, val) {
+        const num = Math.max(0, Math.min(100, parseInt(val, 10))) / 100;
+        audioSettings[channel] = num;
+        const lbl = document.getElementById(`volLabel_${channel}`);
+        if (lbl) lbl.innerText = `${Math.round(num * 100)}%`;
+        const sld = document.getElementById(`volSlider_${channel}`);
+        if (sld && String(sld.value) !== String(Math.round(num * 100))) {
+            sld.value = Math.round(num * 100);
+        }
+
+        if (masterGainNode && audioCtx) {
+            masterGainNode.gain.setTargetAtTime(audioSettings.master, audioCtx.currentTime, 0.03);
+        }
+        mitadruAudio.volume = audioSettings.master * audioSettings.music;
+        updateEngineSoundPitch();
+    }
+
+    function playGameSfx(type) {
+        if (audioSettings.sfx <= 0.01 || audioSettings.master <= 0.01) return;
+        try {
+            const actx = ensureAudioEngine();
+            const now = actx.currentTime;
+            const sVol = audioSettings.sfx;
+
+            if (type === 'steer') {
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(360, now);
+                osc.frequency.exponentialRampToValueAtTime(620, now + 0.06);
+                gain.gain.setValueAtTime(0.14 * sVol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+                osc.connect(gain);
+                gain.connect(masterGainNode);
+                osc.start(now);
+                osc.stop(now + 0.065);
+            } else if (type === 'phantom') {
+                [587.33, 880.0, 1174.66, 1760.0].forEach((freq, idx) => {
+                    const osc = actx.createOscillator();
+                    const gain = actx.createGain();
+                    const st = now + idx * 0.032;
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, st);
+                    gain.gain.setValueAtTime(0.22 * sVol, st);
+                    gain.gain.exponentialRampToValueAtTime(0.001, st + 0.26);
+                    osc.connect(gain);
+                    gain.connect(masterGainNode);
+                    osc.start(st);
+                    osc.stop(st + 0.26);
+                });
+            } else if (type === 'pickup') {
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(680, now);
+                osc.frequency.setValueAtTime(1020, now + 0.045);
+                gain.gain.setValueAtTime(0.18 * sVol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                osc.connect(gain);
+                gain.connect(masterGainNode);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            } else if (type === 'emp') {
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(920, now);
+                osc.frequency.exponentialRampToValueAtTime(36, now + 0.65);
+                gain.gain.setValueAtTime(0.38 * sVol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.68);
+                osc.connect(gain);
+                gain.connect(masterGainNode);
+                osc.start(now);
+                osc.stop(now + 0.68);
+            } else if (type === 'hit') {
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(145, now);
+                osc.frequency.exponentialRampToValueAtTime(28, now + 0.32);
+                gain.gain.setValueAtTime(0.40 * sVol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+                osc.connect(gain);
+                gain.connect(masterGainNode);
+                osc.start(now);
+                osc.stop(now + 0.34);
+            }
+        } catch (e) {}
+    }
+
+    function updateEqVisuals(playing) {
+        document.querySelectorAll('.eq-bar').forEach(bar => {
+            if (playing && audioSettings.master > 0.01 && audioSettings.music > 0.01) bar.classList.remove('eq-paused');
+            else bar.classList.add('eq-paused');
+        });
+    }
+
+    // =========================================================================
+    // MODULE 4: ZERO-ERROR REAL-TIME LEADERBOARD ENGINE
+    // =========================================================================
+    const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v5';
+    const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v5') : null;
+
+    function getLocalLeaderboard() {
+        try {
+            const raw = localStorage.getItem(LB_STORAGE_KEY);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            const deletedGuests = new Set(getDeletedGuestKeys());
+            return (Array.isArray(parsed) ? parsed : []).filter(
+                e => e && e.score > 0 && !deletedGuests.has(e.accountKey || e.id)
+            );
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveLocalLeaderboard(list) {
+        const deletedGuests = new Set(getDeletedGuestKeys());
+        const valid = (Array.isArray(list) ? list : [])
+            .filter(e => e && e.score > 0 && !deletedGuests.has(e.accountKey || e.id))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 100);
+        localStorage.setItem(LB_STORAGE_KEY, JSON.stringify(valid));
+        updateTopLeaderBanner(valid);
+        return valid;
+    }
+
+    function broadcastLeaderboardSync(entries) {
+        if (lbChannel) {
+            try {
+                lbChannel.postMessage({
+                    type: 'lb_update',
+                    entries: entries || getLocalLeaderboard(),
+                    deletedGuests: getDeletedGuestKeys()
+                });
+            } catch (e) {}
+        }
+    }
+
+    if (lbChannel) {
+        lbChannel.onmessage = (ev) => {
+            if (ev.data && ev.data.type === 'lb_update') {
+                if (Array.isArray(ev.data.deletedGuests)) {
+                    const mergedDel = Array.from(new Set([...getDeletedGuestKeys(), ...ev.data.deletedGuests]));
+                    saveDeletedGuestKeys(mergedDel);
+                }
+                if (Array.isArray(ev.data.entries)) {
+                    saveLocalLeaderboard(ev.data.entries);
+                    renderLeaderboardList();
+                }
+            }
+        };
+    }
+
+    window.addEventListener('storage', (ev) => {
+        if (ev.key === LB_STORAGE_KEY || ev.key === ACCOUNTS_DB_KEY || ev.key === DELETED_GUESTS_KEY) {
+            updateTopLeaderBanner();
+            renderLeaderboardList();
+            refreshAccountStatsUI();
+        }
+    });
+
+    function recordScoreToLeaderboard(scoreVal, epochVal) {
+        if (!scoreVal || scoreVal <= 0) return;
+
+        const accountKey = getActiveAccountStorageKey();
+        const pid = currentPilot.isCore ? currentPilot.id : 'GUEST';
+        const pName = currentPilot.isCore ? currentPilot.name : customGuestName;
+
+        if (!currentPilot.isCore) {
+            const delList = getDeletedGuestKeys().filter(k => k !== accountKey);
+            saveDeletedGuestKeys(delList);
+        }
+
+        const list = getLocalLeaderboard();
+        const existingIdx = list.findIndex(e => (e.accountKey || e.id) === accountKey);
+
+        if (existingIdx >= 0) {
+            if (scoreVal > list[existingIdx].score) {
+                list[existingIdx].score = scoreVal;
+                list[existingIdx].epoch = Math.max(list[existingIdx].epoch || 1, epochVal);
+                list[existingIdx].name = pName;
+                list[existingIdx].ts = Date.now();
+            }
+        } else {
+            list.push({
+                id: pid,
+                accountKey: accountKey,
+                name: pName,
+                score: scoreVal,
+                epoch: epochVal,
+                ts: Date.now()
+            });
+        }
+
+        const saved = saveLocalLeaderboard(list);
+        broadcastLeaderboardSync(saved);
+    }
+
+    function updateTopLeaderBanner(list = null) {
+        const arr = list || getLocalLeaderboard();
+        const top = arr[0] || null;
+        const nameEl = document.getElementById('bootTopLeaderName');
+        const scoreEl = document.getElementById('bootTopLeaderScore');
+        const miniEl = document.getElementById('hudLeaderMini');
+
+        if (top && top.score > 0) {
+            if (nameEl) nameEl.innerText = top.name;
+            if (scoreEl) scoreEl.innerText = `(${top.score.toLocaleString()})`;
+            if (miniEl) miniEl.innerText = `${top.name.split(' ')[0]} (${top.score.toLocaleString()})`;
+        } else {
+            if (nameEl) nameEl.innerText = "Unclaimed";
+            if (scoreEl) scoreEl.innerText = "";
+            if (miniEl) miniEl.innerText = "Unclaimed";
+        }
+    }
+
+    function renderLeaderboardList() {
+        const container = document.getElementById('leaderboardListContainer');
+        if (!container) return;
+        const list = getLocalLeaderboard();
+        const isAdminVoid = (currentPilot.id === '1117');
+
+        if (list.length === 0) {
+            container.innerHTML = `
+                <div class="recessed-well p-6 rounded-xl text-center space-y-1">
+                    <div class="text-sm font-bold text-white">No Runs Recorded Yet</div>
+                    <p class="text-xs text-gray-400">Zero-point accounts are hidden. Complete a run with &gt;0 points to claim #1 on the leaderboard!</p>
+                </div>`;
+            return;
+        }
+
+        const medals = ["🥇 #1", "🥈 #2", "🥉 #3"];
+
+        container.innerHTML = list.map((entry, idx) => {
+            const prof = PILOT_PROFILES[entry.id] || PILOT_PROFILES["GUEST"];
+            const isCoreEntry = Boolean(PILOT_PROFILES[entry.id] && entry.id !== 'GUEST');
+            const rankLabel = medals[idx] || `#${idx + 1}`;
+            const accKey = entry.accountKey || entry.id;
+
+            let adminActionHtml = '';
+            if (isAdminVoid) {
+                if (!isCoreEntry) {
+                    adminActionHtml = `<button type="button" onclick="adminPermanentlyDeleteGuest('${escapeHtml(accKey)}')" class="ml-2 px-2 py-1 rounded bg-red-600/85 hover:bg-red-500 text-white text-[9px] mono-num font-bold cursor-pointer" title="Permanently Delete Guest Account & Data">🗑️ Delete Guest</button>`;
+                } else {
+                    adminActionHtml = `<span class="ml-2 px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[8.5px] mono-num">🔒 Core</span>`;
+                }
+            }
+
+            const badgeTag = prof.isVoidChroma
+                ? `<span class="px-1.5 py-0.5 text-[9px] mono-num font-extrabold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">👑 ARCHITECT VOID</span>`
+                : (isCoreEntry
+                    ? `<span class="px-1.5 py-0.5 text-[9px] mono-num font-bold rounded bg-white/10 text-gray-200">⚡ CORE TEAM</span>`
+                    : `<span class="px-1.5 py-0.5 text-[9px] mono-num rounded bg-gray-800 text-gray-400">GUEST</span>`);
+
+            return `
+                <div class="p-3 rounded-xl flex items-center justify-between gap-2 transition ${prof.lbClass}">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="mono-num text-xs font-black text-white px-2 py-1 rounded bg-black/40 border border-white/10 shrink-0">
+                            ${rankLabel}
+                        </span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-xs sm:text-sm truncate ${prof.nameClass}">${escapeHtml(entry.name)}</span>
+                                ${badgeTag}
+                            </div>
+                            <div class="text-[10px] mono-num text-gray-400">
+                                Epoch ${entry.epoch || 1} &bull; ${prof.liveryName}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center shrink-0">
+                        <span class="mono-num text-sm sm:text-base font-black text-emerald-400">${entry.score.toLocaleString()}</span>
+                        ${adminActionHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function adminPermanentlyDeleteGuest(guestAccountKey) {
+        if (currentPilot.id !== '1117') return;
+        const profCheck = PILOT_PROFILES[guestAccountKey];
+        if (profCheck && profCheck.isCore) return;
+
+        const deletedList = getDeletedGuestKeys();
+        if (!deletedList.includes(guestAccountKey)) {
+            deletedList.push(guestAccountKey);
+            saveDeletedGuestKeys(deletedList);
+        }
+
+        const db = getAccountsDatabase();
+        if (db[guestAccountKey]) {
+            delete db[guestAccountKey];
+            saveAccountsDatabase(db);
+        }
+
+        const updatedLb = getLocalLeaderboard().filter(e => (e.accountKey || e.id) !== guestAccountKey);
+        const saved = saveLocalLeaderboard(updatedLb);
+        broadcastLeaderboardSync(saved);
+        renderLeaderboardList();
+        refreshAccountStatsUI();
+    }
+
+    function adminResetAllLeaderboardScores() {
+        if (currentPilot.id !== '1117') return;
+        const db = getAccountsDatabase();
+        Object.keys(db).forEach(k => {
+            if (!PILOT_PROFILES[k] || !PILOT_PROFILES[k].isCore) {
+                delete db[k];
+            } else {
+                db[k].bestScore = 0;
+                db[k].bestEpoch = 1;
+            }
+        });
+        saveAccountsDatabase(db);
+        const saved = saveLocalLeaderboard([]);
+        broadcastLeaderboardSync(saved);
+        renderLeaderboardList();
+        refreshAccountStatsUI();
+    }
+
+    function openLeaderboardModal() {
+        renderLeaderboardList();
+        document.getElementById('leaderboardModal').style.display = 'flex';
+        syncCursorVisibility();
+    }
+
+    function closeLeaderboardModal() {
+        document.getElementById('leaderboardModal').style.display = 'none';
+        syncCursorVisibility();
+    }
+
+    // =========================================================================
+    // MODULE 5: DIFFICULTY, GRAPHICS, CONTROLS & INDIVIDUAL CATEGORY RESETS
+    // =========================================================================
+    const DIFFICULTY_PRESETS = {
+        easy:   { label: "🟢 Assisted Easy",      speedMul: 0.76, spawnMeters: 30.0, hitboxScale: 0.76, scoreMul: 1.0 },
+        normal: { label: "🔵 Telemetry Normal",   speedMul: 0.92, spawnMeters: 23.5, hitboxScale: 0.88, scoreMul: 1.2 },
+        hard:   { label: "🟠 Overdrive Hard",     speedMul: 1.10, spawnMeters: 18.5, hitboxScale: 0.98, scoreMul: 1.6 },
+        void:   { label: "🔮 Void Max",           speedMul: 1.28, spawnMeters: 14.5, hitboxScale: 1.04, scoreMul: 2.2 }
+    };
+    let currentDiffKey = 'easy';
+
+    const gfxSettings = {
+        filter: 'filter-standard',
+        particles: 1.0,
+        bloom: true,
+        shake: true,
+        transitions: true,
+        scanlines: false
+    };
+
+    const controlConfig = {
+        mobileMode: 'buttons',
+        doubleTapNitro: true,
+        tiltCenterGamma: 0,
+        lastTouchTime: 0,
+        binds: {
+            left:  ['a', 'arrowleft'],
+            right: ['d', 'arrowright'],
+            nitro: ['shift', 'w', 'arrowup'],
+            brake: ['s', 'arrowdown'],
+            emp:   [' ', 'e']
+        }
+    };
+
+    function setDifficulty(key) {
+        currentDiffKey = DIFFICULTY_PRESETS[key] ? key : 'easy';
+        const lbl = document.getElementById('diffCurrentLabel');
+        if (lbl) lbl.innerText = DIFFICULTY_PRESETS[currentDiffKey].label;
+        ['easy', 'normal', 'hard', 'void'].forEach(k => {
+            const btn = document.getElementById(`diffBtn_${k}`);
+            if (!btn) return;
+            btn.className = (k === currentDiffKey)
+                ? "py-1.5 px-2 rounded-lg text-[11px] font-bold bg-emerald-500 text-black cursor-pointer"
+                : "py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer";
+        });
+    }
+
+    function setVisualFilter(filterClass) {
+        gfxSettings.filter = filterClass;
+        canvas.className = filterClass;
+        ['filter-standard', 'filter-requiem-noir', 'filter-requiem-ash', 'filter-dl2-grit', 'filter-dl2-darkzone', 'filter-stark-mono'].forEach(fc => {
+            const btn = document.getElementById(`flt_${fc}`);
+            if (!btn) return;
+            btn.className = (fc === filterClass)
+                ? "p-2 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer"
+                : "p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer";
+        });
+    }
+
+    function updateGfxParticles(val) {
+        const num = Math.max(0, Math.min(100, parseInt(val, 10)));
+        gfxSettings.particles = num / 100;
+        const lbl = document.getElementById('gfxParticleLabel');
+        if (lbl) lbl.innerText = `${num}%`;
+        const sld = document.getElementById('gfxParticleSlider');
+        if (sld && String(sld.value) !== String(num)) sld.value = num;
+    }
+
+    function applyGfxOptionState(opt, val) {
+        gfxSettings[opt] = Boolean(val);
+        const btn = document.getElementById(`gfxToggle_${opt}`);
+        const labels = { bloom: '💡 Glow', shake: '📳 Shake', transitions: '🌀 FX Anim', scanlines: '📺 Scanline' };
+        if (btn) {
+            btn.innerText = `${labels[opt]}: ${gfxSettings[opt] ? 'ON' : 'OFF'}`;
+            btn.className = gfxSettings[opt]
+                ? "p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer"
+                : "p-1.5 rounded-lg bg-[#151a26] text-gray-400 border border-[#262f45] text-[10px] font-bold cursor-pointer";
+        }
+        if (opt === 'scanlines') {
+            const overlay = document.getElementById('atmosphereOverlay');
+            if (overlay) {
+                if (gfxSettings.scanlines) overlay.classList.add('scanlines-active');
+                else overlay.classList.remove('scanlines-active');
+            }
+        }
+    }
+
+    function toggleGfxOption(opt) {
+        applyGfxOptionState(opt, !gfxSettings[opt]);
+    }
+
+    function setMobileControlMode(mode) {
+        controlConfig.mobileMode = mode;
+        ['buttons', 'drag', 'tilt'].forEach(m => {
+            const btn = document.getElementById(`mobCtrl_${m}`);
+            if (!btn) return;
+            btn.className = (m === mode)
+                ? "p-2.5 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center"
+                : "p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center";
+        });
+
+        const leftGroup = document.getElementById('mobileLeftTouchGroup');
+        if (leftGroup) {
+            leftGroup.style.opacity = (mode === 'buttons') ? '1' : '0.25';
+        }
+
+        if (mode === 'tilt' && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().catch(() => {});
+        }
+    }
+
+    function applyDoubleTapNitroState(enabled) {
+        controlConfig.doubleTapNitro = Boolean(enabled);
+        const btn = document.getElementById('doubleTapNitroBtn');
+        if (btn) {
+            btn.innerText = controlConfig.doubleTapNitro ? 'ENABLED' : 'DISABLED';
+            btn.className = controlConfig.doubleTapNitro
+                ? "px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer"
+                : "px-3 py-1 rounded bg-gray-800 text-gray-400 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
+        }
+    }
+
+    function toggleDoubleTapNitro() {
+        applyDoubleTapNitroState(!controlConfig.doubleTapNitro);
+    }
+
+    function calibrateTiltSensor() {
+        controlConfig.tiltCenterGamma = lastRawTilt;
+        spawnFloatingText("🧭 TILT CENTER CALIBRATED", "#38bdf8", 0, -25);
+    }
+
+    // INDIVIDUAL SETTING SECTION RESET FUNCTIONS
+    function resetGameSettingsOnly() {
+        setDifficulty('easy');
+        biomeIdx = 0;
+        autoCycleBiomes = true;
+        const btn = document.getElementById('autoBiomeToggleBtn');
+        if (btn) {
+            btn.innerText = "🔄 Auto-Interchange: ON";
+            btn.className = "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer";
+        }
+        const hudBiome = document.getElementById('hudBiomeName');
+        if (hudBiome) hudBiome.innerText = BIOME_THEMES[0].label;
+        buildBiomeSelectorGrid();
+        playGameSfx('pickup');
+    }
+
+    function resetSoundSettingsOnly() {
+        updateVolumeSetting('master', 90);
+        updateVolumeSetting('music', 85);
+        updateVolumeSetting('engine', 75);
+        updateVolumeSetting('sfx', 90);
+        selectOstMode('synth');
+        playGameSfx('pickup');
+    }
+
+    function resetControlSettingsOnly() {
+        if (isMobileHardware) {
+            setMobileControlMode('buttons');
+            applyDoubleTapNitroState(true);
+            controlConfig.tiltCenterGamma = 0;
+        } else {
+            resetDefaultKeybinds();
+        }
+        playGameSfx('pickup');
+    }
+
+    function resetGraphicsSettingsOnly() {
+        setVisualFilter('filter-standard');
+        updateGfxParticles(100);
+        applyGfxOptionState('bloom', true);
+        applyGfxOptionState('shake', true);
+        applyGfxOptionState('transitions', true);
+        applyGfxOptionState('scanlines', false);
+        playGameSfx('pickup');
+    }
+
+    function handleCanvasPointerDrag(e) {
+        const wrapper = document.getElementById('gameViewportWrapper');
+        const isRotatedPortrait = window.innerWidth <= 960 && window.innerHeight > window.innerWidth;
+        const normX = isRotatedPortrait
+            ? (e.clientY / Math.max(1, window.innerHeight))
+            : (e.clientX / Math.max(1, wrapper.clientWidth));
+        const laneContinuous = (normX - 0.5) * 5.2;
+        gameState.targetLane = Math.max(-2, Math.min(2, Math.round(laneContinuous * 2) / 2));
+    }
+
+    function startKeyRebind(actionKey) {
+        awaitingRebindAction = actionKey;
+        const el = document.getElementById(`bindVal_${actionKey}`);
+        if (el) el.innerText = "PRESS KEY...";
+    }
+
+    function resetDefaultKeybinds() {
+        controlConfig.binds = {
+            left:  ['a', 'arrowleft'],
+            right: ['d', 'arrowright'],
+            nitro: ['shift', 'w', 'arrowup'],
+            brake: ['s', 'arrowdown'],
+            emp:   [' ', 'e']
+        };
+        refreshKeybindLabels();
+    }
+
+    function refreshKeybindLabels() {
+        Object.entries(controlConfig.binds).forEach(([act, keys]) => {
+            const el = document.getElementById(`bindVal_${act}`);
+            if (el) {
+                el.innerText = keys.map(k => k === ' ' ? 'SPACE' : k.toUpperCase()).join(' / ');
+            }
+        });
+    }
+
+    // =========================================================================
+    // MODULE 6: PAUSE, SETTINGS TABS, MAIN MENU ROUTING & CURSOR MANAGEMENT
+    // =========================================================================
+    function syncCursorVisibility() {
+        const anyModalOpen =
+            document.getElementById('startModal').style.display !== 'none' ||
+            document.getElementById('pauseSettingsModal').style.display !== 'none' ||
+            document.getElementById('leaderboardModal').style.display !== 'none' ||
+            document.getElementById('gameOverModal').style.display !== 'none';
+
+        if (gameState.running && !gameState.paused && !anyModalOpen) {
+            document.body.classList.add('gameplay-active');
+        } else {
+            document.body.classList.remove('gameplay-active');
+        }
+    }
+
+    function openPauseSettingsModal(defaultTab = 'game') {
+        if (gameState.running && !gameState.paused) {
+            gameState.paused = true;
+            mitadruAudio.pause();
+            updateEngineSoundPitch();
+            updateEqVisuals(false);
+        }
+        const resumeBtn = document.getElementById('resumeOrCloseSettingsBtn');
+        if (resumeBtn) {
+            resumeBtn.innerText = gameState.running ? "▶ Resume" : "✕ Close";
+        }
+        switchSettingsTab(defaultTab);
+        buildBiomeSelectorGrid();
+        document.getElementById('pauseSettingsModal').style.display = 'flex';
+        syncCursorVisibility();
+    }
+
+    function resumeFromSettings() {
+        document.getElementById('pauseSettingsModal').style.display = 'none';
+        if (gameState.running) {
+            gameState.paused = false;
+            if (audioSettings.ostMode === 'mitadru') mitadruAudio.play().catch(() => {});
+            updateEngineSoundPitch();
+            updateEqVisuals(true);
+        }
+        syncCursorVisibility();
+    }
+
+    // Redirects from Pause/Settings or Game Over back to the Game's Main Menu (#startModal)
+    function returnToMainMenu() {
+        gameState.running = false;
+        gameState.paused = false;
+        mitadruAudio.pause();
+        updateEngineSoundPitch();
+        updateEqVisuals(false);
+
+        document.getElementById('pauseSettingsModal').style.display = 'none';
+        document.getElementById('gameOverModal').style.display = 'none';
+        document.getElementById('leaderboardModal').style.display = 'none';
+        document.getElementById('startModal').style.display = 'flex';
+
+        refreshAccountStatsUI();
+        updateTopLeaderBanner();
+        syncCursorVisibility();
+    }
+
+    function switchSettingsTab(tabName) {
+        ['game', 'sounds', 'controls', 'graphics'].forEach(t => {
+            const panel = document.getElementById(`setTab_${t}`);
+            const btn = document.getElementById(`setTabBtn_${t}`);
+            if (panel) {
+                if (t === tabName) panel.classList.remove('hidden');
+                else panel.classList.add('hidden');
+            }
+            if (btn) {
+                btn.className = (t === tabName)
+                    ? "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate"
+                    : "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate";
+            }
+        });
+    }
+
+    // =========================================================================
+    // MODULE 7: 8 IDD ROAD HAZARD CLASSES & ZERO-LAG GAME PHYSICS ENGINE
+    // =========================================================================
+    const IDD_HAZARD_CLASSES = [
+        { id: 0, name: "auto_rickshaw", h: 1.75, w: 1.45, speedMul: 0.55, color: "#f59e0b", roof: "#1e293b", points: 120 },
+        { id: 1, name: "bus_truck",     h: 2.85, w: 2.25, speedMul: 0.45, color: "#ef4444", roof: "#7f1d1d", points: 180 },
+        { id: 2, name: "car",           h: 1.50, w: 1.72, speedMul: 0.65, color: "#38bdf8", roof: "#0c4a6e", points: 140 },
+        { id: 3, name: "two_wheeler",   h: 1.55, w: 0.82, speedMul: 0.75, color: "#a855f7", roof: "#4c1d95", points: 160, weaves: true },
+        { id: 4, name: "pedestrian",    h: 1.70, w: 0.65, speedMul: 0.12, color: "#fb7185", roof: "#881337", points: 200 },
+        { id: 5, name: "stray_animal",  h: 0.95, w: 1.05, speedMul: 0.08, color: "#fbbf24", roof: "#78350f", points: 190 },
+        { id: 6, name: "pothole",       h: 0.15, w: 1.45, speedMul: 0.00, color: "#64748b", roof: "#0f172a", points: 100, flat: true },
+        { id: 7, name: "speed_bump",    h: 0.18, w: 2.05, speedMul: 0.00, color: "#eab308", roof: "#422006", points: 90,  flat: true }
+    ];
+
+    function resizeGameCanvas() {
+        detectDeviceHardware();
+        const wrapper = document.getElementById('gameViewportWrapper');
+        const w = (wrapper ? wrapper.clientWidth : 0) || window.innerWidth;
+        const h = (wrapper ? wrapper.clientHeight : 0) || window.innerHeight;
+        // Cap DPR at 1.25 on mobile and 1.5 on PC for zero-lag 60-120FPS rendering
+        const maxDpr = isMobileHardware ? 1.25 : 1.5;
+        const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+        canvas.width = Math.max(1, Math.floor(w * dpr));
+        canvas.height = Math.max(1, Math.floor(h * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        gameState.viewW = w;
+        gameState.viewH = h;
+    }
+
+    async function lockLandscapeIfPossible() {
+        try {
+            if (screen.orientation && screen.orientation.lock) {
+                await screen.orientation.lock('landscape');
+            }
+        } catch (e) {}
+    }
+
+    function startGameSession() {
+        ensureAudioEngine();
+        lockLandscapeIfPossible();
+        resizeGameCanvas();
+
+        document.getElementById('startModal').style.display = 'none';
+        document.getElementById('pauseSettingsModal').style.display = 'none';
+        document.getElementById('leaderboardModal').style.display = 'none';
+        document.getElementById('gameOverModal').style.display = 'none';
+
+        gameState.running = true;
+        gameState.paused = false;
+        gameState.score = 0;
+        gameState.epoch = 1;
+        gameState.combo = 1.0;
+        gameState.nearMisses = 0;
+        gameState.armor = 100;
+        gameState.nitroFuel = 100;
+        gameState.empCharge = 100;
+        gameState.distanceM = 0;
+        gameState.speedMps = 27;
+        gameState.targetLane = 0;
+        gameState.egoLaneX = 0;
+        gameState.egoRoll = 0;
+        gameState.slowMoTimer = 0;
+        gameState.empWaveRadius = 0;
+        gameState.screenShake = 0;
+        gameState.hazards = [];
+        gameState.pickups = [];
+        gameState.FloatingTexts = [];
+
+        startProceduralSynthLoop();
+        if (audioSettings.ostMode === 'mitadru') {
+            if (!mitadruAudio.src || mitadruAudio.src === window.location.href) {
+                mitadruIdx = 0;
+                mitadruAudio.src = mitadruCandidates[0];
+            }
+            mitadruAudio.currentTime = 0;
+            mitadruAudio.volume = audioSettings.master * audioSettings.music;
+            mitadruAudio.play().catch(() => {});
+        }
+        updateEngineSoundPitch();
+        updateEqVisuals(true);
+        updateHudDOM();
+        syncCursorVisibility();
+    }
+
+    function exitGamePortal() {
+        mitadruAudio.pause();
+        gameState.running = false;
+        updateEngineSoundPitch();
+        updateEqVisuals(false);
+        syncCursorVisibility();
+        try {
+            window.open('', '_self', '');
+            window.close();
+        } catch (e) {}
+        if (!window.closed) {
+            if (window.history.length > 1) window.history.back();
+            else window.location.href = 'index.html';
+        }
+    }
+
+    function steerLane(dir) {
+        if (!gameState.running || gameState.paused) return;
+        const prevLane = Math.round(gameState.targetLane);
+        gameState.targetLane = Math.max(-2, Math.min(2, prevLane + dir));
+
+        if (gameState.targetLane !== prevLane) {
+            playGameSfx('steer');
+            gameState.egoRoll = dir * 0.22;
+
+            for (const h of gameState.hazards) {
+                if (!h.nearMissed && Math.abs(h.lane - prevLane) < 0.55 && h.z > 1.8 && h.z < 9.5) {
+                    h.nearMissed = true;
+                    gameState.nearMisses++;
+                    gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
+                    const bonus = Math.round(250 * gameState.combo);
+                    gameState.score += bonus;
+                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 24);
+                    gameState.empCharge = Math.min(100, gameState.empCharge + 18);
+                    if (gfxSettings.transitions) gameState.slowMoTimer = 0.48;
+                    playGameSfx('phantom');
+                    spawnFloatingText(`⚡ PHANTOM FLASH +${bonus}`, "#00f5d4", 0, -45);
+                    break;
+                }
+            }
+        }
+    }
+
+    function setBoosting(active) {
+        if (active && gameState.nitroFuel <= 2) {
+            gameState.boosting = false;
+            return;
+        }
+        gameState.boosting = active;
+    }
+
+    function setBraking(active) {
+        gameState.braking = active;
+    }
+
+    function triggerNeuralEmp() {
+        if (!gameState.running || gameState.paused) return;
+        if (gameState.empCharge < 100) {
+            spawnFloatingText("⚡ EMP CHARGING...", "#94a3b8", 0, -20);
+            return;
+        }
+        gameState.empCharge = 0;
+        gameState.empWaveRadius = 1;
+        if (gfxSettings.shake) gameState.screenShake = 10;
+        playGameSfx('emp');
+
+        const clearedCount = gameState.hazards.length;
+        const empBonus = clearedCount * Math.round(160 * gameState.combo);
+        gameState.score += empBonus;
+        gameState.hazards = [];
+        spawnFloatingText(`⚡ NEURAL EMP VAPORIZED ${clearedCount} HAZARDS! +${empBonus}`, "#38bdf8", 0, -60);
+        updateHudDOM();
+    }
+
+    function spawnFloatingText(text, color, offsetX = 0, offsetY = 0) {
+        if (!gfxSettings.transitions) return;
+        gameState.FloatingTexts.push({
+            text,
+            color,
+            x: (gameState.viewW || 800) * 0.5 + offsetX,
+            y: (gameState.viewH || 450) * 0.42 + offsetY,
+            life: 1.0
+        });
+    }
+
+    // =========================================================================
+    // MODULE 8: ZERO-LAG 3D PROJECTION & CURVED EGO-CORRIDOR RENDERER
+    // =========================================================================
+    function project3DPoint(laneOffset, zMeters, yMeters, W, H, roadCurve) {
+        const horizonY = H * 0.43;
+        const camHeight = 1.65;
+        const fovFocal = H * 0.82;
+        const zSafe = Math.max(1.2, zMeters);
+        const scale = fovFocal / zSafe;
+
+        const zNorm = zSafe * 0.0181818; // 1 / 55.0
+        const curveShift = roadCurve * (zNorm * zNorm) * (W * 0.22);
+        const worldX = (laneOffset - gameState.egoLaneX * 0.32) * LANE_WIDTH_M;
+
+        const screenX = W * 0.5 + worldX * scale * 0.24 + curveShift;
+        const screenY = horizonY + (camHeight - yMeters) * scale * 0.34;
+        return { x: screenX, y: screenY, scale };
+    }
+
+    function updateGamePhysics(dt) {
+        if (!gameState.running || gameState.paused) return;
+
+        const diff = DIFFICULTY_PRESETS[currentDiffKey] || DIFFICULTY_PRESETS.easy;
+
+        let timeScale = 1.0;
+        if (gameState.slowMoTimer > 0) {
+            gameState.slowMoTimer = Math.max(0, gameState.slowMoTimer - dt);
+            timeScale = 0.48;
+        }
+        const effDt = dt * timeScale;
+
+        const prevEpoch = gameState.epoch;
+        gameState.epoch = Math.min(250, 1 + Math.floor(gameState.distanceM / 68));
+        if (gameState.epoch !== prevEpoch && autoCycleBiomes) {
+            biomeIdx = (gameState.epoch - 1) % BIOME_THEMES.length;
+            const hudBiome = document.getElementById('hudBiomeName');
+            if (hudBiome) hudBiome.innerText = BIOME_THEMES[biomeIdx].label;
+            spawnFloatingText(`🌍 BIOME SHIFT: ${BIOME_THEMES[biomeIdx].label.toUpperCase()}`, "#38bdf8", 0, -55);
+        }
+
+        if (gameState.boosting) {
+            gameState.nitroFuel = Math.max(0, gameState.nitroFuel - dt * 25);
+            if (gameState.nitroFuel <= 0) gameState.boosting = false;
+        } else {
+            gameState.nitroFuel = Math.min(100, gameState.nitroFuel + dt * 5.8);
+        }
+
+        const baseCruise = (26 + Math.min(26, gameState.epoch * 0.17)) * diff.speedMul;
+        const targetSpeed = gameState.boosting
+            ? baseCruise * 1.48
+            : (gameState.braking ? baseCruise * 0.52 : baseCruise);
+
+        gameState.speedMps += (targetSpeed - gameState.speedMps) * Math.min(1, dt * 6);
+        gameState.distanceM += gameState.speedMps * effDt;
+        gameState.score += Math.round(gameState.speedMps * effDt * gameState.combo * diff.scoreMul * 1.35);
+
+        updateEngineSoundPitch();
+
+        const laneDiff = gameState.targetLane - gameState.egoLaneX;
+        gameState.egoLaneX += laneDiff * Math.min(1, dt * 13);
+        gameState.egoRoll += (laneDiff * 0.18 - gameState.egoRoll) * Math.min(1, dt * 10);
+
+        if (gameState.screenShake > 0) {
+            gameState.screenShake = Math.max(0, gameState.screenShake - dt * 28);
+        }
+
+        if (gameState.empWaveRadius > 0) {
+            gameState.empWaveRadius += dt * 1400;
+            if (gameState.empWaveRadius > 1600) gameState.empWaveRadius = 0;
+        }
+
+        gameState.empCharge = Math.min(100, gameState.empCharge + dt * 3.8);
+
+        spawnAccumulator += gameState.speedMps * effDt;
+        const spawnIntervalMeters = Math.max(13.0, diff.spawnMeters - gameState.epoch * 0.05);
+        if (spawnAccumulator >= spawnIntervalMeters) {
+            spawnAccumulator = 0;
+            const cls = IDD_HAZARD_CLASSES[Math.floor(Math.random() * IDD_HAZARD_CLASSES.length)];
+            const lane = LANES[Math.floor(Math.random() * LANES.length)];
+            const dgiVal = +(Math.random() * 0.18 + 0.02).toFixed(2);
+            gameState.hazards.push({
+                cls,
+                lane,
+                baseLane: lane,
+                z: 62.0,
+                speedMps: cls.speedMul * baseCruise * 0.52,
+                dgi: dgiVal,
+                phase: Math.random() * Math.PI * 2,
+                nearMissed: false
+            });
+        }
+
+        pickupAccumulator += gameState.speedMps * effDt;
+        if (pickupAccumulator >= 25.0) {
+            pickupAccumulator = 0;
+            const freeLane = LANES[Math.floor(Math.random() * LANES.length)];
+            const isGoldEpochOrb = Math.random() < 0.35;
+            gameState.pickups.push({
+                lane: freeLane,
+                z: 60.0,
+                isGold: isGoldEpochOrb,
+                spin: 0
+            });
+        }
+
+        for (let i = gameState.hazards.length - 1; i >= 0; i--) {
+            const h = gameState.hazards[i];
+            const relClosingSpeed = Math.max(4, gameState.speedMps - h.speedMps);
+            h.z -= relClosingSpeed * effDt;
+
+            if (h.cls.weaves) {
+                h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(performance.now() * 0.0028 + h.phase) * 0.48));
+            }
+
+            if (h.z <= 3.3 && h.z >= 1.7) {
+                const latDist = Math.abs(h.lane - gameState.egoLaneX);
+                const hitThreshold = (h.cls.id === 1 ? 0.58 : 0.46) * diff.hitboxScale;
+                if (latDist < hitThreshold) {
+                    playGameSfx('hit');
+                    if (gfxSettings.shake) gameState.screenShake = 12;
+                    gameState.combo = 1.0;
+                    const dmg = Math.round((h.cls.flat ? 14 : 25) * diff.hitboxScale);
+                    gameState.armor = Math.max(0, gameState.armor - dmg);
+                    spawnFloatingText(`💥 IMPACT: ${h.cls.name.toUpperCase()} (-${dmg}% HULL)`, "#ef4444", 0, -30);
+                    gameState.hazards.splice(i, 1);
+
+                    if (gameState.armor <= 0) {
+                        triggerGameOver();
+                        return;
+                    }
+                    continue;
+                }
+            }
+
+            if (h.z < 1.2) {
+                gameState.score += Math.round(h.cls.points * gameState.combo * diff.scoreMul);
+                gameState.hazards.splice(i, 1);
+            }
+        }
+
+        for (let i = gameState.pickups.length - 1; i >= 0; i--) {
+            const p = gameState.pickups[i];
+            p.z -= gameState.speedMps * effDt;
+            p.spin += dt * 5;
+
+            if (p.z <= 4.2 && p.z >= 1.3 && Math.abs(p.lane - gameState.egoLaneX) < 0.72) {
+                playGameSfx('pickup');
+                if (p.isGold) {
+                    gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
+                    gameState.armor = Math.min(100, gameState.armor + 18);
+                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 40);
+                    gameState.score += Math.round(450 * gameState.combo);
+                    spawnFloatingText(`🟨 NITRO CORE! +40% NITRO & +18% HULL`, "#fbbf24", 0, -40);
+                } else {
+                    gameState.empCharge = Math.min(100, gameState.empCharge + 28);
+                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 25);
+                    const pts = Math.round(220 * gameState.combo);
+                    gameState.score += pts;
+                    spawnFloatingText(`🟦 TF32 CORE +${pts} (+25% NITRO & EMP)`, "#38bdf8", 0, -35);
+                }
+                gameState.pickups.splice(i, 1);
+                continue;
+            }
+
+            if (p.z < 1.2) {
+                gameState.pickups.splice(i, 1);
+            }
+        }
+
+        for (let i = gameState.FloatingTexts.length - 1; i >= 0; i--) {
+            const ft = gameState.FloatingTexts[i];
+            ft.y -= dt * 42;
+            ft.life -= dt * 1.15;
+            if (ft.life <= 0) gameState.FloatingTexts.splice(i, 1);
+        }
+
+        updateHudDOM();
+    }
+
+    function triggerGameOver() {
+        gameState.running = false;
+        updateEngineSoundPitch();
+
+        saveActiveAccountStats(gameState.score, gameState.epoch, gameState.nearMisses);
+        recordScoreToLeaderboard(gameState.score, gameState.epoch);
+
+        const st = getActiveAccountStats();
+        document.getElementById('finalScoreVal').innerText = gameState.score.toLocaleString();
+        document.getElementById('finalBestVal').innerText = (st.bestScore || gameState.score).toLocaleString();
+        document.getElementById('finalEpochVal').innerText = `Epoch ${gameState.epoch} • ${BIOME_THEMES[biomeIdx].label}`;
+        document.getElementById('finalNearMissVal').innerText = String(gameState.nearMisses);
+        document.getElementById('gameOverModal').style.display = 'flex';
+        syncCursorVisibility();
+    }
+
+    function updateHudDOM() {
+        document.getElementById('hudScore').innerText = String(gameState.score).padStart(6, '0');
+        document.getElementById('hudEpoch').innerText = `EPOCH ${gameState.epoch}`;
+        document.getElementById('hudCombo').innerText = `${gameState.combo.toFixed(1)}x`;
+
+        const kmh = Math.round(gameState.speedMps * 3.6);
+        document.getElementById('hudSpeedKmh').innerText = `${kmh} km/h`;
+
+        const armorBar = document.getElementById('hudArmorBar');
+        const armorPct = document.getElementById('hudArmorPct');
+        if (armorBar && armorPct) {
+            armorBar.style.width = `${gameState.armor}%`;
+            armorPct.innerText = `${gameState.armor}%`;
+        }
+
+        const nitroPct = Math.floor(gameState.nitroFuel);
+        document.getElementById('hudNitroPct').innerText = `${nitroPct}%`;
+        document.getElementById('hudNitroBar').style.width = `${nitroPct}%`;
+
+        const empPct = Math.floor(gameState.empCharge);
+        document.getElementById('hudEmpPct').innerText = empPct >= 100 ? "READY!" : `${empPct}%`;
+        document.getElementById('hudEmpBar').style.width = `${empPct}%`;
+
+        let leadHazard = null;
+        let maxRisk = 0;
+
+        for (const h of gameState.hazards) {
+            const latDiff = Math.abs(h.lane - gameState.egoLaneX);
+            const distRisk = Math.max(0, Math.min(1, 1 - (h.z - 2) / 50));
+            const overlap = Math.max(0, 1 - latDiff / 1.2);
+            const relV = Math.max(1, gameState.speedMps - h.speedMps);
+            const ttc = h.z / relV;
+            const ttcRisk = ttc <= 1.8 ? 1.0 : Math.max(0, (6.0 - ttc) / 4.2);
+            const rFinal = Math.min(1, 0.35 * distRisk + 0.35 * ttcRisk + 0.30 * overlap);
+            h.rFinal = rFinal;
+            h.ttc = ttc;
+
+            if (rFinal > maxRisk) {
+                maxRisk = rFinal;
+                leadHazard = h;
+            }
+        }
+
+        const riskPct = Math.round(maxRisk * 100);
+        const warnBadge = document.getElementById('hudWarningBadge');
+        if (warnBadge) {
+            if (riskPct >= 85) {
+                warnBadge.innerText = "IMMEDIATE WARNING";
+                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
+            } else if (riskPct >= 65) {
+                warnBadge.innerText = "HAZARD AHEAD";
+                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
+            } else if (riskPct >= 35) {
+                warnBadge.innerText = "CAUTION";
+                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
+            } else {
+                warnBadge.innerText = "NO WARNING";
+                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
+            }
+        }
+
+        const leadNameEl = document.getElementById('hudLeadName');
+        const leadTtcEl = document.getElementById('hudLeadTtc');
+        const leadDgiEl = document.getElementById('hudLeadDgi');
+        if (leadNameEl && leadTtcEl && leadDgiEl) {
+            if (leadHazard) {
+                leadNameEl.innerText = `${leadHazard.cls.name.toUpperCase()} (${leadHazard.z.toFixed(1)}m)`;
+                leadTtcEl.innerText = `${leadHazard.ttc.toFixed(1)}s`;
+                leadDgiEl.innerText = String(leadHazard.dgi);
+            } else {
+                leadNameEl.innerText = "CLEAR CORRIDOR";
+                leadTtcEl.innerText = "STABLE";
+                leadDgiEl.innerText = "0.00";
+            }
+        }
+    }
+
+    function renderMiniRadar() {
+        const w = radarCanvas.width, h = radarCanvas.height;
+        rCtx.clearRect(0, 0, w, h);
+        const cx = w * 0.5, cy = h - 8;
+
+        [15, 30, 45].forEach(d => {
+            const r = d * 1.5;
+            rCtx.beginPath();
+            rCtx.arc(cx, cy, r, Math.PI, 0, false);
+            rCtx.strokeStyle = '#1e2638';
+            rCtx.lineWidth = 1;
+            rCtx.stroke();
+        });
+
+        rCtx.fillStyle = currentPilot.dotColor;
+        rCtx.fillRect(cx - 3, cy - 5, 6, 5);
+
+        radarAngle += 0.045;
+        if (radarAngle > Math.PI * 2) radarAngle = Math.PI;
+        rCtx.beginPath();
+        rCtx.moveTo(cx, cy);
+        rCtx.lineTo(cx + Math.cos(radarAngle) * 72, cy + Math.sin(radarAngle) * 72);
+        rCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        rCtx.stroke();
+
+        for (const hz of gameState.hazards) {
+            if (hz.z > 55) continue;
+            const bx = cx + (hz.lane - gameState.egoLaneX) * 10;
+            const by = cy - hz.z * 1.3;
+            if (by > 2 && by < h) {
+                rCtx.beginPath();
+                rCtx.arc(bx, by, 2.8, 0, Math.PI * 2);
+                rCtx.fillStyle = (hz.rFinal >= 0.85) ? '#ef4444' : (hz.rFinal >= 0.65 ? '#f97316' : (hz.rFinal >= 0.35 ? '#f59e0b' : '#38bdf8'));
+                rCtx.fill();
+            }
+        }
+    }
+
+    function renderSceneFrame(now) {
+        const W = gameState.viewW || window.innerWidth;
+        const H = gameState.viewH || window.innerHeight;
+        const theme = BIOME_THEMES[biomeIdx];
+        const horizonY = H * 0.43;
+
+        ctx.save();
+        if (gameState.screenShake > 0 && gfxSettings.shake) {
+            ctx.translate((Math.random() - 0.5) * gameState.screenShake, (Math.random() - 0.5) * gameState.screenShake);
+        }
+
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+        skyGrad.addColorStop(0, theme.skyTop);
+        skyGrad.addColorStop(1, theme.skyBot);
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, horizonY + 2);
+
+        const starCount = Math.floor(gameState.stars.length * gfxSettings.particles);
+        ctx.fillStyle = "#e2e8f0";
+        for (let i = 0; i < starCount; i++) {
+            const st = gameState.stars[i];
+            const sx = ((st.x * W - gameState.distanceM * st.sp) % W + W) % W;
+            const sy = st.y * H;
+            ctx.fillRect(sx, sy, st.s, st.s);
+        }
+
+        const sunGrad = ctx.createRadialGradient(W * 0.5, horizonY - 12, 8, W * 0.5, horizonY - 12, H * 0.23);
+        sunGrad.addColorStop(0, "#ffffff");
+        sunGrad.addColorStop(0.28, theme.sun);
+        sunGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(W * 0.5, horizonY - 12, H * 0.23, Math.PI, 0, false);
+        ctx.fill();
+
+        if (theme.rings) {
+            ctx.strokeStyle = "rgba(129, 140, 248, 0.45)";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.ellipse(W * 0.5, horizonY - 18, W * 0.26, H * 0.045, -0.12, Math.PI, 0, false);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = "#04060c";
+        for (let b = 0; b < 24; b++) {
+            const bw = W / 24 + 2;
+            const bx = b * (W / 24);
+            const bh = 10 + ((b * 37) % 32);
+            ctx.fillRect(bx, horizonY - bh, bw, bh);
+        }
+
+        ctx.fillStyle = "#04060a";
+        ctx.fillRect(0, horizonY, W, H - horizonY);
+
+        const roadCurve = Math.sin(gameState.distanceM * 0.012) * 0.65;
+        const totalSlices = 38;
+
+        const voidHue = (now * 0.14) % 360;
+        const activeRailColor = currentPilot.isVoidChroma
+            ? `hsl(${voidHue}, 95%, 60%)`
+            : currentPilot.railColor;
+
+        for (let i = totalSlices; i >= 1; i--) {
+            const zNear = 1.4 + (i - 1) * 1.5;
+            const zFar = 1.4 + i * 1.5;
+
+            const pNearLeft  = project3DPoint(-2.6, zNear, 0, W, H, roadCurve);
+            const pNearRight = project3DPoint( 2.6, zNear, 0, W, H, roadCurve);
+            const pFarLeft   = project3DPoint(-2.6, zFar,  0, W, H, roadCurve);
+            const pFarRight  = project3DPoint( 2.6, zFar,  0, W, H, roadCurve);
+
+            const stripeIdx = Math.floor((gameState.distanceM + zNear) / 3.0);
+            const isAlt = stripeIdx % 2 === 0;
+
+            ctx.fillStyle = isAlt ? theme.roadLight : theme.roadDark;
+            ctx.beginPath();
+            ctx.moveTo(pFarLeft.x, pFarLeft.y);
+            ctx.lineTo(pFarRight.x, pFarRight.y);
+            ctx.lineTo(pNearRight.x, pNearRight.y);
+            ctx.lineTo(pNearLeft.x, pNearLeft.y);
+            ctx.closePath();
+            ctx.fill();
+
+            if (zFar <= 44.0) {
+                const egoLNear = project3DPoint(gameState.egoLaneX - 0.45, zNear, 0, W, H, roadCurve);
+                const egoRNear = project3DPoint(gameState.egoLaneX + 0.45, zNear, 0, W, H, roadCurve);
+                const egoLFar  = project3DPoint(gameState.egoLaneX - 0.45, zFar,  0, W, H, roadCurve);
+                const egoRFar  = project3DPoint(gameState.egoLaneX + 0.45, zFar,  0, W, H, roadCurve);
+
+                const alphaFade = Math.max(0.03, (1 - zNear / 44.0) * 0.25);
+                ctx.fillStyle = currentPilot.isVoidChroma
+                    ? `hsla(${(voidHue + i * 7) % 360}, 95%, 58%, ${alphaFade})`
+                    : `${activeRailColor}24`;
+                ctx.beginPath();
+                ctx.moveTo(egoLFar.x, egoLFar.y);
+                ctx.lineTo(egoRFar.x, egoRFar.y);
+                ctx.lineTo(egoRNear.x, egoRNear.y);
+                ctx.lineTo(egoLNear.x, egoLNear.y);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = activeRailColor;
+                ctx.lineWidth = Math.max(1.2, pNearLeft.scale * 0.008);
+                ctx.beginPath();
+                ctx.moveTo(egoLFar.x, egoLFar.y);
+                ctx.lineTo(egoLNear.x, egoLNear.y);
+                ctx.moveTo(egoRFar.x, egoRFar.y);
+                ctx.lineTo(egoRNear.x, egoRNear.y);
+                ctx.stroke();
+
+                if (isAlt && i % 2 === 0) {
+                    const egoCenterMid = project3DPoint(gameState.egoLaneX, (zNear + zFar) * 0.5, 0, W, H, roadCurve);
+                    ctx.strokeStyle = activeRailColor;
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(egoLNear.x + (egoRNear.x - egoLNear.x) * 0.25, egoLNear.y);
+                    ctx.lineTo(egoCenterMid.x, egoCenterMid.y);
+                    ctx.lineTo(egoLNear.x + (egoRNear.x - egoLNear.x) * 0.75, egoRNear.y);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.strokeStyle = isAlt ? theme.curb : "#1e293b";
+            ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.012);
+            ctx.beginPath();
+            ctx.moveTo(pFarLeft.x, pFarLeft.y);
+            ctx.lineTo(pNearLeft.x, pNearLeft.y);
+            ctx.moveTo(pFarRight.x, pFarRight.y);
+            ctx.lineTo(pNearRight.x, pNearRight.y);
+            ctx.stroke();
+
+            if (stripeIdx % 4 === 0 && i % 2 === 0) {
+                const pylonH = Math.max(4, pNearLeft.scale * 0.45);
+                ctx.strokeStyle = theme.curb;
+                ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.008);
+                ctx.beginPath();
+                ctx.moveTo(pNearLeft.x - 4, pNearLeft.y);
+                ctx.lineTo(pNearLeft.x - 4, pNearLeft.y - pylonH);
+                ctx.moveTo(pNearRight.x + 4, pNearRight.y);
+                ctx.lineTo(pNearRight.x + 4, pNearRight.y - pylonH);
+                ctx.stroke();
+            }
+
+            if (isAlt) {
+                ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
+                ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.005);
+                for (const divLane of [-1.5, -0.5, 0.5, 1.5]) {
+                    const dFar = project3DPoint(divLane, zFar, 0, W, H, roadCurve);
+                    const dNear = project3DPoint(divLane, zNear, 0, W, H, roadCurve);
+                    ctx.beginPath();
+                    ctx.moveTo(dFar.x, dFar.y);
+                    ctx.lineTo(dNear.x, dNear.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        const sortedPickups = [...gameState.pickups].sort((a, b) => b.z - a.z);
+        for (const pk of sortedPickups) {
+            const pt = project3DPoint(pk.lane, pk.z, 0.6, W, H, roadCurve);
+            const r = Math.max(4, pt.scale * 0.14);
+            ctx.save();
+            ctx.translate(pt.x, pt.y);
+            ctx.rotate(pk.spin);
+            ctx.fillStyle = pk.isGold ? "#fbbf24" : "#38bdf8";
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(-r, -r, r * 2, r * 2);
+            ctx.strokeRect(-r, -r, r * 2, r * 2);
+            ctx.restore();
+        }
+
+        const sortedHazards = [...gameState.hazards].sort((a, b) => b.z - a.z);
+        for (const hz of sortedHazards) {
+            const basePt = project3DPoint(hz.lane, hz.z, 0, W, H, roadCurve);
+            const boxW = Math.max(12, hz.cls.w * basePt.scale * 0.24);
+            const boxH = Math.max(8, hz.cls.h * basePt.scale * 0.28);
+            const x1 = basePt.x - boxW * 0.5;
+            const y2 = basePt.y;
+            const y1 = y2 - boxH;
+
+            ctx.fillStyle = "rgba(0,0,0,0.55)";
+            ctx.fillRect(x1 - 2, y2 - 3, boxW + 4, 5);
+
+            ctx.fillStyle = hz.cls.roof;
+            ctx.fillRect(x1, y1, boxW, boxH);
+
+            ctx.fillStyle = hz.cls.color;
+            ctx.fillRect(x1 + boxW * 0.07, y1 + boxH * 0.24, boxW * 0.86, boxH * 0.70);
+
+            if (!hz.cls.flat && hz.cls.id <= 3) {
+                ctx.fillStyle = "#090d16";
+                ctx.fillRect(x1 + boxW * 0.15, y1 + boxH * 0.12, boxW * 0.70, boxH * 0.22);
+
+                ctx.fillStyle = "#ff1e42";
+                const tlW = Math.max(3, boxW * 0.18);
+                const tlH = Math.max(2, boxH * 0.13);
+                ctx.fillRect(x1 + 2, y2 - tlH * 2.1, tlW, tlH);
+                ctx.fillRect(x1 + boxW - tlW - 2, y2 - tlH * 2.1, tlW, tlH);
+            }
+
+            const tierColor = (hz.rFinal >= 0.85)
+                ? "#ef4444"
+                : (hz.rFinal >= 0.65 ? "#f97316" : (hz.rFinal >= 0.35 ? "#f59e0b" : "#38bdf8"));
+
+            ctx.strokeStyle = tierColor;
+            ctx.lineWidth = hz.rFinal >= 0.65 ? 2.2 : 1.4;
+            ctx.strokeRect(x1 - 3, y1 - 3, boxW + 6, boxH + 6);
+
+            if (hz.z < 38) {
+                const label = `${hz.cls.name} ${hz.z.toFixed(1)}m | DGI ${hz.dgi}`;
+                ctx.font = "bold 10px 'JetBrains Mono', monospace";
+                const textW = ctx.measureText(label).width + 8;
+                ctx.fillStyle = "rgba(9, 11, 16, 0.88)";
+                ctx.fillRect(x1 - 3, y1 - 18, textW, 14);
+                ctx.fillStyle = tierColor;
+                ctx.fillText(label, x1 + 1, y1 - 8);
+            }
+        }
+
+        const egoCenter = project3DPoint(gameState.egoLaneX, 2.2, 0, W, H, roadCurve);
+        ctx.save();
+        ctx.translate(egoCenter.x, H * 0.84);
+        ctx.rotate(gameState.egoRoll);
+
+        if (gfxSettings.bloom) {
+            ctx.shadowColor = activeRailColor;
+            ctx.shadowBlur = gameState.boosting ? 22 : 12;
+        }
+        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        ctx.fillRect(-52, 11, 104, 15);
+
+        ctx.fillStyle = currentPilot.chassisBase;
+        ctx.strokeStyle = gameState.boosting ? "#fbbf24" : activeRailColor;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-48, 14);
+        ctx.lineTo(-38, -8);
+        ctx.lineTo(-24, -19);
+        ctx.lineTo(24, -19);
+        ctx.lineTo(38, -8);
+        ctx.lineTo(48, 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        if (currentPilot.isVoidChroma) {
+            const cGrad = ctx.createLinearGradient(-44, -16, 44, 14);
+            cGrad.addColorStop(0, "#00f5d4");
+            cGrad.addColorStop(0.35, `hsl(${(voidHue + 90) % 360}, 100%, 60%)`);
+            cGrad.addColorStop(0.7, "#ff007f");
+            cGrad.addColorStop(1, "#ffbe0b");
+            ctx.strokeStyle = cGrad;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-34, 10);
+            ctx.lineTo(-20, -14);
+            ctx.lineTo(20, -14);
+            ctx.lineTo(34, 10);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = currentPilot.canopyColor;
+        ctx.beginPath();
+        ctx.moveTo(-22, -4);
+        ctx.lineTo(-14, -15);
+        ctx.lineTo(14, -15);
+        ctx.lineTo(22, -4);
+        ctx.closePath();
+        ctx.fill();
+
+        const thrusterCol = gameState.braking
+            ? "#ef4444"
+            : (gameState.boosting ? "#fbbf24" : (currentPilot.isVoidChroma ? activeRailColor : currentPilot.thrusterColor));
+        ctx.fillStyle = thrusterCol;
+        ctx.fillRect(-38, 2, 18, 7);
+        ctx.fillRect(20, 2, 18, 7);
+
+        if (gameState.boosting) {
+            ctx.fillStyle = "#fde68a";
+            ctx.fillRect(-34, 9, 10, 10 + Math.random() * 8);
+            ctx.fillRect(24, 9, 10, 10 + Math.random() * 8);
+        }
+        ctx.restore();
+
+        if (gameState.empWaveRadius > 0) {
+            ctx.strokeStyle = activeRailColor;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(W * 0.5, H * 0.75, gameState.empWaveRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        if (theme.weather !== 'none' && gfxSettings.particles > 0.05) {
+            const pCount = Math.floor(34 * gfxSettings.particles);
+            ctx.save();
+            for (let r = 0; r < pCount; r++) {
+                const rx = ((r * 97 + now * 0.45) % W);
+                const ry = ((r * 61 + now * 1.1) % H);
+                if (theme.weather === 'rain') {
+                    ctx.strokeStyle = "rgba(125, 211, 252, 0.28)";
+                    ctx.beginPath();
+                    ctx.moveTo(rx, ry);
+                    ctx.lineTo(rx - 7, ry + 16);
+                    ctx.stroke();
+                } else if (theme.weather === 'snow') {
+                    ctx.fillStyle = "rgba(241, 245, 249, 0.65)";
+                    ctx.fillRect(rx, ry, 2.5, 2.5);
+                } else if (theme.weather === 'embers') {
+                    ctx.fillStyle = "rgba(251, 146, 60, 0.65)";
+                    ctx.fillRect(rx, H - ry, 2.5, 2.5);
+                } else if (theme.weather === 'petals') {
+                    ctx.fillStyle = "rgba(244, 114, 182, 0.65)";
+                    ctx.fillRect(rx, ry, 3, 2);
+                } else if (theme.weather === 'spores' || theme.weather === 'matrix') {
+                    ctx.fillStyle = "rgba(74, 222, 128, 0.55)";
+                    ctx.fillRect(rx, ry, 2, 5);
+                }
+            }
+            ctx.restore();
+        }
+
+        for (const ft of gameState.FloatingTexts) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, ft.life);
+            ctx.font = "800 13px 'JetBrains Mono', monospace";
+            ctx.textAlign = "center";
+            ctx.fillStyle = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        }
+
+        ctx.restore();
+        renderMiniRadar();
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    // =========================================================================
+    // MODULE 9: EVENT LISTENERS & BOOTSTRAP
+    // =========================================================================
+    window.addEventListener('resize', resizeGameCanvas);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            mitadruAudio.pause();
+            updateEngineSoundPitch();
+            updateEqVisuals(false);
+        } else if (gameState.running && !gameState.paused) {
+            if (audioSettings.ostMode === 'mitadru') mitadruAudio.play().catch(() => {});
+            updateEngineSoundPitch();
+            updateEqVisuals(true);
+        }
+    });
+
+    window.addEventListener('deviceorientation', (e) => {
+        const tiltVal = (window.innerWidth > window.innerHeight) ? (e.beta || 0) : (e.gamma || 0);
+        lastRawTilt = tiltVal;
+        if (!gameState.running || gameState.paused || controlConfig.mobileMode !== 'tilt') return;
+        const delta = tiltVal - controlConfig.tiltCenterGamma;
+        const mappedLane = Math.max(-2, Math.min(2, delta / 9.5));
+        gameState.targetLane = mappedLane;
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
+        if (!gameState.running || gameState.paused) return;
+        const now = performance.now();
+        if (controlConfig.doubleTapNitro && (now - controlConfig.lastTouchTime < 280)) {
+            setBoosting(true);
+            setTimeout(() => setBoosting(false), 1100);
+        }
+        controlConfig.lastTouchTime = now;
+
+        if (controlConfig.mobileMode === 'drag') {
+            handleCanvasPointerDrag(e);
+        }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if (!gameState.running || gameState.paused) return;
+        if (controlConfig.mobileMode === 'drag' && e.buttons > 0) {
+            handleCanvasPointerDrag(e);
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        const keyLower = e.key.toLowerCase();
+
+        if (awaitingRebindAction) {
+            e.preventDefault();
+            if (keyLower !== 'escape') {
+                controlConfig.binds[awaitingRebindAction] = [keyLower];
+            }
+            awaitingRebindAction = null;
+            refreshKeybindLabels();
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            const lbModal = document.getElementById('leaderboardModal');
+            if (lbModal.style.display !== 'none') {
+                closeLeaderboardModal();
+                return;
+            }
+            const pauseModal = document.getElementById('pauseSettingsModal');
+            if (pauseModal.style.display !== 'none') {
+                resumeFromSettings();
+            } else if (gameState.running || document.getElementById('gameOverModal').style.display !== 'none') {
+                openPauseSettingsModal('game');
+            }
+            return;
+        }
+
+        if (!gameState.running || gameState.paused) return;
+
+        if (controlConfig.binds.left.includes(keyLower)) steerLane(-1);
+        else if (controlConfig.binds.right.includes(keyLower)) steerLane(1);
+        else if (controlConfig.binds.nitro.includes(keyLower)) setBoosting(true);
+        else if (controlConfig.binds.brake.includes(keyLower)) setBraking(true);
+        else if (controlConfig.binds.emp.includes(keyLower)) {
+            e.preventDefault();
+            triggerNeuralEmp();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        const keyLower = e.key.toLowerCase();
+        if (controlConfig.binds.nitro.includes(keyLower)) setBoosting(false);
+        else if (controlConfig.binds.brake.includes(keyLower)) setBraking(false);
+    });
+
+    // Boot Sequence
+    resizeGameCanvas();
+    const savedPilotId = localStorage.getItem('roadSense_overdrive_pilotId') || "GUEST";
+    applyPilotProfile(savedPilotId);
+    setDifficulty('easy');
+    refreshKeybindLabels();
+    buildBiomeSelectorGrid();
+    updateTopLeaderBanner();
+
+    let lastFrameTime = performance.now();
+    function mainLoop(now) {
+        const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+        lastFrameTime = now;
+
+        updateGamePhysics(dt);
+        renderSceneFrame(now);
+
+        requestAnimationFrame(mainLoop);
+    }
+    requestAnimationFrame(mainLoop);
+</script>
+</body>
+</html>
