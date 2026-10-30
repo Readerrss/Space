@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RoadSense Overdrive // Neural Interceptor</title>
     <script>
         (function() {
@@ -35,8 +35,8 @@
         }
 
         body, html {
-            width: 100vw;
-            height: 100dvh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             background: var(--bg-canvas);
             color: #e2e8f0;
@@ -80,7 +80,7 @@
         }
 
         .hardware-panel {
-            background-color: rgba(15, 18, 26, 0.92);
+            background-color: rgba(13, 16, 24, 0.92);
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-subtle);
             border-top-color: var(--border-highlight);
@@ -107,26 +107,16 @@
         }
 
         /* =========================================================
-           FORCED LANDSCAPE VIEWPORT FOR MOBILE & FULLSCREEN PC
+           DYNAMIC LANDSCAPE VIEWPORT FOR MOBILE & FULLSCREEN PC
            ========================================================= */
         #gameViewportWrapper {
             position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100dvh;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             background: #05070b;
-        }
-
-        @media screen and (max-width: 960px) and (orientation: portrait) {
-            #gameViewportWrapper {
-                top: 0;
-                left: 100vw;
-                width: 100dvh;
-                height: 100vw;
-                transform-origin: top left;
-                transform: rotate(90deg);
-            }
         }
 
         canvas#gameCanvas {
@@ -153,7 +143,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 5;
-            background: radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.68) 100%);
+            background: radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.62) 100%);
         }
         #atmosphereOverlay.scanlines-active::after {
             content: "";
@@ -204,24 +194,25 @@
         .eq-3 { animation: eqBounce 0.58s ease-in-out infinite 0.24s; }
         .eq-paused { animation: none !important; height: 4px !important; }
 
+        /* Ergonomic Arcade Thumb Dock Buttons */
         .touch-paddle {
-            background: rgba(14, 18, 26, 0.86);
+            background: linear-gradient(180deg, rgba(24, 31, 46, 0.96) 0%, rgba(12, 16, 25, 0.96) 100%);
             border: 1px solid rgba(56, 189, 248, 0.42);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
-            transition: transform 0.06s ease, background-color 0.06s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transition: transform 0.06s ease, background 0.06s ease, border-color 0.06s ease;
         }
         .touch-paddle:active, .touch-paddle.active-press {
-            transform: scale(0.92);
-            background: rgba(56, 189, 248, 0.32);
+            transform: scale(0.93);
+            background: rgba(56, 189, 248, 0.34);
             border-color: #38bdf8;
         }
 
         @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.96) translateY(5px); }
+            from { opacity: 0; transform: scale(0.97) translateY(4px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .modal-anim {
-            animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: modalPop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         input::placeholder {
@@ -247,97 +238,89 @@
         <div id="atmosphereOverlay"></div>
 
         <!-- =====================================================
-             1. MAIN MENU / PILOT LOGIN OVERLAY (z-[50])
+             1. MAIN MENU OVERLAY (z-[50] — SHAPED TO FIT MOBILE WITH ZERO SCROLLING)
              ===================================================== -->
         <div id="startModal" style="display: flex;" class="absolute inset-0 bg-[#04060a]/90 z-[50] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
-            <div class="hardware-panel modal-anim p-3 sm:p-5 rounded-2xl max-w-xl w-full space-y-2.5 border border-[#2d364a] shadow-2xl max-h-[95%] overflow-y-auto">
+            <div class="hardware-panel modal-anim px-3.5 py-2.5 sm:p-5 rounded-2xl max-w-xl w-full space-y-2 sm:space-y-3 border border-[#2d364a] shadow-2xl">
                 
                 <!-- Top Header & Live #1 Leader Banner -->
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#232836] pb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 text-[9px] mono-num font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full">
-                            NEURAL INTERCEPTOR
+                <div class="flex items-center justify-between gap-2 border-b border-[#232836] pb-1.5 sm:pb-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="px-2 py-0.5 text-[8.5px] sm:text-[9px] mono-num font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full shrink-0">
+                            OVERDRIVE
                         </span>
-                        <h1 class="title-cinzel text-sm sm:text-lg font-bold text-white tracking-wider">
+                        <h1 class="title-cinzel text-xs sm:text-lg font-bold text-white tracking-wider truncate">
                             ROADSENSE: OVERDRIVE
                         </h1>
                     </div>
-                    <div class="recessed-well px-2.5 py-1 rounded-lg text-[10px] mono-num flex items-center gap-1.5">
+                    <div class="recessed-well px-2.5 py-1 rounded-lg text-[10px] mono-num flex items-center gap-1.5 shrink-0">
                         <span>👑 #1:</span>
                         <strong id="bootTopLeaderName" class="text-amber-300">Unclaimed</strong>
                         <span id="bootTopLeaderScore" class="text-emerald-400 font-bold"></span>
                     </div>
                 </div>
 
-                <!-- Pilot ID Authentication & Optional Guest Name -->
-                <div class="recessed-well p-2.5 sm:p-3 rounded-xl border border-[#232b3e] space-y-2">
-                    <div id="pilotLoginInputRow" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                            <div class="text-[10px] mono-num font-bold uppercase text-sky-400">
-                                🔑 PILOT ID LOGIN (CORE OR CUSTOM GUEST ID)
-                            </div>
-                            <p class="text-[11px] text-gray-400">
-                                Enter a 4-digit ID and press Login ID, or play directly as Guest:
-                            </p>
+                <!-- Compact Single-Block Pilot ID & Optional Name Bar -->
+                <div class="recessed-well p-2 sm:p-3 rounded-xl border border-[#232b3e] space-y-1.5">
+                    <!-- Active Pilot Status Row -->
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span id="activePilotColorDot" class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block shrink-0 shadow"></span>
+                            <span class="text-gray-300 truncate text-[11px] sm:text-xs">Pilot: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
+                            <span id="activeLiveryBadge" class="px-2 py-0.5 text-[9.5px] mono-num rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">Tactical Steel</span>
                         </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <input type="text" id="pilotIdInput" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="XXXX" onkeydown="if(event.key==='Enter') loginPilotById()" class="bg-[#07090e] border border-[#2e384f] focus:border-sky-400 rounded-lg px-2 py-1.5 text-xs mono-num text-white tracking-widest w-20 text-center focus:outline-none">
-                            <button type="button" onclick="loginPilotById()" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs transition cursor-pointer">
+                        <button type="button" id="logoutAccountBtn" onclick="logoutCurrentPilot()" class="hidden px-2 py-0.5 rounded-lg bg-red-950/80 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-[9.5px] mono-num font-bold transition cursor-pointer shrink-0">
+                            ⇄ Switch ID
+                        </button>
+                    </div>
+
+                    <!-- Combined 1-Row ID Login & Optional Name Input (Fits mobile landscape with zero scrolling) -->
+                    <div id="pilotLoginInputRow" class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-1.5 border-t border-[#181d29]">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] mono-num font-bold text-sky-400 shrink-0">🔑 ID:</span>
+                            <input type="text" id="pilotIdInput" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="XXXX" onkeydown="if(event.key==='Enter') loginPilotById()" class="bg-[#07090e] border border-[#2e384f] focus:border-sky-400 rounded-lg px-2 py-1 text-xs mono-num text-white tracking-widest w-16 text-center focus:outline-none">
+                            <button type="button" onclick="loginPilotById()" class="px-2.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-[11px] transition cursor-pointer shrink-0">
                                 Login ID
                             </button>
                         </div>
-                    </div>
 
-                    <!-- Optional Guest Name Row (Visible whenever not in a locked Core Member profile) -->
-                    <div id="guestNameInputRow" class="flex items-center justify-between gap-2 pt-1.5 border-t border-[#181d29]">
-                        <span class="text-[10px] mono-num text-gray-400">PILOT NAME <span class="text-gray-500">(OPTIONAL)</span>:</span>
-                        <div class="flex items-center gap-1.5 flex-1 max-w-xs">
+                        <div id="guestNameInputRow" class="flex items-center gap-1.5 flex-1 min-w-[140px]">
+                            <span class="text-[10px] mono-num text-gray-400 shrink-0">NAME:</span>
                             <input type="text" id="guestCallsignInput" maxlength="16" autocomplete="off" placeholder="John Doe" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
                         </div>
                     </div>
 
-                    <!-- Active Account Status + Switch ID Button -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-[#181d29] text-xs">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span id="activePilotColorDot" class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block shrink-0 shadow"></span>
-                            <span class="text-gray-300 truncate">Active: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
-                            <span id="activeLiveryBadge" class="px-2 py-0.5 text-[10px] mono-num rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">Tactical Steel</span>
-                        </div>
-                        <button type="button" id="logoutAccountBtn" onclick="logoutCurrentPilot()" class="hidden px-2.5 py-1 rounded-lg bg-red-950/80 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-[10px] mono-num font-bold transition cursor-pointer shrink-0">
-                            ⇄ Reset / Switch ID
-                        </button>
-                    </div>
-                    <div id="loginFeedbackBanner" class="hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"></div>
+                    <div id="loginFeedbackBanner" class="hidden text-[10.5px] font-semibold px-2 py-1 rounded-lg"></div>
                 </div>
 
-                <!-- Account Personal Telemetry Summary -->
-                <div class="grid grid-cols-3 gap-2 text-left text-[11px] mono-num">
-                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
-                        <div class="text-gray-400 text-[9px]">ACCOUNT BEST</div>
-                        <div id="bootHighScore" class="text-emerald-400 font-extrabold text-sm">0</div>
+                <!-- Account Personal Stats Summary -->
+                <div class="grid grid-cols-3 gap-2 text-left mono-num">
+                    <div class="recessed-well px-2.5 py-1.5 sm:p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[8.5px] sm:text-[9px]">BEST SCORE</div>
+                        <div id="bootHighScore" class="text-emerald-400 font-extrabold text-xs sm:text-sm">0</div>
                     </div>
-                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
-                        <div class="text-gray-400 text-[9px]">MAX EPOCH</div>
-                        <div id="bootBestEpoch" class="text-sky-300 font-extrabold text-sm">Epoch 1</div>
+                    <div class="recessed-well px-2.5 py-1.5 sm:p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[8.5px] sm:text-[9px]">MAX EPOCH</div>
+                        <div id="bootBestEpoch" class="text-sky-300 font-extrabold text-xs sm:text-sm">Epoch 1</div>
                     </div>
-                    <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
-                        <div class="text-gray-400 text-[9px]">PHANTOM FLASHES</div>
-                        <div id="bootTotalFlashes" class="text-purple-300 font-extrabold text-sm">0</div>
+                    <div class="recessed-well px-2.5 py-1.5 sm:p-2 rounded-xl border border-[#1f2637]">
+                        <div class="text-gray-400 text-[8.5px] sm:text-[9px]">PHANTOM FLASHES</div>
+                        <div id="bootTotalFlashes" class="text-purple-300 font-extrabold text-xs sm:text-sm">0</div>
                     </div>
                 </div>
 
                 <!-- Bottom Launch, Ranks, Settings & Exit Buttons -->
-                <div class="flex flex-wrap items-center gap-2 pt-0.5">
-                    <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm uppercase tracking-widest cursor-pointer">
+                <div class="flex items-center gap-2 pt-0.5">
+                    <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm uppercase tracking-wider cursor-pointer">
                         ▶ Engage Interceptor
                     </button>
-                    <button type="button" onclick="openLeaderboardModal()" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-amber-300 border border-amber-500/40 text-xs font-bold transition cursor-pointer">
+                    <button type="button" onclick="openLeaderboardModal()" class="px-3 py-2 sm:py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-amber-300 border border-amber-500/40 text-xs font-bold transition cursor-pointer shrink-0">
                         🏆 Ranks
                     </button>
-                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-sky-300 border border-sky-500/40 text-xs font-bold transition cursor-pointer">
+                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2 sm:py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#222c40] text-sky-300 border border-sky-500/40 text-xs font-bold transition cursor-pointer shrink-0">
                         ⚙️ Settings
                     </button>
-                    <button type="button" onclick="exitGamePortal()" class="px-3 py-2.5 rounded-xl bg-red-600/85 hover:bg-red-500 text-white border border-red-400/40 text-xs font-bold transition cursor-pointer" title="Exit Game Portal">
+                    <button type="button" onclick="exitGamePortal()" class="px-3 py-2 sm:py-2.5 rounded-xl bg-red-600/85 hover:bg-red-500 text-white border border-red-400/40 text-xs font-bold transition cursor-pointer shrink-0">
                         🚪 Exit
                     </button>
                 </div>
@@ -345,47 +328,47 @@
         </div>
 
         <!-- =====================================================
-             2. GAME OVER / TELEMETRY DEBRIEF MODAL (z-[55])
+             2. GAME OVER / RUN DEBRIEF MODAL (z-[55])
              ===================================================== -->
         <div id="gameOverModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[55] flex items-center justify-center p-2.5 sm:p-5 backdrop-blur-md">
-            <div class="hardware-panel modal-anim p-4 sm:p-5 rounded-2xl max-w-md w-full space-y-3 border border-red-500/40 shadow-2xl text-center">
-                <span class="px-2.5 py-0.5 text-[10px] mono-num font-bold uppercase bg-red-500/20 text-red-300 border border-red-500/40 rounded-full">
-                    CRITICAL COLLISION // HULL INTEGRITY 0%
+            <div class="hardware-panel modal-anim p-3.5 sm:p-5 rounded-2xl max-w-md w-full space-y-2.5 border border-red-500/40 shadow-2xl text-center">
+                <span class="px-2.5 py-0.5 text-[9.5px] mono-num font-bold uppercase bg-red-500/20 text-red-300 border border-red-500/40 rounded-full">
+                    CRITICAL COLLISION // HULL 0%
                 </span>
                 <h2 class="title-cinzel text-base sm:text-xl font-bold text-white">
-                    TELEMETRY DEBRIEF
+                    RUN DEBRIEF
                 </h2>
 
                 <div class="grid grid-cols-2 gap-2 text-left mono-num text-xs">
-                    <div class="recessed-well p-2.5 rounded-xl">
-                        <div class="text-[10px] text-gray-400">RUN SCORE</div>
+                    <div class="recessed-well p-2 rounded-xl">
+                        <div class="text-[9.5px] text-gray-400">RUN SCORE</div>
                         <div id="finalScoreVal" class="text-base sm:text-lg font-extrabold text-emerald-400">0</div>
                     </div>
-                    <div class="recessed-well p-2.5 rounded-xl">
-                        <div class="text-[10px] text-gray-400">ACCOUNT BEST</div>
+                    <div class="recessed-well p-2 rounded-xl">
+                        <div class="text-[9.5px] text-gray-400">ACCOUNT BEST</div>
                         <div id="finalBestVal" class="text-base sm:text-lg font-extrabold text-amber-300">0</div>
                     </div>
-                    <div class="recessed-well p-2.5 rounded-xl">
-                        <div class="text-[10px] text-gray-400">EPOCH &amp; BIOME</div>
+                    <div class="recessed-well p-2 rounded-xl">
+                        <div class="text-[9.5px] text-gray-400">EPOCH &amp; BIOME</div>
                         <div id="finalEpochVal" class="text-xs font-bold text-sky-300 truncate">Epoch 1</div>
                     </div>
-                    <div class="recessed-well p-2.5 rounded-xl">
-                        <div class="text-[10px] text-gray-400">PHANTOM FLASHES</div>
+                    <div class="recessed-well p-2 rounded-xl">
+                        <div class="text-[9.5px] text-gray-400">PHANTOM FLASHES</div>
                         <div id="finalNearMissVal" class="text-sm font-bold text-purple-300">0</div>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 pt-1">
+                <div class="flex items-center gap-2 pt-1">
                     <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider cursor-pointer">
                         ↻ Reboot
                     </button>
                     <button type="button" onclick="openLeaderboardModal()" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-amber-300 border border-amber-500/40 text-xs font-bold cursor-pointer">
                         🏆 Ranks
                     </button>
-                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/40 text-xs font-bold cursor-pointer" title="Open Settings">
+                    <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/40 text-xs font-bold cursor-pointer">
                         ⚙️
                     </button>
-                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-2.5 rounded-xl bg-[#1f2738] hover:bg-[#2b354b] text-gray-200 border border-gray-600/40 text-xs font-bold cursor-pointer" title="Back to Main Menu">
+                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-2.5 rounded-xl bg-[#1f2738] hover:bg-[#2b354b] text-gray-200 border border-gray-600/40 text-xs font-bold cursor-pointer">
                         ← Back
                     </button>
                 </div>
@@ -394,7 +377,6 @@
 
         <!-- =====================================================
              3. PAUSE & MODULAR SETTINGS HUB MODAL (z-[65])
-                (Zero Redundant Footer Buttons — Clean Header Navigation)
              ===================================================== -->
         <div id="pauseSettingsModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[65] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
             <div class="hardware-panel modal-anim w-full max-w-2xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[94%] overflow-hidden">
@@ -404,7 +386,7 @@
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
                         <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                            SETTINGS &amp; TELEMETRY HUB
+                            SETTINGS HUB
                         </h2>
                     </div>
                     <div class="flex items-center gap-1.5">
@@ -445,7 +427,7 @@
                     <!-- TAB 1: GAME SETTINGS -->
                     <div id="setTab_game" class="space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Difficulty &amp; Biome Cycling</span>
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Difficulty &amp; Biome Selection</span>
                             <button type="button" onclick="resetGameSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Game Settings
                             </button>
@@ -453,7 +435,7 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty &amp; Epoch Scaling</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty Mode</span>
                                 <span id="diffCurrentLabel" class="text-[10px] mono-num text-emerald-400 font-bold">🟢 Assisted Easy</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -474,19 +456,19 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">🌍 Highway Biome Selector (13 Biomes)</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">🌍 Highway Biome (13 Biomes)</span>
                                 <button type="button" id="autoBiomeToggleBtn" onclick="toggleAutoBiomeCycle()" class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
-                                    🔄 Auto-Interchange: ON
+                                    🔄 Auto-Cycle: ON
                                 </button>
                             </div>
-                            <div id="biomeGridSelector" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-32 overflow-y-auto pr-1"></div>
+                            <div id="biomeGridSelector" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-28 overflow-y-auto pr-1"></div>
                         </div>
                     </div>
 
                     <!-- TAB 2: SOUNDS & OST -->
                     <div id="setTab_sounds" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Audio Mixer &amp; OST Engine</span>
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Audio Mixer &amp; Soundtrack</span>
                             <button type="button" onclick="resetSoundSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Sound Settings
                             </button>
@@ -494,20 +476,20 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">🎵 Soundtrack / OST Selection</span>
-                                <span id="ostLockStatus" class="text-[10px] mono-num text-sky-400">Procedural Synth Active</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">🎵 Soundtrack Selection</span>
+                                <span id="ostLockStatus" class="text-[10px] mono-num text-sky-400">Cyber-Synth Active</span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <button type="button" id="ostBtn_synth" onclick="selectOstMode('synth')" class="p-2 rounded-xl text-left border bg-sky-500/20 border-sky-400 text-white cursor-pointer">
-                                    <div class="font-bold text-xs">🎹 Procedural Cyber-Synth OST</div>
-                                    <div class="text-[10px] text-gray-300 mt-0.5">128 BPM D-Minor WebAudio Engine (Default)</div>
+                                    <div class="font-bold text-xs">🎹 Cyber-Synth OST</div>
+                                    <div class="text-[10px] text-gray-300 mt-0.5">128 BPM D-Minor Synthwave (Default)</div>
                                 </button>
                                 <button type="button" id="ostBtn_mitadru" onclick="selectOstMode('mitadru')" class="p-2 rounded-xl text-left border bg-[#141824] border-[#262f45] text-gray-300 cursor-pointer">
                                     <div class="font-bold text-xs flex items-center justify-between">
                                         <span>🎧 Mitadru.m4a (Architect OST)</span>
                                         <span id="mitadruOstBadge" class="px-1.5 py-0.5 text-[9px] mono-num rounded bg-purple-500/20 text-purple-300">ID 1117</span>
                                     </div>
-                                    <div class="text-[10px] text-gray-400 mt-0.5">Personal track loop for Mitadru (Void)</div>
+                                    <div class="text-[10px] text-gray-400 mt-0.5">Personal track for Mitadru (Void)</div>
                                 </button>
                             </div>
                         </div>
@@ -532,7 +514,7 @@
 
                             <div>
                                 <div class="flex justify-between text-[11px]">
-                                    <span class="text-gray-300">🏎️ Car Engine, Turbo &amp; Exhaust</span>
+                                    <span class="text-gray-300">🏎️ Engine &amp; Turbo Volume</span>
                                     <span id="volLabel_engine" class="text-amber-400 font-bold">75%</span>
                                 </div>
                                 <input type="range" id="volSlider_engine" min="0" max="100" value="75" oninput="updateVolumeSetting('engine', this.value)" class="w-full accent-amber-400 cursor-pointer">
@@ -540,7 +522,7 @@
 
                             <div>
                                 <div class="flex justify-between text-[11px]">
-                                    <span class="text-gray-300">⚡ ADAS Telemetry, Phantom Flash &amp; EMP SFX</span>
+                                    <span class="text-gray-300">⚡ Effects &amp; EMP SFX</span>
                                     <span id="volLabel_sfx" class="text-purple-400 font-bold">90%</span>
                                 </div>
                                 <input type="range" id="volSlider_sfx" min="0" max="100" value="90" oninput="updateVolumeSetting('sfx', this.value)" class="w-full accent-purple-400 cursor-pointer">
@@ -551,16 +533,16 @@
                     <!-- TAB 3: CONTROLS (STRICTLY SEPARATED: MOBILE-ONLY ON PHONE, PC-ONLY ON PC) -->
                     <div id="setTab_controls" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span id="ctrlPlatformHeaderLabel" class="text-[10px] mono-num uppercase text-gray-400 font-bold">Active Platform Controls</span>
+                            <span id="ctrlPlatformHeaderLabel" class="text-[10px] mono-num uppercase text-gray-400 font-bold">Platform Controls</span>
                             <button type="button" onclick="resetControlSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Controls
                             </button>
                         </div>
 
                         <!-- PHONE / ANDROID CONTROLS SECTION (Hidden on PC via .mobile-only-ui) -->
-                        <div class="mobile-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
+                        <div class="mobile-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="font-bold text-white uppercase text-[11px] mono-num">
-                                📱 Mobile / Android Steering Mode
+                                📱 Steering Mode
                             </div>
 
                             <div class="grid grid-cols-3 gap-1.5">
@@ -578,7 +560,7 @@
                             <!-- Landscape Gyro Calibration & Live Tilt Meter (Greyed out unless Gyro Mode is active) -->
                             <div id="gyroCalibrationBox" class="p-2 rounded-lg bg-[#0d111a] border border-[#1f273a] flex flex-wrap items-center justify-between gap-2 opacity-40 pointer-events-none transition">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[10px] mono-num text-gray-300">LANDSCAPE TILT:</span>
+                                    <span class="text-[10px] mono-num text-gray-300">TILT ANGLE:</span>
                                     <span id="gyroLiveAngleLabel" class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold">0.0°</span>
                                 </div>
                                 <div class="flex items-center gap-1.5">
@@ -591,19 +573,19 @@
                                 </div>
                             </div>
 
-                            <!-- Active Mode Control Map Reference (Shows how Brake, Boost & EMP work in each mode) -->
+                            <!-- Active Mode Control Map Reference -->
                             <div class="p-2 rounded-lg bg-[#0c0f17] border border-[#1c2333] space-y-1 text-[10px] mono-num">
                                 <div class="text-sky-300 font-bold uppercase" id="mobileModeMapTitle">ACTIVE CONTROL MAP // ARROW PADDLES</div>
                                 <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-300">
-                                    <div>↔️ STEER: <strong id="mapSteerDesc" class="text-white">Left ◀ / ▶ Right Paddles</strong></div>
-                                    <div>🛑 STOP / BRAKE: <strong class="text-red-300">🛑 BRAKE Button (Right)</strong></div>
-                                    <div>🔥 NITRO BOOST: <strong class="text-amber-300">🔥 NITRO Button / 2x Tap</strong></div>
-                                    <div>⚡ EMP PULSE: <strong class="text-sky-300">⚡ EMP Button (Right)</strong></div>
+                                    <div>↔️ STEER: <strong id="mapSteerDesc" class="text-white">Left ◀ / ▶ Right Dock</strong></div>
+                                    <div>🛑 BRAKE: <strong class="text-red-300">🛑 BRAKE Dock (Right)</strong></div>
+                                    <div>🔥 NITRO: <strong class="text-amber-300">🔥 NITRO Dock / 2x Tap</strong></div>
+                                    <div>⚡ EMP: <strong class="text-sky-300">⚡ EMP Dock (Right)</strong></div>
                                 </div>
                             </div>
 
                             <div class="flex items-center justify-between pt-1 border-t border-[#1b2230] text-[11px]">
-                                <span class="text-gray-300">Double-Tap Highway for Nitro Boost:</span>
+                                <span class="text-gray-300">Double-Tap Road for Nitro Boost:</span>
                                 <button type="button" id="doubleTapNitroBtn" onclick="toggleDoubleTapNitro()" class="px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
                                     ENABLED
                                 </button>
@@ -613,7 +595,7 @@
                         <!-- PC KEYBOARD CONTROLS SECTION (Hidden on Phone via .pc-only-ui) -->
                         <div class="pc-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">⌨️ PC Keyboard Remapper (Click Any Box to Rebind)</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⌨️ PC Keyboard Remapper (Click Box to Rebind)</span>
                                 <span class="text-[10px] mono-num text-gray-400">ESC = Pause / Back</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mono-num text-[11px]">
@@ -648,7 +630,7 @@
                     <!-- TAB 4: GRAPHICS & ATMOSPHERIC FILTERS -->
                     <div id="setTab_graphics" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Post-Processing &amp; Performance</span>
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Visual Filters &amp; Effects</span>
                             <button type="button" onclick="resetGraphicsSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Graphics
                             </button>
@@ -656,7 +638,7 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="font-bold text-white uppercase text-[11px] mono-num">
-                                🎬 Atmospheric Filters (Resident Evil Requiem &amp; Dying Light 2 Style)
+                                🎬 Atmospheric Filters
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                                 <button type="button" onclick="setVisualFilter('filter-standard')" id="flt_filter-standard" class="p-2 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer">
@@ -684,7 +666,7 @@
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2 mono-num">
                             <div>
                                 <div class="flex justify-between text-[11px]">
-                                    <span class="text-gray-300">✨ Particle, Starfield &amp; Weather Scale</span>
+                                    <span class="text-gray-300">✨ Particle &amp; Weather Density</span>
                                     <span id="gfxParticleLabel" class="text-sky-400 font-bold">100%</span>
                                 </div>
                                 <input type="range" id="gfxParticleSlider" min="0" max="100" value="100" oninput="updateGfxParticles(this.value)" class="w-full accent-sky-400 cursor-pointer">
@@ -712,30 +694,28 @@
         </div>
 
         <!-- =====================================================
-             4. REAL-TIME CROSS-DEVICE LEADERBOARD MODAL (z-[75])
+             4. REAL-TIME GLOBAL LEADERBOARD MODAL (z-[75])
+                (Single Pulsing Dot, Yellow Subtitle, Auto-Sync Only)
              ===================================================== -->
         <div id="leaderboardModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[75] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
             <div class="hardware-panel modal-anim w-full max-w-xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[92%] overflow-hidden">
                 <div class="px-4 py-2.5 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span id="lbSyncPulseDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_#34d399]"></span>
                             <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
                                 🏆 GLOBAL REAL-TIME LEADERBOARD
                             </h2>
                         </div>
-                        <p id="lbSyncStatusText" class="text-[10px] mono-num text-gray-400 mt-0.5">
-                            Live Cross-Device Cloud Stream &bull; Verified Runs (&gt;0 pts)
+                        <p id="lbSyncStatusText" class="text-[10px] mono-num text-amber-300 font-semibold mt-0.5">
+                            Live Global Standings &bull; Top Verified Pilots
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button type="button" onclick="pullGlobalCloudLeaderboard(true)" class="px-2 py-1 rounded-lg bg-[#171d2b] hover:bg-[#222c40] text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer" title="Instant Cloud Refresh">
-                            🔄 Sync
-                        </button>
-                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
+                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1.5 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
                             🗑️ Reset (1117)
                         </button>
-                        <button type="button" onclick="closeLeaderboardModal()" class="px-3 py-1 rounded-lg bg-[#1f2738] hover:bg-[#2b354b] text-white border border-gray-600/40 text-xs font-bold cursor-pointer">
+                        <button type="button" onclick="closeLeaderboardModal()" class="px-3.5 py-1.5 rounded-lg bg-[#1f2738] hover:bg-[#2b354b] text-white border border-gray-600/40 text-xs font-bold cursor-pointer">
                             ← Back
                         </button>
                     </div>
@@ -747,78 +727,76 @@
 
         <!-- =====================================================
              5. TOP ADAS TELEMETRY HUD BAR
-                (All telemetry visible on BOTH Mobile & PC + Hide UI Toggle)
              ===================================================== -->
-        <header class="absolute top-0 inset-x-0 z-30 p-1.5 sm:p-2.5 pointer-events-none">
-            <div class="max-w-7xl mx-auto flex items-center justify-between gap-1">
+        <header class="absolute top-0 inset-x-0 z-30 p-2 sm:p-2.5 pointer-events-none">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5">
 
-                <!-- Left Telemetry Cluster: Callsign, Score, Epoch, Combo, and HULL (Visible on Mobile & PC!) -->
-                <div class="hud-collapsible hardware-panel px-2 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+                <!-- Left Telemetry Cluster: Callsign, Score, Epoch, Combo, and HULL -->
+                <div class="hud-collapsible hardware-panel px-2.5 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
                     <div class="flex items-center gap-1">
                         <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-                        <span id="hudPilotCallsign" class="text-[9px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[62px] sm:max-w-[120px]">GUEST</span>
+                        <span id="hudPilotCallsign" class="text-[9.5px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[68px] sm:max-w-[120px]">GUEST</span>
                     </div>
 
                     <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[10px] sm:text-[11px]">
                         <strong id="hudScore" class="text-emerald-400">000000</strong>
                     </div>
 
-                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9px] sm:text-[11px]">
+                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9.5px] sm:text-[11px]">
                         <span id="hudEpoch" class="text-sky-300 font-bold">EP 1</span>
                     </div>
 
-                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9px] sm:text-[11px]">
+                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9.5px] sm:text-[11px]">
                         <span id="hudCombo" class="text-amber-300 font-bold">1.0x</span>
                     </div>
 
-                    <!-- Hull Integrity Bar (Visible on Mobile & PC!) -->
+                    <!-- Hull Integrity Bar (Visible on Mobile & PC) -->
                     <div class="flex items-center gap-1 recessed-well px-1.5 py-0.5 rounded-lg">
                         <span class="text-[8px] sm:text-[9px] mono-num text-gray-400">HULL</span>
-                        <div class="w-8 sm:w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
+                        <div class="w-9 sm:w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
                             <div id="hudArmorBar" class="h-full bg-emerald-400 transition-all duration-150" style="width: 100%;"></div>
                         </div>
                         <span id="hudArmorPct" class="text-[9px] sm:text-[10px] mono-num font-bold text-emerald-400">100%</span>
                     </div>
                 </div>
 
-                <!-- Center Biome, Warning & Live #1 Leader Pill (Visible on Mobile & PC!) -->
-                <div class="hud-collapsible hardware-panel px-2 sm:px-3 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto text-[9px] sm:text-[11px] mono-num">
-                    <span id="hudBiomeName" class="text-sky-300 font-bold truncate max-w-[78px] sm:max-w-none">🌌 Cyber Void</span>
+                <!-- Center Biome, Warning & Live #1 Leader Pill -->
+                <div class="hud-collapsible hardware-panel px-2.5 sm:px-3 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto text-[9.5px] sm:text-[11px] mono-num">
+                    <span id="hudBiomeName" class="text-sky-300 font-bold truncate max-w-[90px] sm:max-w-none">🌌 Cyber Void</span>
                     <span class="text-gray-600">|</span>
-                    <span id="hudWarningBadge" class="px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
+                    <span id="hudWarningBadge" class="px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
                         CLEAR
                     </span>
-                    <span class="hidden sm:inline text-gray-600">|</span>
-                    <span class="hidden sm:inline text-amber-300">👑 <strong id="hudLeaderMini">Unclaimed</strong></span>
+                    <span class="hidden md:inline text-gray-600">|</span>
+                    <span class="hidden md:inline text-amber-300">👑 <strong id="hudLeaderMini">Unclaimed</strong></span>
                 </div>
 
-                <!-- Right Cluster: Equalizer + Mobile Hide UI (Always Visible on Mobile) + Pause/ESC -->
+                <!-- Right Cluster: PC Hints + Unified Mobile Top-Right Control Pill -->
                 <div class="flex items-center gap-1.5 pointer-events-auto">
-                    <div class="hud-collapsible hardware-panel px-2 py-1 rounded-xl flex items-center gap-1.5">
-                        <div class="hidden sm:flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg recessed-well">
+                    <!-- PC ONLY Equalizer & Hints -->
+                    <div class="pc-only-ui hud-collapsible hardware-panel px-2.5 py-1 rounded-xl flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg recessed-well">
                             <div class="flex items-end gap-0.5 h-3">
-                                <span class="eq-bar w-0.5 sm:w-1 bg-emerald-400 eq-1 eq-paused rounded-full"></span>
-                                <span class="eq-bar w-0.5 sm:w-1 bg-sky-400 eq-2 eq-paused rounded-full"></span>
-                                <span class="eq-bar w-0.5 sm:w-1 bg-amber-400 eq-3 eq-paused rounded-full"></span>
+                                <span class="eq-bar w-1 bg-emerald-400 eq-1 eq-paused rounded-full"></span>
+                                <span class="eq-bar w-1 bg-sky-400 eq-2 eq-paused rounded-full"></span>
+                                <span class="eq-bar w-1 bg-amber-400 eq-3 eq-paused rounded-full"></span>
                             </div>
                             <span id="hudOstShortLabel" class="mono-num text-[9px] text-gray-300">SYNTH</span>
                         </div>
-
-                        <!-- PC ONLY HINTS (Hidden on Phones) -->
-                        <span id="pcHideUiHintBadge" class="pc-only-ui px-2 py-0.5 rounded-lg recessed-well text-[10px] mono-num text-gray-400">
+                        <span id="pcHideUiHintBadge" class="px-2 py-0.5 rounded-lg recessed-well text-[10px] mono-num text-gray-400">
                             [H] UI &bull; [ESC] Menu
                         </span>
-
-                        <!-- MOBILE ONLY PAUSE BUTTON (Hidden when UI is collapsed) -->
-                        <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="mobile-only-ui px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[10px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
-                            ⏸ Pause
-                        </button>
                     </div>
 
-                    <!-- MOBILE ONLY HIDE/UNHIDE UI BUTTON (Stays visible even when HUD is hidden!) -->
-                    <button type="button" id="mobileHideUiBtn" onclick="toggleGameHudVisibility()" class="mobile-only-ui hardware-panel px-2.5 py-1 rounded-xl border border-purple-400/50 text-[10px] mono-num font-bold text-purple-200 active:scale-95 transition cursor-pointer">
-                        👁️ UI
-                    </button>
+                    <!-- MOBILE ONLY Unified Top-Right Control Pill (Larger & Cleanly Grouped) -->
+                    <div class="mobile-only-ui hardware-panel p-1 rounded-xl flex items-center gap-1.5">
+                        <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="hud-collapsible px-3 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[11px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
+                            ⏸ Pause
+                        </button>
+                        <button type="button" id="mobileHideUiBtn" onclick="toggleGameHudVisibility()" class="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-400/50 text-[11px] mono-num font-extrabold text-purple-200 active:scale-95 transition cursor-pointer">
+                            👁️ UI
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -827,8 +805,8 @@
         <!-- =====================================================
              6. LIVE 30M RADAR + NITRO ACCELERATION & EMP METERS
              ===================================================== -->
-        <div class="hud-collapsible absolute top-11 sm:top-12 left-1.5 sm:left-3 z-20 pointer-events-none flex flex-col gap-1">
-            <div class="hardware-panel p-1 sm:p-1.5 rounded-2xl flex flex-col items-center w-20 sm:w-24">
+        <div class="hud-collapsible absolute top-13 sm:top-14 left-2 sm:left-3 z-20 pointer-events-none flex flex-col gap-1.5">
+            <div class="hardware-panel p-1.5 rounded-2xl flex flex-col items-center w-20 sm:w-24">
                 <div class="w-full flex items-center justify-between px-1 mb-0.5">
                     <span class="text-[7.5px] mono-num font-bold text-gray-400">RADAR</span>
                     <span id="hudSpeedKmh" class="text-[8.5px] mono-num font-bold text-emerald-400">100 km/h</span>
@@ -838,7 +816,7 @@
                 </div>
             </div>
 
-            <div class="hardware-panel px-2 py-1 rounded-xl flex flex-col gap-1 w-20 sm:w-24">
+            <div class="hardware-panel px-2 py-1.5 rounded-xl flex flex-col gap-1 w-20 sm:w-24">
                 <div>
                     <div class="flex items-center justify-between text-[8px] mono-num">
                         <span class="text-amber-300 font-bold">🔥 NITRO</span>
@@ -862,33 +840,33 @@
         </div>
 
         <!-- =====================================================
-             7. BOTTOM MOBILE TOUCH DOCK & TELEMETRY BAR
+             7. BOTTOM UNIFIED ARCADE MOBILE TOUCH DOCKS & TELEMETRY BAR
              ===================================================== -->
-        <footer class="absolute bottom-0 inset-x-0 z-30 p-1.5 sm:p-2.5 pointer-events-none flex items-end justify-between gap-2">
+        <footer class="absolute bottom-0 inset-x-0 z-30 px-2.5 pb-2.5 pt-1 sm:p-3 pointer-events-none flex items-end justify-between gap-2">
 
-            <!-- Left Thumb (Mobile Only — Shown in 'buttons' mode, hidden in 'drag' & 'tilt' modes) -->
-            <div id="mobileLeftTouchGroup" class="mobile-only-ui flex items-center gap-1.5 pointer-events-auto">
+            <!-- Left Thumb Unified Steering Dock (Mobile Only — Shown in 'buttons' mode) -->
+            <div id="mobileLeftTouchGroup" class="mobile-only-ui hardware-panel p-1.5 rounded-2xl flex items-center gap-2 pointer-events-auto">
                 <button type="button" id="btnLeftLane"
                     onpointerdown="steerLane(-1); this.classList.add('active-press')"
                     onpointerup="this.classList.remove('active-press')"
                     onpointerleave="this.classList.remove('active-press')"
-                    class="touch-paddle px-3.5 py-2 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
-                    <span class="text-base font-black text-sky-300">◀</span>
-                    <span class="text-[7.5px] mono-num font-bold text-gray-300">LEFT</span>
+                    class="touch-paddle min-w-[64px] min-h-[50px] px-4 py-2 rounded-xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-lg leading-none font-black text-sky-300">◀</span>
+                    <span class="text-[8.5px] mono-num font-extrabold text-gray-200 mt-1">LEFT</span>
                 </button>
 
                 <button type="button" id="btnRightLane"
                     onpointerdown="steerLane(1); this.classList.add('active-press')"
                     onpointerup="this.classList.remove('active-press')"
                     onpointerleave="this.classList.remove('active-press')"
-                    class="touch-paddle px-3.5 py-2 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
-                    <span class="text-base font-black text-sky-300">▶</span>
-                    <span class="text-[7.5px] mono-num font-bold text-gray-300">RIGHT</span>
+                    class="touch-paddle min-w-[64px] min-h-[50px] px-4 py-2 rounded-xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-lg leading-none font-black text-sky-300">▶</span>
+                    <span class="text-[8.5px] mono-num font-extrabold text-gray-200 mt-1">RIGHT</span>
                 </button>
             </div>
 
             <!-- Center Telemetry Readout (Visible on BOTH Mobile and PC, hides when Hide UI is active) -->
-            <div class="hud-collapsible flex hardware-panel px-2.5 sm:px-3.5 py-1 rounded-xl items-center gap-2 sm:gap-3 text-[9px] sm:text-[11px] mono-num mx-auto">
+            <div class="hud-collapsible flex hardware-panel px-3 sm:px-3.5 py-1.5 rounded-xl items-center gap-2 sm:gap-3 text-[9.5px] sm:text-[11px] mono-num mx-auto">
                 <span>LEAD: <strong id="hudLeadName" class="text-white">CLEAR</strong></span>
                 <span class="text-gray-600">|</span>
                 <span>TTC: <strong id="hudLeadTtc" class="text-emerald-400">STABLE</strong></span>
@@ -896,31 +874,31 @@
                 <span>DGI: <strong id="hudLeadDgi" class="text-sky-300">0.00</strong></span>
             </div>
 
-            <!-- Right Thumb (Mobile Only — Active in ALL 3 mobile modes: Paddles, Finger Drag, and Gyro Tilt) -->
-            <div id="mobileRightTouchGroup" class="mobile-only-ui flex items-center gap-1.5 pointer-events-auto">
+            <!-- Right Thumb Unified Action Dock (Mobile Only — Active in ALL 3 mobile modes) -->
+            <div id="mobileRightTouchGroup" class="mobile-only-ui hardware-panel p-1.5 rounded-2xl flex items-center gap-2 pointer-events-auto">
                 <button type="button" id="btnBrake"
                     onpointerdown="setBraking(true); this.classList.add('active-press')"
                     onpointerup="setBraking(false); this.classList.remove('active-press')"
                     onpointerleave="setBraking(false); this.classList.remove('active-press')"
-                    class="touch-paddle px-2.5 py-2 rounded-2xl flex flex-col items-center justify-center border-red-500/40 cursor-pointer">
-                    <span class="text-xs font-extrabold text-red-400">🛑</span>
-                    <span class="text-[7.5px] mono-num font-bold text-red-300">BRAKE</span>
+                    class="touch-paddle min-w-[58px] min-h-[50px] px-3 py-2 rounded-xl flex flex-col items-center justify-center border-red-500/45 cursor-pointer">
+                    <span class="text-sm leading-none font-extrabold text-red-400">🛑</span>
+                    <span class="text-[8.5px] mono-num font-extrabold text-red-200 mt-1">BRAKE</span>
                 </button>
 
                 <button type="button" id="btnBoost"
                     onpointerdown="setBoosting(true); this.classList.add('active-press')"
                     onpointerup="setBoosting(false); this.classList.remove('active-press')"
                     onpointerleave="setBoosting(false); this.classList.remove('active-press')"
-                    class="touch-paddle px-2.5 py-2 rounded-2xl flex flex-col items-center justify-center border-amber-400/50 bg-amber-500/15 cursor-pointer">
-                    <span class="text-xs font-extrabold text-amber-300">🔥</span>
-                    <span class="text-[7.5px] mono-num font-bold text-amber-200">NITRO</span>
+                    class="touch-paddle min-w-[58px] min-h-[50px] px-3 py-2 rounded-xl flex flex-col items-center justify-center border-amber-400/55 bg-amber-500/15 cursor-pointer">
+                    <span class="text-sm leading-none font-extrabold text-amber-300">🔥</span>
+                    <span class="text-[8.5px] mono-num font-extrabold text-amber-200 mt-1">NITRO</span>
                 </button>
 
                 <button type="button" id="btnEmpPulse"
                     onpointerdown="triggerNeuralEmp()"
-                    class="touch-paddle px-3 py-2 rounded-2xl flex flex-col items-center justify-center border-sky-400/60 bg-sky-500/20 cursor-pointer">
-                    <span class="text-xs font-black text-sky-300">⚡</span>
-                    <span class="text-[7.5px] mono-num font-extrabold text-sky-200">EMP</span>
+                    class="touch-paddle min-w-[58px] min-h-[50px] px-3 py-2 rounded-xl flex flex-col items-center justify-center border-sky-400/65 bg-sky-500/20 cursor-pointer">
+                    <span class="text-sm leading-none font-black text-sky-300">⚡</span>
+                    <span class="text-[8.5px] mono-num font-extrabold text-sky-200 mt-1">EMP</span>
                 </button>
             </div>
 
@@ -930,7 +908,7 @@
 
 <script>
     // =========================================================================
-    // MODULE 0: HARDWARE DETECTION, HUD TOGGLE & CORE STATE INITIALIZATION
+    // MODULE 0: HARDWARE DETECTION, VIEWPORT LOCK & CORE STATE INITIALIZATION
     // =========================================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -1207,8 +1185,8 @@
         const banner = document.getElementById('loginFeedbackBanner');
         if (!banner) return;
         banner.className = isSuccess
-            ? "text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 block"
-            : "text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-red-950/90 text-red-300 border border-red-500/40 block";
+            ? "text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 block"
+            : "text-[10.5px] font-semibold px-2.5 py-1 rounded-lg bg-red-950/90 text-red-300 border border-red-500/40 block";
         banner.innerText = msg;
     }
 
@@ -1217,7 +1195,7 @@
         const raw = (input ? input.value : '').trim();
 
         if (!/^\d{4}$/.test(raw)) {
-            showLoginBanner("✕ Please enter a valid 4-digit numeric ID (e.g., XXXX) or launch directly as Guest.", false);
+            showLoginBanner("✕ Enter a 4-digit numeric ID (e.g., XXXX) or play directly as Guest.", false);
             playGameSfx('hit');
             return;
         }
@@ -1227,10 +1205,9 @@
             localStorage.removeItem('roadSense_overdrive_customGuestId');
             applyPilotProfile(raw);
             if (input) input.value = '';
-            showLoginBanner(`✓ Core Pilot Authenticated: ${currentPilot.name} — ${currentPilot.liveryName} Active`, true);
+            showLoginBanner(`✓ Core Pilot Authenticated: ${currentPilot.name}`, true);
             playGameSfx('pickup');
         } else {
-            // Custom 4-digit Guest Account ID! Load saved name for this Guest ID if one exists
             customGuestId = raw;
             localStorage.setItem('roadSense_overdrive_customGuestId', customGuestId);
             const db = getAccountsDatabase();
@@ -1241,7 +1218,7 @@
             }
             applyPilotProfile("GUEST");
             if (input) input.value = '';
-            showLoginBanner(`✓ Guest Account #${customGuestId} Active! You may optionally enter your name below.`, true);
+            showLoginBanner(`✓ Pilot ID #${customGuestId} Active! Optional name available.`, true);
             playGameSfx('pickup');
         }
     }
@@ -1254,7 +1231,7 @@
         const gInput = document.getElementById('guestCallsignInput');
         if (gInput) gInput.value = "";
         applyPilotProfile("GUEST");
-        showLoginBanner("⇄ Reset to open Guest Pilot session.", true);
+        showLoginBanner("⇄ Switched to Guest Pilot session.", true);
     }
 
     function updateGuestCallsign(val) {
@@ -1264,7 +1241,6 @@
             const disp = getEffectiveGuestDisplayName();
             document.getElementById('activePilotLabel').innerText = customGuestId ? `${disp} (#${customGuestId})` : disp;
             document.getElementById('hudPilotCallsign').innerText = disp.toUpperCase();
-            // Save name update if customGuestId is active
             if (customGuestId) {
                 const db = getAccountsDatabase();
                 const key = getActiveAccountStorageKey();
@@ -1282,7 +1258,7 @@
         localStorage.setItem('roadSense_overdrive_pilotId', currentPilot.id);
 
         const dispName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
-        const dispLabel = (!currentPilot.isCore && customGuestId) ? `${dispName} (ID #${customGuestId})` : dispName;
+        const dispLabel = (!currentPilot.isCore && customGuestId) ? `${dispName} (#${customGuestId})` : dispName;
         const displayCallsign = currentPilot.isCore ? currentPilot.callsign : dispName.toUpperCase();
 
         document.getElementById('activePilotLabel').innerText = dispLabel;
@@ -1293,16 +1269,13 @@
         document.getElementById('hudPilotDot').style.backgroundColor = currentPilot.dotColor;
 
         const loginRow = document.getElementById('pilotLoginInputRow');
-        const guestRow = document.getElementById('guestNameInputRow');
         const logoutBtn = document.getElementById('logoutAccountBtn');
 
         if (currentPilot.isCore) {
             if (loginRow) loginRow.classList.add('hidden');
-            if (guestRow) guestRow.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
         } else {
             if (loginRow) loginRow.classList.remove('hidden');
-            if (guestRow) guestRow.classList.remove('hidden');
             if (logoutBtn) {
                 if (customGuestId || customGuestName) logoutBtn.classList.remove('hidden');
                 else logoutBtn.classList.add('hidden');
@@ -1366,7 +1339,7 @@
         autoCycleBiomes = false;
         const btn = document.getElementById('autoBiomeToggleBtn');
         if (btn) {
-            btn.innerText = "🔄 Auto-Interchange: OFF";
+            btn.innerText = "🔄 Auto-Cycle: OFF";
             btn.className = "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
         }
         const hudBiome = document.getElementById('hudBiomeName');
@@ -1378,7 +1351,7 @@
         autoCycleBiomes = !autoCycleBiomes;
         const btn = document.getElementById('autoBiomeToggleBtn');
         if (btn) {
-            btn.innerText = autoCycleBiomes ? "🔄 Auto-Interchange: ON" : "🔄 Auto-Interchange: OFF";
+            btn.innerText = autoCycleBiomes ? "🔄 Auto-Cycle: ON" : "🔄 Auto-Cycle: OFF";
             btn.className = autoCycleBiomes
                 ? "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer"
                 : "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
@@ -1580,7 +1553,7 @@
             if (btnSynth) btnSynth.className = "p-2 rounded-xl text-left border bg-sky-500/20 border-sky-400 text-white cursor-pointer";
             if (btnMit) btnMit.className = "p-2 rounded-xl text-left border bg-[#141824] border-[#262f45] text-gray-300 cursor-pointer";
             if (shortLabel) shortLabel.innerText = "SYNTH";
-            if (statusEl) statusEl.innerText = "Procedural Synth Active";
+            if (statusEl) statusEl.innerText = "Cyber-Synth Active";
             mitadruAudio.pause();
         }
     }
@@ -1683,14 +1656,14 @@
     }
 
     // =========================================================================
-    // MODULE 4: INSTANT REAL-TIME CROSS-DEVICE CLOUD + LOCAL LEADERBOARD ENGINE
-    //           (Uses ntfy.sh SSE + REST Cloud Stream + BroadcastChannel)
+    // MODULE 4: AUTOMATIC REAL-TIME LEADERBOARD ENGINE (NON-OVERWHELMING)
     // =========================================================================
     const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v6';
     const CLOUD_SYNC_TOPIC = 'roadsense_overdrive_global_lb_sync_v6';
     const CLOUD_SYNC_URL = `https://ntfy.sh/${CLOUD_SYNC_TOPIC}`;
     const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v6') : null;
     let cloudEventSource = null;
+    let isPullingCloud = false;
     let lastCloudResetTs = Number(localStorage.getItem('roadSense_overdrive_resetTs_v6') || 0);
 
     function getLocalLeaderboard() {
@@ -1787,11 +1760,9 @@
         } catch (e) {}
     }
 
-    async function pullGlobalCloudLeaderboard(showFeedback = false) {
-        const statusEl = document.getElementById('lbSyncStatusText');
-        if (showFeedback && statusEl) {
-            statusEl.innerText = "⚡ Syncing with Global Cloud Stream...";
-        }
+    async function pullGlobalCloudLeaderboard() {
+        if (isPullingCloud || document.hidden) return;
+        isPullingCloud = true;
         try {
             const res = await fetch(`${CLOUD_SYNC_URL}/json?poll=1&since=24h`);
             if (res.ok) {
@@ -1810,18 +1781,14 @@
                     } catch (innerErr) {}
                 }
             }
-            if (statusEl) {
-                statusEl.innerText = "🟢 Instant Cross-Device Cloud Stream Active • Verified Runs (>0 pts)";
-            }
         } catch (e) {
-            if (statusEl) {
-                statusEl.innerText = "🟡 Local Telemetry Cache Active • Verified Runs (>0 pts)";
-            }
+        } finally {
+            isPullingCloud = false;
         }
     }
 
     function connectRealtimeCloudStream() {
-        pullGlobalCloudLeaderboard(false);
+        pullGlobalCloudLeaderboard();
         if (typeof EventSource !== 'undefined') {
             try {
                 if (cloudEventSource) cloudEventSource.close();
@@ -1839,6 +1806,10 @@
                 };
             } catch (e) {}
         }
+        // Lightweight non-overlapping background sync check every 10s
+        setInterval(() => {
+            if (!document.hidden) pullGlobalCloudLeaderboard();
+        }, 10000);
     }
 
     if (lbChannel) {
@@ -1922,7 +1893,7 @@
             container.innerHTML = `
                 <div class="recessed-well p-6 rounded-xl text-center space-y-1">
                     <div class="text-sm font-bold text-white">No Runs Recorded Yet</div>
-                    <p class="text-xs text-gray-400">Zero-point accounts are hidden. Complete a run with &gt;0 points to claim #1 on the leaderboard!</p>
+                    <p class="text-xs text-gray-400">Complete a run to claim #1 on the Global Leaderboard!</p>
                 </div>`;
             return;
         }
@@ -1938,7 +1909,7 @@
             let adminActionHtml = '';
             if (isAdminVoid) {
                 if (!isCoreEntry) {
-                    adminActionHtml = `<button type="button" onclick="adminPermanentlyDeleteGuest('${escapeHtml(accKey)}')" class="ml-2 px-2 py-1 rounded bg-red-600/85 hover:bg-red-500 text-white text-[9px] mono-num font-bold cursor-pointer" title="Permanently Delete Guest Account & Data">🗑️ Delete</button>`;
+                    adminActionHtml = `<button type="button" onclick="adminPermanentlyDeleteGuest('${escapeHtml(accKey)}')" class="ml-2 px-2 py-1 rounded bg-red-600/85 hover:bg-red-500 text-white text-[9px] mono-num font-bold cursor-pointer" title="Delete Guest Account">🗑️ Delete</button>`;
                 } else {
                     adminActionHtml = `<span class="ml-2 px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[8.5px] mono-num">🔒 Core</span>`;
                 }
@@ -2021,7 +1992,7 @@
 
     function openLeaderboardModal() {
         renderLeaderboardList();
-        pullGlobalCloudLeaderboard(false);
+        pullGlobalCloudLeaderboard();
         document.getElementById('leaderboardModal').style.display = 'flex';
         syncCursorVisibility();
     }
@@ -2134,13 +2105,11 @@
                 : "p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center";
         });
 
-        // Show Left Arrow Paddles ONLY in 'buttons' mode; always keep Right Action Buttons (Brake/Nitro/EMP) visible!
         const leftGroup = document.getElementById('mobileLeftTouchGroup');
         if (leftGroup) {
             leftGroup.style.display = (mode === 'buttons') ? 'flex' : 'none';
         }
 
-        // Grey out Calibrate Tilt Box unless 'tilt' (Gyro) mode is selected
         const gyroBox = document.getElementById('gyroCalibrationBox');
         if (gyroBox) {
             if (mode === 'tilt') {
@@ -2150,13 +2119,12 @@
             }
         }
 
-        // Update Active Control Map Description
         const mapTitle = document.getElementById('mobileModeMapTitle');
         const mapSteer = document.getElementById('mapSteerDesc');
         if (mapTitle && mapSteer) {
             if (mode === 'buttons') {
                 mapTitle.innerText = "ACTIVE CONTROL MAP // ARROW PADDLES";
-                mapSteer.innerText = "Left ◀ / ▶ Right Paddles";
+                mapSteer.innerText = "Left ◀ / ▶ Right Dock";
             } else if (mode === 'drag') {
                 mapTitle.innerText = "ACTIVE CONTROL MAP // FINGER DRAG";
                 mapSteer.innerText = "Slide Finger Left/Right on Road";
@@ -2216,7 +2184,7 @@
         autoCycleBiomes = true;
         const btn = document.getElementById('autoBiomeToggleBtn');
         if (btn) {
-            btn.innerText = "🔄 Auto-Interchange: ON";
+            btn.innerText = "🔄 Auto-Cycle: ON";
             btn.className = "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer";
         }
         const hudBiome = document.getElementById('hudBiomeName');
@@ -2275,11 +2243,10 @@
 
     function handleCanvasPointerDrag(e) {
         const wrapper = document.getElementById('gameViewportWrapper');
-        const isRotatedPortrait = window.innerWidth <= 960 && window.innerHeight > window.innerWidth;
+        const isRotatedPortrait = isMobileHardware && window.innerHeight > window.innerWidth;
         const normX = isRotatedPortrait
             ? (e.clientY / Math.max(1, window.innerHeight))
             : (e.clientX / Math.max(1, wrapper.clientWidth));
-        // Strictly snap to discrete integer lanes [-2, -1, 0, 1, 2] so car can NEVER park between lanes
         const discreteLane = Math.round((normX - 0.5) * 4.8);
         setDiscreteTargetLane(discreteLane);
     }
@@ -2405,7 +2372,7 @@
     }
 
     // =========================================================================
-    // MODULE 7: 8 IDD ROAD HAZARD CLASSES & STRICT LANE COLLISION PHYSICS
+    // MODULE 7: 8 IDD ROAD HAZARD CLASSES, FULLSCREEN LANDSCAPE LOCK & PHYSICS
     // =========================================================================
     const IDD_HAZARD_CLASSES = [
         { id: 0, name: "auto_rickshaw", h: 1.75, w: 1.45, speedMul: 0.55, color: "#f59e0b", roof: "#1e293b", points: 120 },
@@ -2421,8 +2388,33 @@
     function resizeGameCanvas() {
         detectDeviceHardware();
         const wrapper = document.getElementById('gameViewportWrapper');
-        const w = (wrapper ? wrapper.clientWidth : 0) || window.innerWidth;
-        const h = (wrapper ? wrapper.clientHeight : 0) || window.innerHeight;
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+
+        let w = winW;
+        let h = winH;
+
+        // Exact pixel sizing for portrait-locked mobile browsers so address bars never clip UI edges
+        if (isMobileHardware && winH > winW) {
+            w = winH;
+            h = winW;
+            if (wrapper) {
+                wrapper.style.top = '0px';
+                wrapper.style.left = `${winW}px`;
+                wrapper.style.width = `${winH}px`;
+                wrapper.style.height = `${winW}px`;
+                wrapper.style.transformOrigin = 'top left';
+                wrapper.style.transform = 'rotate(90deg)';
+            }
+        } else if (wrapper) {
+            wrapper.style.top = '0px';
+            wrapper.style.left = '0px';
+            wrapper.style.width = `${winW}px`;
+            wrapper.style.height = `${winH}px`;
+            wrapper.style.transformOrigin = '';
+            wrapper.style.transform = 'none';
+        }
+
         const maxDpr = isMobileHardware ? 1.25 : 1.5;
         const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         canvas.width = Math.max(1, Math.floor(w * dpr));
@@ -2432,17 +2424,27 @@
         gameState.viewH = h;
     }
 
-    async function lockLandscapeIfPossible() {
+    // Enters Fullscreen (navigationUI: 'hide') and locks orientation to 'landscape'
+    // so Android hides the floating auto-rotate suggestion button over the corner docks
+    async function enterFullscreenAndLockLandscape() {
+        if (!isMobileHardware) return;
+        try {
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement && docEl.requestFullscreen) {
+                await docEl.requestFullscreen({ navigationUI: 'hide' });
+            }
+        } catch (e) {}
         try {
             if (screen.orientation && screen.orientation.lock) {
                 await screen.orientation.lock('landscape');
             }
         } catch (e) {}
+        setTimeout(resizeGameCanvas, 120);
     }
 
     function startGameSession() {
         ensureAudioEngine();
-        lockLandscapeIfPossible();
+        enterFullscreenAndLockLandscape();
         resizeGameCanvas();
 
         document.getElementById('startModal').style.display = 'none';
@@ -2572,14 +2574,14 @@
     }
 
     // =========================================================================
-    // MODULE 8: 3D PROJECTION & CURVED EGO-CORRIDOR RENDERER
-    //           (Balanced Bottom Gap for Both PC & Mobile)
+    // MODULE 8: 3D PROJECTION & FULL-BLEED CURVED EGO-CORRIDOR RENDERER
+    //           (Extends 100% to bottom edge so zero black clipping occurs)
     // =========================================================================
     function project3DPoint(laneOffset, zMeters, yMeters, W, H, roadCurve) {
         const horizonY = H * 0.42;
         const camHeight = 1.72;
         const fovFocal = H * 0.85;
-        const zSafe = Math.max(0.95, zMeters);
+        const zSafe = Math.max(0.45, zMeters);
         const scale = fovFocal / zSafe;
 
         const zNorm = zSafe * 0.0181818;
@@ -2630,7 +2632,6 @@
 
         updateEngineSoundPitch();
 
-        // Always snap targetLane to discrete integer [-2..2] so car can never stand between lanes
         gameState.targetLane = Math.max(-2, Math.min(2, Math.round(gameState.targetLane)));
         const laneDiff = gameState.targetLane - gameState.egoLaneX;
         gameState.egoLaneX += laneDiff * Math.min(1, dt * 15);
@@ -2688,7 +2689,6 @@
                 h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(performance.now() * 0.0028 + h.phase) * 0.42));
             }
 
-            // True physical chassis-width collision check (no safe blind spot between lanes)
             if (h.z <= 3.5 && h.z >= 1.55) {
                 const latDist = Math.abs(h.lane - gameState.egoLaneX);
                 const baseHitHalfWidth = (h.cls.id === 1 ? 0.68 : 0.58);
@@ -2819,16 +2819,16 @@
         if (warnBadge) {
             if (riskPct >= 85) {
                 warnBadge.innerText = "CRITICAL";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
             } else if (riskPct >= 65) {
                 warnBadge.innerText = "WARNING";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
             } else if (riskPct >= 35) {
                 warnBadge.innerText = "CAUTION";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
             } else {
                 warnBadge.innerText = "CLEAR";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
             }
         }
 
@@ -2937,21 +2937,25 @@
             ctx.fillRect(bx, horizonY - bh, bw, bh);
         }
 
-        ctx.fillStyle = "#04060a";
+        // Ground apron gradient so outer shoulders blend seamlessly with the biome road
+        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+        groundGrad.addColorStop(0, "#05070d");
+        groundGrad.addColorStop(1, theme.roadDark);
+        ctx.fillStyle = groundGrad;
         ctx.fillRect(0, horizonY, W, H - horizonY);
 
         const roadCurve = Math.sin(gameState.distanceM * 0.012) * 0.65;
-        const totalSlices = 40;
+        const totalSlices = 42;
 
         const voidHue = (now * 0.14) % 360;
         const activeRailColor = currentPilot.isVoidChroma
             ? `hsl(${voidHue}, 95%, 60%)`
             : currentPilot.railColor;
 
-        // Start zNear at 1.05m so the highway extends cleanly to ~92% of the screen height (leaving a balanced bottom margin)
+        // Start zNear at 0.55m so the highway and ego corridor extend 100% past the bottom edge of the screen
         for (let i = totalSlices; i >= 1; i--) {
-            const zNear = 1.05 + (i - 1) * 1.45;
-            const zFar = 1.05 + i * 1.45;
+            const zNear = 0.55 + (i - 1) * 1.42;
+            const zFar = 0.55 + i * 1.42;
 
             const pNearLeft  = project3DPoint(-2.6, zNear, 0, W, H, roadCurve);
             const pNearRight = project3DPoint( 2.6, zNear, 0, W, H, roadCurve);
@@ -3107,19 +3111,23 @@
             }
         }
 
-        // Ego Interceptor positioned with balanced bottom spacing above the controls bar on both PC and Mobile
+        // Ego Interceptor positioned cleanly above the bottom HUD bar with a contoured elliptical shadow
         const egoCenter = project3DPoint(gameState.egoLaneX, 2.2, 0, W, H, roadCurve);
-        const egoY = isMobileHardware ? H * 0.80 : H * 0.825;
+        const egoY = isMobileHardware ? H * 0.775 : H * 0.815;
         ctx.save();
         ctx.translate(egoCenter.x, egoY);
         ctx.rotate(gameState.egoRoll);
+
+        // Smooth contoured shadow (no rectangular black box clipping)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+        ctx.beginPath();
+        ctx.ellipse(0, 15, 48, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
 
         if (gfxSettings.bloom) {
             ctx.shadowColor = activeRailColor;
             ctx.shadowBlur = gameState.boosting ? 22 : 12;
         }
-        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-        ctx.fillRect(-52, 11, 104, 15);
 
         ctx.fillStyle = currentPilot.chassisBase;
         ctx.strokeStyle = gameState.boosting ? "#fbbf24" : activeRailColor;
@@ -3233,6 +3241,7 @@
     // MODULE 9: EVENT LISTENERS, LANDSCAPE GYRO & BOOTSTRAP
     // =========================================================================
     window.addEventListener('resize', resizeGameCanvas);
+    window.addEventListener('orientationchange', () => setTimeout(resizeGameCanvas, 80));
 
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -3250,8 +3259,6 @@
     window.addEventListener('deviceorientation', (e) => {
         if (e.beta === null && e.gamma === null) return;
 
-        // When holding a phone horizontally in landscape like a steering wheel,
-        // tilting left/right rotates around the device's physical Y-axis (e.beta).
         const screenAngle = (screen.orientation && typeof screen.orientation.angle === 'number')
             ? screen.orientation.angle
             : (typeof window.orientation === 'number' ? window.orientation : 0);
@@ -3267,7 +3274,6 @@
         lastRawLandscapeTilt = rawLandscapeAngle;
         const calibratedDelta = rawLandscapeAngle - controlConfig.tiltCenterOffset;
 
-        // Update Live Tilt Meter in Controls Tab whenever Gyro Mode is selected
         if (controlConfig.mobileMode === 'tilt') {
             const angleLbl = document.getElementById('gyroLiveAngleLabel');
             if (angleLbl) {
@@ -3278,7 +3284,6 @@
 
         if (!gameState.running || gameState.paused || controlConfig.mobileMode !== 'tilt') return;
 
-        // Map landscape steering angle to discrete integer lanes [-2, -1, 0, 1, 2]
         const discreteGyroLane = Math.max(-2, Math.min(2, Math.round(calibratedDelta / 7.5)));
         setDiscreteTargetLane(discreteGyroLane);
     });
