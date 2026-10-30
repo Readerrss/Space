@@ -51,12 +51,23 @@
             cursor: none !important;
         }
 
-        /* Strict Device-Specific Visibility Rules (Works across all phone landscape widths) */
+        /* Strict Device-Specific Visibility Rules */
         body.is-pc .mobile-only-ui {
             display: none !important;
         }
         body.is-mobile .pc-only-ui {
             display: none !important;
+        }
+
+        /* Clean HUD Hide Mode (Hides telemetry panels, keeps mobile unhide button accessible) */
+        #gameViewportWrapper.hud-hidden .hud-collapsible {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateY(-4px);
+        }
+
+        .hud-collapsible {
+            transition: opacity 0.18s ease, transform 0.18s ease;
         }
 
         .mono-num {
@@ -69,11 +80,11 @@
         }
 
         .hardware-panel {
-            background-color: rgba(15, 18, 26, 0.94);
+            background-color: rgba(15, 18, 26, 0.92);
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-subtle);
             border-top-color: var(--border-highlight);
-            box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.9);
         }
 
         .recessed-well {
@@ -186,7 +197,7 @@
 
         @keyframes eqBounce {
             0%, 100% { height: 4px; }
-            50% { height: 13px; }
+            50% { height: 11px; }
         }
         .eq-1 { animation: eqBounce 0.48s ease-in-out infinite; }
         .eq-2 { animation: eqBounce 0.35s ease-in-out infinite 0.12s; }
@@ -194,14 +205,14 @@
         .eq-paused { animation: none !important; height: 4px !important; }
 
         .touch-paddle {
-            background: rgba(14, 18, 26, 0.85);
-            border: 1px solid rgba(56, 189, 248, 0.4);
+            background: rgba(14, 18, 26, 0.86);
+            border: 1px solid rgba(56, 189, 248, 0.42);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
             transition: transform 0.06s ease, background-color 0.06s ease;
         }
         .touch-paddle:active, .touch-paddle.active-press {
             transform: scale(0.92);
-            background: rgba(56, 189, 248, 0.3);
+            background: rgba(56, 189, 248, 0.32);
             border-color: #38bdf8;
         }
 
@@ -211,6 +222,11 @@
         }
         .modal-anim {
             animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        input::placeholder {
+            color: #4b5563 !important;
+            opacity: 1;
         }
 
         * {
@@ -231,16 +247,16 @@
         <div id="atmosphereOverlay"></div>
 
         <!-- =====================================================
-             1. MAIN MENU / CONFIDENTIAL PILOT LOGIN OVERLAY (z-[50])
+             1. MAIN MENU / PILOT LOGIN OVERLAY (z-[50])
              ===================================================== -->
         <div id="startModal" style="display: flex;" class="absolute inset-0 bg-[#04060a]/90 z-[50] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
-            <div class="hardware-panel modal-anim p-3.5 sm:p-5 rounded-2xl max-w-xl w-full space-y-2.5 border border-[#2d364a] shadow-2xl max-h-[94%] overflow-y-auto">
+            <div class="hardware-panel modal-anim p-3 sm:p-5 rounded-2xl max-w-xl w-full space-y-2.5 border border-[#2d364a] shadow-2xl max-h-[95%] overflow-y-auto">
                 
                 <!-- Top Header & Live #1 Leader Banner -->
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#232836] pb-2">
                     <div class="flex items-center gap-2">
                         <span class="px-2 py-0.5 text-[9px] mono-num font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full">
-                            NEURAL INTERCEPTOR // OVERDRIVE
+                            NEURAL INTERCEPTOR
                         </span>
                         <h1 class="title-cinzel text-sm sm:text-lg font-bold text-white tracking-wider">
                             ROADSENSE: OVERDRIVE
@@ -253,42 +269,42 @@
                     </div>
                 </div>
 
-                <!-- Confidential Pilot ID Authentication & Guest Callsign Bar -->
+                <!-- Pilot ID Authentication & Optional Guest Name -->
                 <div class="recessed-well p-2.5 sm:p-3 rounded-xl border border-[#232b3e] space-y-2">
                     <div id="pilotLoginInputRow" class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <div class="text-[10px] mono-num font-bold uppercase text-sky-400">
-                                🔑 PILOT AUTHENTICATION (CORE LIVERY &amp; ACCOUNT SYNC)
+                                🔑 PILOT ID LOGIN (CORE OR CUSTOM GUEST ID)
                             </div>
                             <p class="text-[11px] text-gray-400">
-                                Enter your confidential 4-digit Pilot ID for your custom Interceptor livery, or enter a Guest Callsign:
+                                Enter a 4-digit ID and press Login ID, or play directly as Guest:
                             </p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
-                            <input type="password" id="pilotIdInput" maxlength="4" inputmode="numeric" placeholder="4-Digit ID" onkeydown="if(event.key==='Enter') loginPilotById()" class="bg-[#07090e] border border-[#2e384f] focus:border-sky-400 rounded-lg px-2 py-1.5 text-xs mono-num text-white tracking-widest w-24 text-center focus:outline-none">
+                            <input type="text" id="pilotIdInput" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="XXXX" onkeydown="if(event.key==='Enter') loginPilotById()" class="bg-[#07090e] border border-[#2e384f] focus:border-sky-400 rounded-lg px-2 py-1.5 text-xs mono-num text-white tracking-widest w-20 text-center focus:outline-none">
                             <button type="button" onclick="loginPilotById()" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold text-xs transition cursor-pointer">
                                 Login ID
                             </button>
                         </div>
                     </div>
 
-                    <!-- Guest Name Row (Only when in Guest Mode) -->
-                    <div id="guestNameInputRow" class="flex items-center justify-between gap-2 pt-1 border-t border-[#181d29]">
-                        <span class="text-[10px] mono-num text-gray-400">GUEST CALLSIGN:</span>
+                    <!-- Optional Guest Name Row (Visible whenever not in a locked Core Member profile) -->
+                    <div id="guestNameInputRow" class="flex items-center justify-between gap-2 pt-1.5 border-t border-[#181d29]">
+                        <span class="text-[10px] mono-num text-gray-400">PILOT NAME <span class="text-gray-500">(OPTIONAL)</span>:</span>
                         <div class="flex items-center gap-1.5 flex-1 max-w-xs">
-                            <input type="text" id="guestCallsignInput" maxlength="16" placeholder="Guest Pilot Name" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                            <input type="text" id="guestCallsignInput" maxlength="16" autocomplete="off" placeholder="John Doe" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
                         </div>
                     </div>
 
-                    <!-- Active Account Status + Logout Button -->
+                    <!-- Active Account Status + Switch ID Button -->
                     <div class="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-[#181d29] text-xs">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span id="activePilotColorDot" class="w-3 h-3 rounded-full bg-sky-400 inline-block shrink-0 shadow"></span>
-                            <span class="text-gray-300 truncate">Pilot: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
+                            <span id="activePilotColorDot" class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block shrink-0 shadow"></span>
+                            <span class="text-gray-300 truncate">Active: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
                             <span id="activeLiveryBadge" class="px-2 py-0.5 text-[10px] mono-num rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">Tactical Steel</span>
                         </div>
                         <button type="button" id="logoutAccountBtn" onclick="logoutCurrentPilot()" class="hidden px-2.5 py-1 rounded-lg bg-red-950/80 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-[10px] mono-num font-bold transition cursor-pointer shrink-0">
-                            ⇄ Logout / Switch ID
+                            ⇄ Reset / Switch ID
                         </button>
                     </div>
                     <div id="loginFeedbackBanner" class="hidden text-[11px] font-semibold px-2.5 py-1 rounded-lg"></div>
@@ -297,11 +313,11 @@
                 <!-- Account Personal Telemetry Summary -->
                 <div class="grid grid-cols-3 gap-2 text-left text-[11px] mono-num">
                     <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
-                        <div class="text-gray-400 text-[9px]">ACCOUNT BEST SCORE</div>
+                        <div class="text-gray-400 text-[9px]">ACCOUNT BEST</div>
                         <div id="bootHighScore" class="text-emerald-400 font-extrabold text-sm">0</div>
                     </div>
                     <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
-                        <div class="text-gray-400 text-[9px]">MAX EPOCH REACHED</div>
+                        <div class="text-gray-400 text-[9px]">MAX EPOCH</div>
                         <div id="bootBestEpoch" class="text-sky-300 font-extrabold text-sm">Epoch 1</div>
                     </div>
                     <div class="recessed-well p-2 rounded-xl border border-[#1f2637]">
@@ -310,7 +326,7 @@
                     </div>
                 </div>
 
-                <!-- Bottom Launch, Ranks, Settings & Exit Portal Buttons -->
+                <!-- Bottom Launch, Ranks, Settings & Exit Buttons -->
                 <div class="flex flex-wrap items-center gap-2 pt-0.5">
                     <button type="button" onclick="startGameSession()" class="btn-launch flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm uppercase tracking-widest cursor-pointer">
                         ▶ Engage Interceptor
@@ -369,34 +385,40 @@
                     <button type="button" onclick="openPauseSettingsModal('game')" class="px-3 py-2.5 rounded-xl bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/40 text-xs font-bold cursor-pointer" title="Open Settings">
                         ⚙️
                     </button>
-                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-2.5 rounded-xl bg-red-600/85 hover:bg-red-500 text-white text-xs font-bold cursor-pointer" title="Exit to Main Menu">
-                        🏠 Menu
+                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-2.5 rounded-xl bg-[#1f2738] hover:bg-[#2b354b] text-gray-200 border border-gray-600/40 text-xs font-bold cursor-pointer" title="Back to Main Menu">
+                        ← Back
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- =====================================================
-             3. ESC / PAUSE & MODULAR SETTINGS HUB MODAL (z-[65])
-                (Game Settings | Sounds | Controls | Graphics)
+             3. PAUSE & MODULAR SETTINGS HUB MODAL (z-[65])
+                (Zero Redundant Footer Buttons — Clean Header Navigation)
              ===================================================== -->
         <div id="pauseSettingsModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[65] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
             <div class="hardware-panel modal-anim w-full max-w-2xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[94%] overflow-hidden">
                 
                 <!-- Modal Header -->
-                <div class="px-3.5 py-2 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
+                <div class="px-3.5 py-2 bg-[#0c0f16] border-b border-[#232836] flex flex-wrap items-center justify-between gap-2 shrink-0">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
                         <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                            SYSTEM PAUSE &amp; SETTINGS HUB
+                            SETTINGS &amp; TELEMETRY HUB
                         </h2>
                     </div>
                     <div class="flex items-center gap-1.5">
+                        <button type="button" id="inGameRestartBtn" onclick="startGameSession()" class="hidden px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold cursor-pointer">
+                            ↻ Restart
+                        </button>
+                        <button type="button" id="inGameMenuBtn" onclick="returnToMainMenu()" class="hidden px-2.5 py-1 rounded-lg bg-red-600/80 hover:bg-red-500 text-white text-[11px] font-bold cursor-pointer">
+                            ← Menu
+                        </button>
                         <button type="button" onclick="openLeaderboardModal()" class="px-2.5 py-1 rounded-lg bg-[#171d2b] hover:bg-[#222b3e] text-amber-300 border border-amber-500/30 text-[11px] font-bold cursor-pointer">
                             🏆 Ranks
                         </button>
                         <button type="button" id="resumeOrCloseSettingsBtn" onclick="resumeFromSettings()" class="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-extrabold cursor-pointer">
-                            ▶ Resume
+                            ← Back
                         </button>
                     </div>
                 </div>
@@ -404,10 +426,10 @@
                 <!-- 4-Tab Settings Navigation Bar -->
                 <div class="px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-4 gap-1.5 shrink-0">
                     <button type="button" id="setTabBtn_game" onclick="switchSettingsTab('game')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate">
-                        🎮 Game Settings
+                        🎮 Game
                     </button>
                     <button type="button" id="setTabBtn_sounds" onclick="switchSettingsTab('sounds')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
-                        🔊 Sounds &amp; OST
+                        🔊 Sounds
                     </button>
                     <button type="button" id="setTabBtn_controls" onclick="switchSettingsTab('controls')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
                         🕹️ Controls
@@ -420,10 +442,10 @@
                 <!-- Tab Content Area -->
                 <div class="flex-1 p-3 sm:p-4 overflow-y-auto space-y-2.5 text-xs">
 
-                    <!-- TAB 1: GAME SETTINGS (DIFFICULTY + 13 INTERCHANGEABLE BIOMES + INDIVIDUAL RESET) -->
+                    <!-- TAB 1: GAME SETTINGS -->
                     <div id="setTab_game" class="space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Configure Difficulty &amp; Biome Cycling</span>
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Difficulty &amp; Biome Cycling</span>
                             <button type="button" onclick="resetGameSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Game Settings
                             </button>
@@ -431,7 +453,7 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty &amp; Progressive Epoch Scaling</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty &amp; Epoch Scaling</span>
                                 <span id="diffCurrentLabel" class="text-[10px] mono-num text-emerald-400 font-bold">🟢 Assisted Easy</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -461,7 +483,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 2: SOUNDS & OST (4 VOLUME SLIDERS + MITADRU.M4A SWITCHER + INDIVIDUAL RESET) -->
+                    <!-- TAB 2: SOUNDS & OST -->
                     <div id="setTab_sounds" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
                             <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Audio Mixer &amp; OST Engine</span>
@@ -526,7 +548,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 3: CONTROLS (STRICTLY SEPARATED: MOBILE-ONLY ON PHONE, PC-ONLY ON PC + INDIVIDUAL RESET) -->
+                    <!-- TAB 3: CONTROLS (STRICTLY SEPARATED: MOBILE-ONLY ON PHONE, PC-ONLY ON PC) -->
                     <div id="setTab_controls" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
                             <span id="ctrlPlatformHeaderLabel" class="text-[10px] mono-num uppercase text-gray-400 font-bold">Active Platform Controls</span>
@@ -537,25 +559,51 @@
 
                         <!-- PHONE / ANDROID CONTROLS SECTION (Hidden on PC via .mobile-only-ui) -->
                         <div class="mobile-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">📱 Mobile / Android Steering Mode</span>
-                                <button type="button" onclick="calibrateTiltSensor()" class="px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] mono-num font-bold cursor-pointer">
-                                    🧭 Calibrate Tilt Center
-                                </button>
+                            <div class="font-bold text-white uppercase text-[11px] mono-num">
+                                📱 Mobile / Android Steering Mode
                             </div>
+
                             <div class="grid grid-cols-3 gap-1.5">
-                                <button type="button" id="mobCtrl_buttons" onclick="setMobileControlMode('buttons')" class="p-2.5 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center">
+                                <button type="button" id="mobCtrl_buttons" onclick="setMobileControlMode('buttons')" class="p-2 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center">
                                     ◀▶ Arrow Paddles
                                 </button>
-                                <button type="button" id="mobCtrl_drag" onclick="setMobileControlMode('drag')" class="p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
+                                <button type="button" id="mobCtrl_drag" onclick="setMobileControlMode('drag')" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
                                     👆 Finger Drag
                                 </button>
-                                <button type="button" id="mobCtrl_tilt" onclick="setMobileControlMode('tilt')" class="p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
+                                <button type="button" id="mobCtrl_tilt" onclick="setMobileControlMode('tilt')" class="p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center">
                                     📲 Phone Tilt (Gyro)
                                 </button>
                             </div>
+
+                            <!-- Landscape Gyro Calibration & Live Tilt Meter (Greyed out unless Gyro Mode is active) -->
+                            <div id="gyroCalibrationBox" class="p-2 rounded-lg bg-[#0d111a] border border-[#1f273a] flex flex-wrap items-center justify-between gap-2 opacity-40 pointer-events-none transition">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] mono-num text-gray-300">LANDSCAPE TILT:</span>
+                                    <span id="gyroLiveAngleLabel" class="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold">0.0°</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" id="invertGyroBtn" onclick="toggleInvertGyro()" class="px-2 py-1 rounded bg-[#182032] hover:bg-[#232f47] text-gray-200 border border-gray-600/40 text-[10px] mono-num font-bold cursor-pointer">
+                                        ⇄ Flip Axis: OFF
+                                    </button>
+                                    <button type="button" id="calibrateTiltBtn" onclick="calibrateTiltSensor()" class="px-2.5 py-1 rounded bg-sky-500 hover:bg-sky-400 text-black text-[10px] mono-num font-extrabold cursor-pointer">
+                                        🧭 Calibrate Center
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Active Mode Control Map Reference (Shows how Brake, Boost & EMP work in each mode) -->
+                            <div class="p-2 rounded-lg bg-[#0c0f17] border border-[#1c2333] space-y-1 text-[10px] mono-num">
+                                <div class="text-sky-300 font-bold uppercase" id="mobileModeMapTitle">ACTIVE CONTROL MAP // ARROW PADDLES</div>
+                                <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-300">
+                                    <div>↔️ STEER: <strong id="mapSteerDesc" class="text-white">Left ◀ / ▶ Right Paddles</strong></div>
+                                    <div>🛑 STOP / BRAKE: <strong class="text-red-300">🛑 BRAKE Button (Right)</strong></div>
+                                    <div>🔥 NITRO BOOST: <strong class="text-amber-300">🔥 NITRO Button / 2x Tap</strong></div>
+                                    <div>⚡ EMP PULSE: <strong class="text-sky-300">⚡ EMP Button (Right)</strong></div>
+                                </div>
+                            </div>
+
                             <div class="flex items-center justify-between pt-1 border-t border-[#1b2230] text-[11px]">
-                                <span class="text-gray-300">Double-Tap Screen for Nitro Overdrive:</span>
+                                <span class="text-gray-300">Double-Tap Highway for Nitro Boost:</span>
                                 <button type="button" id="doubleTapNitroBtn" onclick="toggleDoubleTapNitro()" class="px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
                                     ENABLED
                                 </button>
@@ -566,7 +614,7 @@
                         <div class="pc-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-white uppercase text-[11px] mono-num">⌨️ PC Keyboard Remapper (Click Any Box to Rebind)</span>
-                                <span class="text-[10px] mono-num text-gray-400">ESC = Pause / Menu</span>
+                                <span class="text-[10px] mono-num text-gray-400">ESC = Pause / Back</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mono-num text-[11px]">
                                 <button type="button" onclick="startKeyRebind('left')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-sky-400 text-left cursor-pointer">
@@ -585,15 +633,19 @@
                                     <div class="text-[9px] text-gray-400">AEB BRAKE</div>
                                     <div class="text-red-300 font-bold mt-0.5" id="bindVal_brake">S / ARROWDOWN</div>
                                 </button>
-                                <button type="button" onclick="startKeyRebind('emp')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-emerald-400 text-left cursor-pointer col-span-2 sm:col-span-2">
+                                <button type="button" onclick="startKeyRebind('emp')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-emerald-400 text-left cursor-pointer">
                                     <div class="text-[9px] text-gray-400">NEURAL EMP PULSE</div>
                                     <div class="text-emerald-300 font-bold mt-0.5" id="bindVal_emp">SPACE / E</div>
+                                </button>
+                                <button type="button" onclick="startKeyRebind('hideui')" class="p-2.5 rounded-lg bg-[#141824] border border-[#262f45] hover:border-purple-400 text-left cursor-pointer">
+                                    <div class="text-[9px] text-gray-400">HIDE / SHOW HUD</div>
+                                    <div class="text-purple-300 font-bold mt-0.5" id="bindVal_hideui">H</div>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB 4: GRAPHICS & ATMOSPHERIC FILTERS (RE REQUIEM / DYING LIGHT 2 + INDIVIDUAL RESET) -->
+                    <!-- TAB 4: GRAPHICS & ATMOSPHERIC FILTERS -->
                     <div id="setTab_graphics" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
                             <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Post-Processing &amp; Performance</span>
@@ -656,49 +708,35 @@
                     </div>
 
                 </div>
-
-                <!-- Modal Footer (Switch Account, Restart Run, Exit to Main Menu) -->
-                <div class="px-3.5 py-2 bg-[#0c0f16] border-t border-[#232836] flex items-center justify-between gap-2 shrink-0">
-                    <button type="button" onclick="returnToMainMenu()" class="px-3 py-1.5 rounded-lg bg-[#181f2e] hover:bg-[#232d42] text-sky-300 border border-sky-500/30 text-xs font-semibold cursor-pointer">
-                        🔑 Switch Pilot ID
-                    </button>
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="startGameSession()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold cursor-pointer">
-                            ↻ Restart Run
-                        </button>
-                        <button type="button" onclick="returnToMainMenu()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer">
-                            🏠 Main Menu
-                        </button>
-                    </div>
-                </div>
-
             </div>
         </div>
 
         <!-- =====================================================
-             4. REAL-TIME CROSS-DEVICE LEADERBOARD MODAL (z-[75] — TOP LAYER)
+             4. REAL-TIME CROSS-DEVICE LEADERBOARD MODAL (z-[75])
              ===================================================== -->
         <div id="leaderboardModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[75] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
             <div class="hardware-panel modal-anim w-full max-w-xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[92%] overflow-hidden">
                 <div class="px-4 py-2.5 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span id="lbSyncPulseDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                             <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                                🏆 GLOBAL REAL-TIME TELEMETRY LEADERBOARD
+                                🏆 GLOBAL REAL-TIME LEADERBOARD
                             </h2>
                         </div>
-                        <p class="text-[10px] mono-num text-gray-400 mt-0.5">
-                            Only verified runs (&gt;0 pts) are ranked &bull; Instant Persistent Sync
+                        <p id="lbSyncStatusText" class="text-[10px] mono-num text-gray-400 mt-0.5">
+                            Live Cross-Device Cloud Stream &bull; Verified Runs (&gt;0 pts)
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <!-- Admin Reset Button (Visible ONLY when logged in as Mitadru 1117) -->
-                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
-                            🔄 Reset Scores (1117)
+                        <button type="button" onclick="pullGlobalCloudLeaderboard(true)" class="px-2 py-1 rounded-lg bg-[#171d2b] hover:bg-[#222c40] text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer" title="Instant Cloud Refresh">
+                            🔄 Sync
                         </button>
-                        <button type="button" onclick="closeLeaderboardModal()" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold cursor-pointer">
-                            ✕ Close
+                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
+                            🗑️ Reset (1117)
+                        </button>
+                        <button type="button" onclick="closeLeaderboardModal()" class="px-3 py-1 rounded-lg bg-[#1f2738] hover:bg-[#2b354b] text-white border border-gray-600/40 text-xs font-bold cursor-pointer">
+                            ← Back
                         </button>
                     </div>
                 </div>
@@ -709,69 +747,77 @@
 
         <!-- =====================================================
              5. TOP ADAS TELEMETRY HUD BAR
-                (PC: [ESC] Menu only | Phone: Dedicated ⏸ Pause button only)
+                (All telemetry visible on BOTH Mobile & PC + Hide UI Toggle)
              ===================================================== -->
-        <header class="absolute top-0 inset-x-0 z-30 p-2 sm:p-2.5 pointer-events-none">
-            <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5">
+        <header class="absolute top-0 inset-x-0 z-30 p-1.5 sm:p-2.5 pointer-events-none">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-1">
 
-                <!-- Left Telemetry Cluster -->
-                <div class="hardware-panel px-2.5 py-1 rounded-2xl flex items-center gap-2 pointer-events-auto">
-                    <div class="flex items-center gap-1.5">
-                        <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span id="hudPilotCallsign" class="text-[10px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[85px] sm:max-w-[130px]">GUEST</span>
-                    </div>
-
-                    <div class="recessed-well px-2 py-0.5 rounded-lg mono-num text-[11px]">
-                        <strong id="hudScore" class="text-emerald-400">000000</strong>
-                    </div>
-
-                    <div class="recessed-well px-2 py-0.5 rounded-lg mono-num text-[10px] sm:text-[11px]">
-                        <span id="hudEpoch" class="text-sky-300 font-bold">EPOCH 1</span>
+                <!-- Left Telemetry Cluster: Callsign, Score, Epoch, Combo, and HULL (Visible on Mobile & PC!) -->
+                <div class="hud-collapsible hardware-panel px-2 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+                    <div class="flex items-center gap-1">
+                        <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                        <span id="hudPilotCallsign" class="text-[9px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[62px] sm:max-w-[120px]">GUEST</span>
                     </div>
 
                     <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[10px] sm:text-[11px]">
+                        <strong id="hudScore" class="text-emerald-400">000000</strong>
+                    </div>
+
+                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9px] sm:text-[11px]">
+                        <span id="hudEpoch" class="text-sky-300 font-bold">EP 1</span>
+                    </div>
+
+                    <div class="recessed-well px-1.5 py-0.5 rounded-lg mono-num text-[9px] sm:text-[11px]">
                         <span id="hudCombo" class="text-amber-300 font-bold">1.0x</span>
                     </div>
 
-                    <div class="hidden sm:flex items-center gap-1.5 recessed-well px-2 py-0.5 rounded-lg">
-                        <span class="text-[9px] mono-num text-gray-400">HULL</span>
-                        <div class="w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
+                    <!-- Hull Integrity Bar (Visible on Mobile & PC!) -->
+                    <div class="flex items-center gap-1 recessed-well px-1.5 py-0.5 rounded-lg">
+                        <span class="text-[8px] sm:text-[9px] mono-num text-gray-400">HULL</span>
+                        <div class="w-8 sm:w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
                             <div id="hudArmorBar" class="h-full bg-emerald-400 transition-all duration-150" style="width: 100%;"></div>
                         </div>
-                        <span id="hudArmorPct" class="text-[10px] mono-num font-bold text-emerald-400">100%</span>
+                        <span id="hudArmorPct" class="text-[9px] sm:text-[10px] mono-num font-bold text-emerald-400">100%</span>
                     </div>
                 </div>
 
-                <!-- Center Biome, Warning & Live #1 Leader Pill -->
-                <div class="hardware-panel px-3 py-1 rounded-2xl hidden lg:flex items-center gap-2.5 pointer-events-auto text-[11px] mono-num">
-                    <span id="hudBiomeName" class="text-sky-300 font-bold">🌌 Cyber Void</span>
+                <!-- Center Biome, Warning & Live #1 Leader Pill (Visible on Mobile & PC!) -->
+                <div class="hud-collapsible hardware-panel px-2 sm:px-3 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto text-[9px] sm:text-[11px] mono-num">
+                    <span id="hudBiomeName" class="text-sky-300 font-bold truncate max-w-[78px] sm:max-w-none">🌌 Cyber Void</span>
                     <span class="text-gray-600">|</span>
-                    <span id="hudWarningBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
-                        NO WARNING
+                    <span id="hudWarningBadge" class="px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700">
+                        CLEAR
                     </span>
-                    <span class="text-gray-600">|</span>
-                    <span class="text-amber-300">👑 #1: <strong id="hudLeaderMini">Unclaimed</strong></span>
+                    <span class="hidden sm:inline text-gray-600">|</span>
+                    <span class="hidden sm:inline text-amber-300">👑 <strong id="hudLeaderMini">Unclaimed</strong></span>
                 </div>
 
-                <!-- Right Cluster: Equalizer + Strict PC vs Mobile Pause/ESC UI -->
-                <div class="hardware-panel px-2.5 py-1 rounded-2xl flex items-center gap-2 pointer-events-auto">
-                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg recessed-well">
-                        <div class="flex items-end gap-0.5 h-3">
-                            <span class="eq-bar w-0.5 sm:w-1 bg-emerald-400 eq-1 eq-paused rounded-full"></span>
-                            <span class="eq-bar w-0.5 sm:w-1 bg-sky-400 eq-2 eq-paused rounded-full"></span>
-                            <span class="eq-bar w-0.5 sm:w-1 bg-amber-400 eq-3 eq-paused rounded-full"></span>
+                <!-- Right Cluster: Equalizer + Mobile Hide UI (Always Visible on Mobile) + Pause/ESC -->
+                <div class="flex items-center gap-1.5 pointer-events-auto">
+                    <div class="hud-collapsible hardware-panel px-2 py-1 rounded-xl flex items-center gap-1.5">
+                        <div class="hidden sm:flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg recessed-well">
+                            <div class="flex items-end gap-0.5 h-3">
+                                <span class="eq-bar w-0.5 sm:w-1 bg-emerald-400 eq-1 eq-paused rounded-full"></span>
+                                <span class="eq-bar w-0.5 sm:w-1 bg-sky-400 eq-2 eq-paused rounded-full"></span>
+                                <span class="eq-bar w-0.5 sm:w-1 bg-amber-400 eq-3 eq-paused rounded-full"></span>
+                            </div>
+                            <span id="hudOstShortLabel" class="mono-num text-[9px] text-gray-300">SYNTH</span>
                         </div>
-                        <span id="hudOstShortLabel" class="mono-num text-[10px] text-gray-300">SYNTH</span>
+
+                        <!-- PC ONLY HINTS (Hidden on Phones) -->
+                        <span id="pcHideUiHintBadge" class="pc-only-ui px-2 py-0.5 rounded-lg recessed-well text-[10px] mono-num text-gray-400">
+                            [H] UI &bull; [ESC] Menu
+                        </span>
+
+                        <!-- MOBILE ONLY PAUSE BUTTON (Hidden when UI is collapsed) -->
+                        <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="mobile-only-ui px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[10px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
+                            ⏸ Pause
+                        </button>
                     </div>
 
-                    <!-- PC ONLY HINT (Hidden on Phones) -->
-                    <span class="pc-only-ui px-2 py-0.5 rounded-lg recessed-well text-[10px] mono-num text-gray-400">
-                        [ESC] Menu
-                    </span>
-
-                    <!-- MOBILE ONLY PAUSE BUTTON (Hidden on PC) -->
-                    <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="mobile-only-ui px-2.5 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[11px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
-                        ⏸ Pause
+                    <!-- MOBILE ONLY HIDE/UNHIDE UI BUTTON (Stays visible even when HUD is hidden!) -->
+                    <button type="button" id="mobileHideUiBtn" onclick="toggleGameHudVisibility()" class="mobile-only-ui hardware-panel px-2.5 py-1 rounded-xl border border-purple-400/50 text-[10px] mono-num font-bold text-purple-200 active:scale-95 transition cursor-pointer">
+                        👁️ UI
                     </button>
                 </div>
 
@@ -781,20 +827,20 @@
         <!-- =====================================================
              6. LIVE 30M RADAR + NITRO ACCELERATION & EMP METERS
              ===================================================== -->
-        <div class="absolute top-12 left-2 sm:left-3 z-20 pointer-events-none flex flex-col gap-1.5">
-            <div class="hardware-panel p-1.5 rounded-2xl flex flex-col items-center w-22 sm:w-26">
+        <div class="hud-collapsible absolute top-11 sm:top-12 left-1.5 sm:left-3 z-20 pointer-events-none flex flex-col gap-1">
+            <div class="hardware-panel p-1 sm:p-1.5 rounded-2xl flex flex-col items-center w-20 sm:w-24">
                 <div class="w-full flex items-center justify-between px-1 mb-0.5">
-                    <span class="text-[8px] mono-num font-bold text-gray-400">RADAR</span>
-                    <span id="hudSpeedKmh" class="text-[9px] mono-num font-bold text-emerald-400">100 km/h</span>
+                    <span class="text-[7.5px] mono-num font-bold text-gray-400">RADAR</span>
+                    <span id="hudSpeedKmh" class="text-[8.5px] mono-num font-bold text-emerald-400">100 km/h</span>
                 </div>
-                <div class="recessed-well rounded-xl overflow-hidden w-18 h-18 sm:w-22 sm:h-22 flex items-center justify-center">
-                    <canvas id="miniRadarCanvas" width="88" height="88" class="w-full h-full"></canvas>
+                <div class="recessed-well rounded-xl overflow-hidden w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                    <canvas id="miniRadarCanvas" width="84" height="84" class="w-full h-full"></canvas>
                 </div>
             </div>
 
-            <div class="hardware-panel px-2 py-1.5 rounded-xl flex flex-col gap-1 w-22 sm:w-26">
+            <div class="hardware-panel px-2 py-1 rounded-xl flex flex-col gap-1 w-20 sm:w-24">
                 <div>
-                    <div class="flex items-center justify-between text-[8.5px] mono-num">
+                    <div class="flex items-center justify-between text-[8px] mono-num">
                         <span class="text-amber-300 font-bold">🔥 NITRO</span>
                         <span id="hudNitroPct" class="text-amber-300 font-bold">100%</span>
                     </div>
@@ -804,7 +850,7 @@
                 </div>
 
                 <div>
-                    <div class="flex items-center justify-between text-[8.5px] mono-num">
+                    <div class="flex items-center justify-between text-[8px] mono-num">
                         <span class="text-sky-300 font-bold">⚡ EMP</span>
                         <span id="hudEmpPct" class="text-sky-300 font-bold">100%</span>
                     </div>
@@ -816,33 +862,33 @@
         </div>
 
         <!-- =====================================================
-             7. STRICTLY SEPARATED MOBILE TOUCH PADDLES & PC BAR
+             7. BOTTOM MOBILE TOUCH DOCK & TELEMETRY BAR
              ===================================================== -->
-        <footer class="absolute bottom-0 inset-x-0 z-30 p-2 sm:p-3.5 pointer-events-none flex items-end justify-between">
+        <footer class="absolute bottom-0 inset-x-0 z-30 p-1.5 sm:p-2.5 pointer-events-none flex items-end justify-between gap-2">
 
-            <!-- Left Thumb (Strictly Mobile Only) -->
-            <div id="mobileLeftTouchGroup" class="mobile-only-ui flex items-center gap-2 pointer-events-auto">
+            <!-- Left Thumb (Mobile Only — Shown in 'buttons' mode, hidden in 'drag' & 'tilt' modes) -->
+            <div id="mobileLeftTouchGroup" class="mobile-only-ui flex items-center gap-1.5 pointer-events-auto">
                 <button type="button" id="btnLeftLane"
                     onpointerdown="steerLane(-1); this.classList.add('active-press')"
                     onpointerup="this.classList.remove('active-press')"
                     onpointerleave="this.classList.remove('active-press')"
-                    class="touch-paddle px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
-                    <span class="text-lg font-black text-sky-300">◀</span>
-                    <span class="text-[8px] mono-num font-bold text-gray-300">LEFT</span>
+                    class="touch-paddle px-3.5 py-2 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-base font-black text-sky-300">◀</span>
+                    <span class="text-[7.5px] mono-num font-bold text-gray-300">LEFT</span>
                 </button>
 
                 <button type="button" id="btnRightLane"
                     onpointerdown="steerLane(1); this.classList.add('active-press')"
                     onpointerup="this.classList.remove('active-press')"
                     onpointerleave="this.classList.remove('active-press')"
-                    class="touch-paddle px-4 py-2.5 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
-                    <span class="text-lg font-black text-sky-300">▶</span>
-                    <span class="text-[8px] mono-num font-bold text-gray-300">RIGHT</span>
+                    class="touch-paddle px-3.5 py-2 rounded-2xl flex flex-col items-center justify-center text-white cursor-pointer">
+                    <span class="text-base font-black text-sky-300">▶</span>
+                    <span class="text-[7.5px] mono-num font-bold text-gray-300">RIGHT</span>
                 </button>
             </div>
 
-            <!-- Center Telemetry Readout -->
-            <div class="hidden sm:flex hardware-panel px-3.5 py-1 rounded-xl items-center gap-3 text-[11px] mono-num mx-auto">
+            <!-- Center Telemetry Readout (Visible on BOTH Mobile and PC, hides when Hide UI is active) -->
+            <div class="hud-collapsible flex hardware-panel px-2.5 sm:px-3.5 py-1 rounded-xl items-center gap-2 sm:gap-3 text-[9px] sm:text-[11px] mono-num mx-auto">
                 <span>LEAD: <strong id="hudLeadName" class="text-white">CLEAR</strong></span>
                 <span class="text-gray-600">|</span>
                 <span>TTC: <strong id="hudLeadTtc" class="text-emerald-400">STABLE</strong></span>
@@ -850,31 +896,31 @@
                 <span>DGI: <strong id="hudLeadDgi" class="text-sky-300">0.00</strong></span>
             </div>
 
-            <!-- Right Thumb (Strictly Mobile Only) -->
+            <!-- Right Thumb (Mobile Only — Active in ALL 3 mobile modes: Paddles, Finger Drag, and Gyro Tilt) -->
             <div id="mobileRightTouchGroup" class="mobile-only-ui flex items-center gap-1.5 pointer-events-auto">
                 <button type="button" id="btnBrake"
                     onpointerdown="setBraking(true); this.classList.add('active-press')"
                     onpointerup="setBraking(false); this.classList.remove('active-press')"
                     onpointerleave="setBraking(false); this.classList.remove('active-press')"
-                    class="touch-paddle px-3 py-2.5 rounded-2xl flex flex-col items-center justify-center border-red-500/40 cursor-pointer">
-                    <span class="text-sm font-extrabold text-red-400">🛑</span>
-                    <span class="text-[8px] mono-num font-bold text-red-300">BRAKE</span>
+                    class="touch-paddle px-2.5 py-2 rounded-2xl flex flex-col items-center justify-center border-red-500/40 cursor-pointer">
+                    <span class="text-xs font-extrabold text-red-400">🛑</span>
+                    <span class="text-[7.5px] mono-num font-bold text-red-300">BRAKE</span>
                 </button>
 
                 <button type="button" id="btnBoost"
                     onpointerdown="setBoosting(true); this.classList.add('active-press')"
                     onpointerup="setBoosting(false); this.classList.remove('active-press')"
                     onpointerleave="setBoosting(false); this.classList.remove('active-press')"
-                    class="touch-paddle px-3 py-2.5 rounded-2xl flex flex-col items-center justify-center border-amber-400/50 bg-amber-500/15 cursor-pointer">
-                    <span class="text-sm font-extrabold text-amber-300">🔥</span>
-                    <span class="text-[8px] mono-num font-bold text-amber-200">NITRO</span>
+                    class="touch-paddle px-2.5 py-2 rounded-2xl flex flex-col items-center justify-center border-amber-400/50 bg-amber-500/15 cursor-pointer">
+                    <span class="text-xs font-extrabold text-amber-300">🔥</span>
+                    <span class="text-[7.5px] mono-num font-bold text-amber-200">NITRO</span>
                 </button>
 
                 <button type="button" id="btnEmpPulse"
                     onpointerdown="triggerNeuralEmp()"
-                    class="touch-paddle px-3.5 py-2.5 rounded-2xl flex flex-col items-center justify-center border-sky-400/60 bg-sky-500/20 cursor-pointer">
-                    <span class="text-sm font-black text-sky-300">⚡</span>
-                    <span class="text-[8px] mono-num font-extrabold text-sky-200">EMP</span>
+                    class="touch-paddle px-3 py-2 rounded-2xl flex flex-col items-center justify-center border-sky-400/60 bg-sky-500/20 cursor-pointer">
+                    <span class="text-xs font-black text-sky-300">⚡</span>
+                    <span class="text-[7.5px] mono-num font-extrabold text-sky-200">EMP</span>
                 </button>
             </div>
 
@@ -884,7 +930,7 @@
 
 <script>
     // =========================================================================
-    // MODULE 0: HARDWARE DETECTION & CORE STATE INITIALIZATION
+    // MODULE 0: HARDWARE DETECTION, HUD TOGGLE & CORE STATE INITIALIZATION
     // =========================================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -895,6 +941,7 @@
     const LANE_WIDTH_M = 3.5;
 
     let isMobileHardware = false;
+    let isHudHidden = false;
 
     function detectDeviceHardware() {
         const uaMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -914,6 +961,19 @@
             ctrlHeader.innerText = isMobileHardware
                 ? "📱 Mobile / Android Touch & Gyro Controls"
                 : "⌨️ PC Keyboard Controls & Keybinds";
+        }
+    }
+
+    function toggleGameHudVisibility() {
+        isHudHidden = !isHudHidden;
+        const wrapper = document.getElementById('gameViewportWrapper');
+        const mobBtn = document.getElementById('mobileHideUiBtn');
+        if (wrapper) {
+            if (isHudHidden) wrapper.classList.add('hud-hidden');
+            else wrapper.classList.remove('hud-hidden');
+        }
+        if (mobBtn) {
+            mobBtn.innerText = isHudHidden ? "👁️ Show UI" : "👁️ UI";
         }
     }
 
@@ -957,11 +1017,11 @@
     let spawnAccumulator = 0;
     let pickupAccumulator = 0;
     let radarAngle = Math.PI;
-    let lastRawTilt = 0;
+    let lastRawLandscapeTilt = 0;
     let awaitingRebindAction = null;
 
     // =========================================================================
-    // MODULE 1: CONFIDENTIAL CORE PILOT PROFILES & PER-ACCOUNT STORAGE
+    // MODULE 1: PILOT PROFILES (5 CORE + CUSTOM 4-DIGIT GUEST IDs + GUEST)
     // =========================================================================
     const PILOT_PROFILES = {
         "1117": {
@@ -1062,11 +1122,12 @@
         }
     };
 
-    const ACCOUNTS_DB_KEY = 'roadSense_overdrive_accounts_db_v5';
-    const DELETED_GUESTS_KEY = 'roadSense_overdrive_deleted_guests_v5';
+    const ACCOUNTS_DB_KEY = 'roadSense_overdrive_accounts_db_v6';
+    const DELETED_GUESTS_KEY = 'roadSense_overdrive_deleted_guests_v6';
 
     let currentPilot = PILOT_PROFILES["GUEST"];
-    let customGuestName = localStorage.getItem('roadSense_overdrive_guestName') || "Guest Pilot";
+    let customGuestId = localStorage.getItem('roadSense_overdrive_customGuestId') || "";
+    let customGuestName = localStorage.getItem('roadSense_overdrive_guestName') || "";
 
     function getAccountsDatabase() {
         try {
@@ -1094,9 +1155,17 @@
         localStorage.setItem(DELETED_GUESTS_KEY, JSON.stringify(arr));
     }
 
+    function getEffectiveGuestDisplayName() {
+        const cleanName = (customGuestName || "").trim();
+        if (cleanName) return cleanName;
+        if (customGuestId) return `Pilot #${customGuestId}`;
+        return "Guest Pilot";
+    }
+
     function getActiveAccountStorageKey() {
         if (currentPilot.isCore) return currentPilot.id;
-        const cleanGuest = (customGuestName || "Guest Pilot").trim().replace(/\s+/g, '_').toUpperCase();
+        if (customGuestId) return `GUEST_ID_${customGuestId}`;
+        const cleanGuest = getEffectiveGuestDisplayName().replace(/\s+/g, '_').toUpperCase();
         return `GUEST_${cleanGuest}`;
     }
 
@@ -1110,9 +1179,10 @@
         const db = getAccountsDatabase();
         const key = getActiveAccountStorageKey();
         const prev = db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0 };
+        const dispName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
         db[key] = {
             id: currentPilot.isCore ? currentPilot.id : key,
-            name: currentPilot.isCore ? currentPilot.name : customGuestName,
+            name: dispName,
             isCore: currentPilot.isCore,
             bestScore: Math.max(prev.bestScore || 0, scoreVal),
             bestEpoch: Math.max(prev.bestEpoch || 1, epochVal),
@@ -1145,29 +1215,64 @@
     function loginPilotById() {
         const input = document.getElementById('pilotIdInput');
         const raw = (input ? input.value : '').trim();
+
+        if (!/^\d{4}$/.test(raw)) {
+            showLoginBanner("✕ Please enter a valid 4-digit numeric ID (e.g., XXXX) or launch directly as Guest.", false);
+            playGameSfx('hit');
+            return;
+        }
+
         if (PILOT_PROFILES[raw] && raw !== "GUEST") {
+            customGuestId = "";
+            localStorage.removeItem('roadSense_overdrive_customGuestId');
             applyPilotProfile(raw);
             if (input) input.value = '';
-            showLoginBanner(`✓ Authenticated: ${currentPilot.name} — ${currentPilot.liveryName} Livery Active`, true);
+            showLoginBanner(`✓ Core Pilot Authenticated: ${currentPilot.name} — ${currentPilot.liveryName} Active`, true);
             playGameSfx('pickup');
         } else {
-            showLoginBanner("✕ Unrecognized 4-digit Pilot ID. Verify your credentials or launch as Guest.", false);
-            playGameSfx('hit');
+            // Custom 4-digit Guest Account ID! Load saved name for this Guest ID if one exists
+            customGuestId = raw;
+            localStorage.setItem('roadSense_overdrive_customGuestId', customGuestId);
+            const db = getAccountsDatabase();
+            const existingAcc = db[`GUEST_ID_${customGuestId}`];
+            if (existingAcc && existingAcc.name && !customGuestName) {
+                customGuestName = existingAcc.name.startsWith('Pilot #') ? '' : existingAcc.name;
+                localStorage.setItem('roadSense_overdrive_guestName', customGuestName);
+            }
+            applyPilotProfile("GUEST");
+            if (input) input.value = '';
+            showLoginBanner(`✓ Guest Account #${customGuestId} Active! You may optionally enter your name below.`, true);
+            playGameSfx('pickup');
         }
     }
 
     function logoutCurrentPilot() {
+        customGuestId = "";
+        customGuestName = "";
+        localStorage.removeItem('roadSense_overdrive_customGuestId');
+        localStorage.removeItem('roadSense_overdrive_guestName');
+        const gInput = document.getElementById('guestCallsignInput');
+        if (gInput) gInput.value = "";
         applyPilotProfile("GUEST");
-        showLoginBanner("⇄ Switched to Guest Pilot session. Your previous account telemetry is safely saved.", true);
+        showLoginBanner("⇄ Reset to open Guest Pilot session.", true);
     }
 
     function updateGuestCallsign(val) {
-        const clean = (val || "").trim();
-        customGuestName = clean || "Guest Pilot";
+        customGuestName = (val || "").trim();
         localStorage.setItem('roadSense_overdrive_guestName', customGuestName);
         if (!currentPilot.isCore) {
-            document.getElementById('activePilotLabel').innerText = customGuestName;
-            document.getElementById('hudPilotCallsign').innerText = customGuestName.toUpperCase();
+            const disp = getEffectiveGuestDisplayName();
+            document.getElementById('activePilotLabel').innerText = customGuestId ? `${disp} (#${customGuestId})` : disp;
+            document.getElementById('hudPilotCallsign').innerText = disp.toUpperCase();
+            // Save name update if customGuestId is active
+            if (customGuestId) {
+                const db = getAccountsDatabase();
+                const key = getActiveAccountStorageKey();
+                if (db[key]) {
+                    db[key].name = disp;
+                    saveAccountsDatabase(db);
+                }
+            }
             refreshAccountStatsUI();
         }
     }
@@ -1176,10 +1281,11 @@
         currentPilot = PILOT_PROFILES[idKey] || PILOT_PROFILES["GUEST"];
         localStorage.setItem('roadSense_overdrive_pilotId', currentPilot.id);
 
-        const displayName = currentPilot.isCore ? currentPilot.name : customGuestName;
-        const displayCallsign = currentPilot.isCore ? currentPilot.callsign : customGuestName.toUpperCase();
+        const dispName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
+        const dispLabel = (!currentPilot.isCore && customGuestId) ? `${dispName} (ID #${customGuestId})` : dispName;
+        const displayCallsign = currentPilot.isCore ? currentPilot.callsign : dispName.toUpperCase();
 
-        document.getElementById('activePilotLabel').innerText = displayName;
+        document.getElementById('activePilotLabel').innerText = dispLabel;
         document.getElementById('activeLiveryBadge').innerText = currentPilot.liveryName;
         document.getElementById('activePilotColorDot').style.backgroundColor = currentPilot.dotColor;
 
@@ -1197,9 +1303,12 @@
         } else {
             if (loginRow) loginRow.classList.remove('hidden');
             if (guestRow) guestRow.classList.remove('hidden');
-            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (logoutBtn) {
+                if (customGuestId || customGuestName) logoutBtn.classList.remove('hidden');
+                else logoutBtn.classList.add('hidden');
+            }
             const gInput = document.getElementById('guestCallsignInput');
-            if (gInput) gInput.value = customGuestName === "Guest Pilot" ? "" : customGuestName;
+            if (gInput) gInput.value = customGuestName;
         }
 
         if (currentPilot.id !== "1117" && audioSettings.ostMode === 'mitadru') {
@@ -1277,7 +1386,7 @@
     }
 
     // =========================================================================
-    // MODULE 3: OPTIMIZED WEB AUDIO SYNTHWAVE OST + DYNAMIC CAR ENGINE + MITADRU.M4A
+    // MODULE 3: WEB AUDIO SYNTHWAVE OST + DYNAMIC CAR ENGINE + MITADRU.M4A
     // =========================================================================
     const audioSettings = {
         master: 0.90,
@@ -1574,10 +1683,15 @@
     }
 
     // =========================================================================
-    // MODULE 4: ZERO-ERROR REAL-TIME LEADERBOARD ENGINE
+    // MODULE 4: INSTANT REAL-TIME CROSS-DEVICE CLOUD + LOCAL LEADERBOARD ENGINE
+    //           (Uses ntfy.sh SSE + REST Cloud Stream + BroadcastChannel)
     // =========================================================================
-    const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v5';
-    const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v5') : null;
+    const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v6';
+    const CLOUD_SYNC_TOPIC = 'roadsense_overdrive_global_lb_sync_v6';
+    const CLOUD_SYNC_URL = `https://ntfy.sh/${CLOUD_SYNC_TOPIC}`;
+    const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v6') : null;
+    let cloudEventSource = null;
+    let lastCloudResetTs = Number(localStorage.getItem('roadSense_overdrive_resetTs_v6') || 0);
 
     function getLocalLeaderboard() {
         try {
@@ -1604,29 +1718,133 @@
         return valid;
     }
 
-    function broadcastLeaderboardSync(entries) {
-        if (lbChannel) {
-            try {
-                lbChannel.postMessage({
-                    type: 'lb_update',
-                    entries: entries || getLocalLeaderboard(),
-                    deletedGuests: getDeletedGuestKeys()
+    function mergeRemoteLeaderboardPacket(packet) {
+        if (!packet || typeof packet !== 'object') return;
+
+        if (packet.resetTs && Number(packet.resetTs) > lastCloudResetTs) {
+            lastCloudResetTs = Number(packet.resetTs);
+            localStorage.setItem('roadSense_overdrive_resetTs_v6', String(lastCloudResetTs));
+            localStorage.setItem(LB_STORAGE_KEY, JSON.stringify([]));
+        }
+
+        if (Array.isArray(packet.deletedGuests) && packet.deletedGuests.length > 0) {
+            const mergedDel = Array.from(new Set([...getDeletedGuestKeys(), ...packet.deletedGuests]));
+            saveDeletedGuestKeys(mergedDel);
+        }
+
+        const deletedSet = new Set(getDeletedGuestKeys());
+        const currentList = getLocalLeaderboard();
+        const mapByKey = new Map();
+
+        currentList.forEach(item => {
+            const k = item.accountKey || item.id;
+            if (!deletedSet.has(k) && item.score > 0) {
+                mapByKey.set(k, item);
+            }
+        });
+
+        const incomingEntries = Array.isArray(packet.entries) ? packet.entries : [];
+        incomingEntries.forEach(rem => {
+            if (!rem || !rem.score || rem.score <= 0) return;
+            if (rem.ts && lastCloudResetTs && rem.ts < lastCloudResetTs) return;
+            const k = rem.accountKey || rem.id;
+            if (deletedSet.has(k)) return;
+            const existing = mapByKey.get(k);
+            if (!existing || rem.score > existing.score) {
+                mapByKey.set(k, {
+                    id: rem.id || 'GUEST',
+                    accountKey: k,
+                    name: rem.name || 'Guest Pilot',
+                    score: Number(rem.score),
+                    epoch: Number(rem.epoch || 1),
+                    ts: Number(rem.ts || Date.now())
                 });
+            }
+        });
+
+        saveLocalLeaderboard(Array.from(mapByKey.values()));
+        renderLeaderboardList();
+    }
+
+    async function pushCloudLeaderboardPacket(extraProps = {}) {
+        const payload = {
+            type: 'lb_sync_v6',
+            resetTs: lastCloudResetTs,
+            entries: getLocalLeaderboard().slice(0, 35),
+            deletedGuests: getDeletedGuestKeys(),
+            ...extraProps
+        };
+
+        if (lbChannel) {
+            try { lbChannel.postMessage(payload); } catch (e) {}
+        }
+
+        try {
+            await fetch(CLOUD_SYNC_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {}
+    }
+
+    async function pullGlobalCloudLeaderboard(showFeedback = false) {
+        const statusEl = document.getElementById('lbSyncStatusText');
+        if (showFeedback && statusEl) {
+            statusEl.innerText = "⚡ Syncing with Global Cloud Stream...";
+        }
+        try {
+            const res = await fetch(`${CLOUD_SYNC_URL}/json?poll=1&since=24h`);
+            if (res.ok) {
+                const text = await res.text();
+                const lines = text.trim().split('\n');
+                for (const line of lines) {
+                    if (!line) continue;
+                    try {
+                        const wrapper = JSON.parse(line);
+                        if (wrapper && wrapper.event === 'message' && wrapper.message) {
+                            const packet = JSON.parse(wrapper.message);
+                            if (packet && packet.type === 'lb_sync_v6') {
+                                mergeRemoteLeaderboardPacket(packet);
+                            }
+                        }
+                    } catch (innerErr) {}
+                }
+            }
+            if (statusEl) {
+                statusEl.innerText = "🟢 Instant Cross-Device Cloud Stream Active • Verified Runs (>0 pts)";
+            }
+        } catch (e) {
+            if (statusEl) {
+                statusEl.innerText = "🟡 Local Telemetry Cache Active • Verified Runs (>0 pts)";
+            }
+        }
+    }
+
+    function connectRealtimeCloudStream() {
+        pullGlobalCloudLeaderboard(false);
+        if (typeof EventSource !== 'undefined') {
+            try {
+                if (cloudEventSource) cloudEventSource.close();
+                cloudEventSource = new EventSource(`${CLOUD_SYNC_URL}/sse`);
+                cloudEventSource.onmessage = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.data);
+                        if (data && data.message) {
+                            const packet = JSON.parse(data.message);
+                            if (packet && packet.type === 'lb_sync_v6') {
+                                mergeRemoteLeaderboardPacket(packet);
+                            }
+                        }
+                    } catch (e) {}
+                };
             } catch (e) {}
         }
     }
 
     if (lbChannel) {
         lbChannel.onmessage = (ev) => {
-            if (ev.data && ev.data.type === 'lb_update') {
-                if (Array.isArray(ev.data.deletedGuests)) {
-                    const mergedDel = Array.from(new Set([...getDeletedGuestKeys(), ...ev.data.deletedGuests]));
-                    saveDeletedGuestKeys(mergedDel);
-                }
-                if (Array.isArray(ev.data.entries)) {
-                    saveLocalLeaderboard(ev.data.entries);
-                    renderLeaderboardList();
-                }
+            if (ev.data && ev.data.type === 'lb_sync_v6') {
+                mergeRemoteLeaderboardPacket(ev.data);
             }
         };
     }
@@ -1644,7 +1862,7 @@
 
         const accountKey = getActiveAccountStorageKey();
         const pid = currentPilot.isCore ? currentPilot.id : 'GUEST';
-        const pName = currentPilot.isCore ? currentPilot.name : customGuestName;
+        const pName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
 
         if (!currentPilot.isCore) {
             const delList = getDeletedGuestKeys().filter(k => k !== accountKey);
@@ -1672,8 +1890,8 @@
             });
         }
 
-        const saved = saveLocalLeaderboard(list);
-        broadcastLeaderboardSync(saved);
+        saveLocalLeaderboard(list);
+        pushCloudLeaderboardPacket();
     }
 
     function updateTopLeaderBanner(list = null) {
@@ -1720,7 +1938,7 @@
             let adminActionHtml = '';
             if (isAdminVoid) {
                 if (!isCoreEntry) {
-                    adminActionHtml = `<button type="button" onclick="adminPermanentlyDeleteGuest('${escapeHtml(accKey)}')" class="ml-2 px-2 py-1 rounded bg-red-600/85 hover:bg-red-500 text-white text-[9px] mono-num font-bold cursor-pointer" title="Permanently Delete Guest Account & Data">🗑️ Delete Guest</button>`;
+                    adminActionHtml = `<button type="button" onclick="adminPermanentlyDeleteGuest('${escapeHtml(accKey)}')" class="ml-2 px-2 py-1 rounded bg-red-600/85 hover:bg-red-500 text-white text-[9px] mono-num font-bold cursor-pointer" title="Permanently Delete Guest Account & Data">🗑️ Delete</button>`;
                 } else {
                     adminActionHtml = `<span class="ml-2 px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[8.5px] mono-num">🔒 Core</span>`;
                 }
@@ -1730,7 +1948,7 @@
                 ? `<span class="px-1.5 py-0.5 text-[9px] mono-num font-extrabold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">👑 ARCHITECT VOID</span>`
                 : (isCoreEntry
                     ? `<span class="px-1.5 py-0.5 text-[9px] mono-num font-bold rounded bg-white/10 text-gray-200">⚡ CORE TEAM</span>`
-                    : `<span class="px-1.5 py-0.5 text-[9px] mono-num rounded bg-gray-800 text-gray-400">GUEST</span>`);
+                    : `<span class="px-1.5 py-0.5 text-[9px] mono-num rounded bg-gray-800 text-gray-400">PILOT</span>`);
 
             return `
                 <div class="p-3 rounded-xl flex items-center justify-between gap-2 transition ${prof.lbClass}">
@@ -1775,8 +1993,8 @@
         }
 
         const updatedLb = getLocalLeaderboard().filter(e => (e.accountKey || e.id) !== guestAccountKey);
-        const saved = saveLocalLeaderboard(updatedLb);
-        broadcastLeaderboardSync(saved);
+        saveLocalLeaderboard(updatedLb);
+        pushCloudLeaderboardPacket();
         renderLeaderboardList();
         refreshAccountStatsUI();
     }
@@ -1793,14 +2011,17 @@
             }
         });
         saveAccountsDatabase(db);
-        const saved = saveLocalLeaderboard([]);
-        broadcastLeaderboardSync(saved);
+        lastCloudResetTs = Date.now();
+        localStorage.setItem('roadSense_overdrive_resetTs_v6', String(lastCloudResetTs));
+        saveLocalLeaderboard([]);
+        pushCloudLeaderboardPacket({ resetTs: lastCloudResetTs, entries: [] });
         renderLeaderboardList();
         refreshAccountStatsUI();
     }
 
     function openLeaderboardModal() {
         renderLeaderboardList();
+        pullGlobalCloudLeaderboard(false);
         document.getElementById('leaderboardModal').style.display = 'flex';
         syncCursorVisibility();
     }
@@ -1811,13 +2032,13 @@
     }
 
     // =========================================================================
-    // MODULE 5: DIFFICULTY, GRAPHICS, CONTROLS & INDIVIDUAL CATEGORY RESETS
+    // MODULE 5: DIFFICULTY, GRAPHICS, CONTROLS & LANDSCAPE GYRO CALIBRATION
     // =========================================================================
     const DIFFICULTY_PRESETS = {
-        easy:   { label: "🟢 Assisted Easy",      speedMul: 0.76, spawnMeters: 30.0, hitboxScale: 0.76, scoreMul: 1.0 },
-        normal: { label: "🔵 Telemetry Normal",   speedMul: 0.92, spawnMeters: 23.5, hitboxScale: 0.88, scoreMul: 1.2 },
-        hard:   { label: "🟠 Overdrive Hard",     speedMul: 1.10, spawnMeters: 18.5, hitboxScale: 0.98, scoreMul: 1.6 },
-        void:   { label: "🔮 Void Max",           speedMul: 1.28, spawnMeters: 14.5, hitboxScale: 1.04, scoreMul: 2.2 }
+        easy:   { label: "🟢 Assisted Easy",      speedMul: 0.76, spawnMeters: 30.0, hitboxScale: 0.85, scoreMul: 1.0 },
+        normal: { label: "🔵 Telemetry Normal",   speedMul: 0.92, spawnMeters: 23.5, hitboxScale: 0.94, scoreMul: 1.2 },
+        hard:   { label: "🟠 Overdrive Hard",     speedMul: 1.10, spawnMeters: 18.5, hitboxScale: 1.00, scoreMul: 1.6 },
+        void:   { label: "🔮 Void Max",           speedMul: 1.28, spawnMeters: 14.5, hitboxScale: 1.05, scoreMul: 2.2 }
     };
     let currentDiffKey = 'easy';
 
@@ -1833,14 +2054,16 @@
     const controlConfig = {
         mobileMode: 'buttons',
         doubleTapNitro: true,
-        tiltCenterGamma: 0,
+        tiltCenterOffset: 0,
+        invertGyro: false,
         lastTouchTime: 0,
         binds: {
-            left:  ['a', 'arrowleft'],
-            right: ['d', 'arrowright'],
-            nitro: ['shift', 'w', 'arrowup'],
-            brake: ['s', 'arrowdown'],
-            emp:   [' ', 'e']
+            left:   ['a', 'arrowleft'],
+            right:  ['d', 'arrowright'],
+            nitro:  ['shift', 'w', 'arrowup'],
+            brake:  ['s', 'arrowdown'],
+            emp:    [' ', 'e'],
+            hideui: ['h']
         }
     };
 
@@ -1907,18 +2130,68 @@
             const btn = document.getElementById(`mobCtrl_${m}`);
             if (!btn) return;
             btn.className = (m === mode)
-                ? "p-2.5 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center"
-                : "p-2.5 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center";
+                ? "p-2 rounded-lg text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center"
+                : "p-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer text-center";
         });
 
+        // Show Left Arrow Paddles ONLY in 'buttons' mode; always keep Right Action Buttons (Brake/Nitro/EMP) visible!
         const leftGroup = document.getElementById('mobileLeftTouchGroup');
         if (leftGroup) {
-            leftGroup.style.opacity = (mode === 'buttons') ? '1' : '0.25';
+            leftGroup.style.display = (mode === 'buttons') ? 'flex' : 'none';
+        }
+
+        // Grey out Calibrate Tilt Box unless 'tilt' (Gyro) mode is selected
+        const gyroBox = document.getElementById('gyroCalibrationBox');
+        if (gyroBox) {
+            if (mode === 'tilt') {
+                gyroBox.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                gyroBox.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        // Update Active Control Map Description
+        const mapTitle = document.getElementById('mobileModeMapTitle');
+        const mapSteer = document.getElementById('mapSteerDesc');
+        if (mapTitle && mapSteer) {
+            if (mode === 'buttons') {
+                mapTitle.innerText = "ACTIVE CONTROL MAP // ARROW PADDLES";
+                mapSteer.innerText = "Left ◀ / ▶ Right Paddles";
+            } else if (mode === 'drag') {
+                mapTitle.innerText = "ACTIVE CONTROL MAP // FINGER DRAG";
+                mapSteer.innerText = "Slide Finger Left/Right on Road";
+            } else {
+                mapTitle.innerText = "ACTIVE CONTROL MAP // PHONE TILT (GYRO)";
+                mapSteer.innerText = "Tilt Phone in Landscape (Wheel)";
+            }
         }
 
         if (mode === 'tilt' && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission().catch(() => {});
         }
+    }
+
+    function toggleInvertGyro() {
+        controlConfig.invertGyro = !controlConfig.invertGyro;
+        const btn = document.getElementById('invertGyroBtn');
+        if (btn) {
+            btn.innerText = `⇄ Flip Axis: ${controlConfig.invertGyro ? 'ON' : 'OFF'}`;
+            btn.className = controlConfig.invertGyro
+                ? "px-2 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] mono-num font-bold cursor-pointer"
+                : "px-2 py-1 rounded bg-[#182032] hover:bg-[#232f47] text-gray-200 border border-gray-600/40 text-[10px] mono-num font-bold cursor-pointer";
+        }
+        playGameSfx('steer');
+    }
+
+    function calibrateTiltSensor() {
+        if (controlConfig.mobileMode !== 'tilt') return;
+        controlConfig.tiltCenterOffset = lastRawLandscapeTilt;
+        const angleLbl = document.getElementById('gyroLiveAngleLabel');
+        if (angleLbl) {
+            angleLbl.innerText = "0.0° (CALIBRATED ✓)";
+        }
+        playGameSfx('pickup');
+        spawnFloatingText("🧭 GYRO TILT CENTER CALIBRATED", "#38bdf8", 0, -25);
     }
 
     function applyDoubleTapNitroState(enabled) {
@@ -1934,11 +2207,6 @@
 
     function toggleDoubleTapNitro() {
         applyDoubleTapNitroState(!controlConfig.doubleTapNitro);
-    }
-
-    function calibrateTiltSensor() {
-        controlConfig.tiltCenterGamma = lastRawTilt;
-        spawnFloatingText("🧭 TILT CENTER CALIBRATED", "#38bdf8", 0, -25);
     }
 
     // INDIVIDUAL SETTING SECTION RESET FUNCTIONS
@@ -1970,7 +2238,13 @@
         if (isMobileHardware) {
             setMobileControlMode('buttons');
             applyDoubleTapNitroState(true);
-            controlConfig.tiltCenterGamma = 0;
+            controlConfig.tiltCenterOffset = 0;
+            controlConfig.invertGyro = false;
+            const invBtn = document.getElementById('invertGyroBtn');
+            if (invBtn) {
+                invBtn.innerText = "⇄ Flip Axis: OFF";
+                invBtn.className = "px-2 py-1 rounded bg-[#182032] hover:bg-[#232f47] text-gray-200 border border-gray-600/40 text-[10px] mono-num font-bold cursor-pointer";
+            }
         } else {
             resetDefaultKeybinds();
         }
@@ -1987,14 +2261,27 @@
         playGameSfx('pickup');
     }
 
+    function setDiscreteTargetLane(newLaneInt) {
+        const clamped = Math.max(-2, Math.min(2, Math.round(newLaneInt)));
+        const prevLane = Math.round(gameState.targetLane);
+        if (clamped !== prevLane) {
+            const dir = clamped > prevLane ? 1 : -1;
+            gameState.targetLane = clamped;
+            playGameSfx('steer');
+            gameState.egoRoll = dir * 0.22;
+            checkPhantomFlashNearMiss(prevLane);
+        }
+    }
+
     function handleCanvasPointerDrag(e) {
         const wrapper = document.getElementById('gameViewportWrapper');
         const isRotatedPortrait = window.innerWidth <= 960 && window.innerHeight > window.innerWidth;
         const normX = isRotatedPortrait
             ? (e.clientY / Math.max(1, window.innerHeight))
             : (e.clientX / Math.max(1, wrapper.clientWidth));
-        const laneContinuous = (normX - 0.5) * 5.2;
-        gameState.targetLane = Math.max(-2, Math.min(2, Math.round(laneContinuous * 2) / 2));
+        // Strictly snap to discrete integer lanes [-2, -1, 0, 1, 2] so car can NEVER park between lanes
+        const discreteLane = Math.round((normX - 0.5) * 4.8);
+        setDiscreteTargetLane(discreteLane);
     }
 
     function startKeyRebind(actionKey) {
@@ -2005,11 +2292,12 @@
 
     function resetDefaultKeybinds() {
         controlConfig.binds = {
-            left:  ['a', 'arrowleft'],
-            right: ['d', 'arrowright'],
-            nitro: ['shift', 'w', 'arrowup'],
-            brake: ['s', 'arrowdown'],
-            emp:   [' ', 'e']
+            left:   ['a', 'arrowleft'],
+            right:  ['d', 'arrowright'],
+            nitro:  ['shift', 'w', 'arrowup'],
+            brake:  ['s', 'arrowdown'],
+            emp:    [' ', 'e'],
+            hideui: ['h']
         };
         refreshKeybindLabels();
     }
@@ -2021,6 +2309,11 @@
                 el.innerText = keys.map(k => k === ' ' ? 'SPACE' : k.toUpperCase()).join(' / ');
             }
         });
+        const hintBadge = document.getElementById('pcHideUiHintBadge');
+        if (hintBadge && controlConfig.binds.hideui && controlConfig.binds.hideui[0]) {
+            const k = controlConfig.binds.hideui[0] === ' ' ? 'SPACE' : controlConfig.binds.hideui[0].toUpperCase();
+            hintBadge.innerText = `[${k}] UI • [ESC] Menu`;
+        }
     }
 
     // =========================================================================
@@ -2048,9 +2341,19 @@
             updateEqVisuals(false);
         }
         const resumeBtn = document.getElementById('resumeOrCloseSettingsBtn');
-        if (resumeBtn) {
-            resumeBtn.innerText = gameState.running ? "▶ Resume" : "✕ Close";
+        const restartBtn = document.getElementById('inGameRestartBtn');
+        const menuBtn = document.getElementById('inGameMenuBtn');
+
+        if (gameState.running) {
+            if (resumeBtn) resumeBtn.innerText = "▶ Resume";
+            if (restartBtn) restartBtn.classList.remove('hidden');
+            if (menuBtn) menuBtn.classList.remove('hidden');
+        } else {
+            if (resumeBtn) resumeBtn.innerText = "← Back";
+            if (restartBtn) restartBtn.classList.add('hidden');
+            if (menuBtn) menuBtn.classList.add('hidden');
         }
+
         switchSettingsTab(defaultTab);
         buildBiomeSelectorGrid();
         document.getElementById('pauseSettingsModal').style.display = 'flex';
@@ -2068,7 +2371,6 @@
         syncCursorVisibility();
     }
 
-    // Redirects from Pause/Settings or Game Over back to the Game's Main Menu (#startModal)
     function returnToMainMenu() {
         gameState.running = false;
         gameState.paused = false;
@@ -2103,7 +2405,7 @@
     }
 
     // =========================================================================
-    // MODULE 7: 8 IDD ROAD HAZARD CLASSES & ZERO-LAG GAME PHYSICS ENGINE
+    // MODULE 7: 8 IDD ROAD HAZARD CLASSES & STRICT LANE COLLISION PHYSICS
     // =========================================================================
     const IDD_HAZARD_CLASSES = [
         { id: 0, name: "auto_rickshaw", h: 1.75, w: 1.45, speedMul: 0.55, color: "#f59e0b", roof: "#1e293b", points: 120 },
@@ -2121,7 +2423,6 @@
         const wrapper = document.getElementById('gameViewportWrapper');
         const w = (wrapper ? wrapper.clientWidth : 0) || window.innerWidth;
         const h = (wrapper ? wrapper.clientHeight : 0) || window.innerHeight;
-        // Cap DPR at 1.25 on mobile and 1.5 on PC for zero-lag 60-120FPS rendering
         const maxDpr = isMobileHardware ? 1.25 : 1.5;
         const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         canvas.width = Math.max(1, Math.floor(w * dpr));
@@ -2163,6 +2464,8 @@
         gameState.targetLane = 0;
         gameState.egoLaneX = 0;
         gameState.egoRoll = 0;
+        gameState.boosting = false;
+        gameState.braking = false;
         gameState.slowMoTimer = 0;
         gameState.empWaveRadius = 0;
         gameState.screenShake = 0;
@@ -2202,31 +2505,28 @@
         }
     }
 
+    function checkPhantomFlashNearMiss(prevLane) {
+        for (const h of gameState.hazards) {
+            if (!h.nearMissed && Math.abs(h.lane - prevLane) < 0.65 && h.z > 1.8 && h.z < 9.8) {
+                h.nearMissed = true;
+                gameState.nearMisses++;
+                gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
+                const bonus = Math.round(250 * gameState.combo);
+                gameState.score += bonus;
+                gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 24);
+                gameState.empCharge = Math.min(100, gameState.empCharge + 18);
+                if (gfxSettings.transitions) gameState.slowMoTimer = 0.48;
+                playGameSfx('phantom');
+                spawnFloatingText(`⚡ PHANTOM FLASH +${bonus}`, "#00f5d4", 0, -45);
+                break;
+            }
+        }
+    }
+
     function steerLane(dir) {
         if (!gameState.running || gameState.paused) return;
         const prevLane = Math.round(gameState.targetLane);
-        gameState.targetLane = Math.max(-2, Math.min(2, prevLane + dir));
-
-        if (gameState.targetLane !== prevLane) {
-            playGameSfx('steer');
-            gameState.egoRoll = dir * 0.22;
-
-            for (const h of gameState.hazards) {
-                if (!h.nearMissed && Math.abs(h.lane - prevLane) < 0.55 && h.z > 1.8 && h.z < 9.5) {
-                    h.nearMissed = true;
-                    gameState.nearMisses++;
-                    gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
-                    const bonus = Math.round(250 * gameState.combo);
-                    gameState.score += bonus;
-                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 24);
-                    gameState.empCharge = Math.min(100, gameState.empCharge + 18);
-                    if (gfxSettings.transitions) gameState.slowMoTimer = 0.48;
-                    playGameSfx('phantom');
-                    spawnFloatingText(`⚡ PHANTOM FLASH +${bonus}`, "#00f5d4", 0, -45);
-                    break;
-                }
-            }
-        }
+        setDiscreteTargetLane(prevLane + dir);
     }
 
     function setBoosting(active) {
@@ -2272,21 +2572,22 @@
     }
 
     // =========================================================================
-    // MODULE 8: ZERO-LAG 3D PROJECTION & CURVED EGO-CORRIDOR RENDERER
+    // MODULE 8: 3D PROJECTION & CURVED EGO-CORRIDOR RENDERER
+    //           (Balanced Bottom Gap for Both PC & Mobile)
     // =========================================================================
     function project3DPoint(laneOffset, zMeters, yMeters, W, H, roadCurve) {
-        const horizonY = H * 0.43;
-        const camHeight = 1.65;
-        const fovFocal = H * 0.82;
-        const zSafe = Math.max(1.2, zMeters);
+        const horizonY = H * 0.42;
+        const camHeight = 1.72;
+        const fovFocal = H * 0.85;
+        const zSafe = Math.max(0.95, zMeters);
         const scale = fovFocal / zSafe;
 
-        const zNorm = zSafe * 0.0181818; // 1 / 55.0
+        const zNorm = zSafe * 0.0181818;
         const curveShift = roadCurve * (zNorm * zNorm) * (W * 0.22);
         const worldX = (laneOffset - gameState.egoLaneX * 0.32) * LANE_WIDTH_M;
 
         const screenX = W * 0.5 + worldX * scale * 0.24 + curveShift;
-        const screenY = horizonY + (camHeight - yMeters) * scale * 0.34;
+        const screenY = horizonY + (camHeight - yMeters) * scale * 0.36;
         return { x: screenX, y: screenY, scale };
     }
 
@@ -2329,9 +2630,11 @@
 
         updateEngineSoundPitch();
 
+        // Always snap targetLane to discrete integer [-2..2] so car can never stand between lanes
+        gameState.targetLane = Math.max(-2, Math.min(2, Math.round(gameState.targetLane)));
         const laneDiff = gameState.targetLane - gameState.egoLaneX;
-        gameState.egoLaneX += laneDiff * Math.min(1, dt * 13);
-        gameState.egoRoll += (laneDiff * 0.18 - gameState.egoRoll) * Math.min(1, dt * 10);
+        gameState.egoLaneX += laneDiff * Math.min(1, dt * 15);
+        gameState.egoRoll += (laneDiff * 0.18 - gameState.egoRoll) * Math.min(1, dt * 11);
 
         if (gameState.screenShake > 0) {
             gameState.screenShake = Math.max(0, gameState.screenShake - dt * 28);
@@ -2382,12 +2685,14 @@
             h.z -= relClosingSpeed * effDt;
 
             if (h.cls.weaves) {
-                h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(performance.now() * 0.0028 + h.phase) * 0.48));
+                h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(performance.now() * 0.0028 + h.phase) * 0.42));
             }
 
-            if (h.z <= 3.3 && h.z >= 1.7) {
+            // True physical chassis-width collision check (no safe blind spot between lanes)
+            if (h.z <= 3.5 && h.z >= 1.55) {
                 const latDist = Math.abs(h.lane - gameState.egoLaneX);
-                const hitThreshold = (h.cls.id === 1 ? 0.58 : 0.46) * diff.hitboxScale;
+                const baseHitHalfWidth = (h.cls.id === 1 ? 0.68 : 0.58);
+                const hitThreshold = baseHitHalfWidth * diff.hitboxScale;
                 if (latDist < hitThreshold) {
                     playGameSfx('hit');
                     if (gfxSettings.shake) gameState.screenShake = 12;
@@ -2405,7 +2710,7 @@
                 }
             }
 
-            if (h.z < 1.2) {
+            if (h.z < 1.1) {
                 gameState.score += Math.round(h.cls.points * gameState.combo * diff.scoreMul);
                 gameState.hazards.splice(i, 1);
             }
@@ -2435,7 +2740,7 @@
                 continue;
             }
 
-            if (p.z < 1.2) {
+            if (p.z < 1.1) {
                 gameState.pickups.splice(i, 1);
             }
         }
@@ -2468,7 +2773,7 @@
 
     function updateHudDOM() {
         document.getElementById('hudScore').innerText = String(gameState.score).padStart(6, '0');
-        document.getElementById('hudEpoch').innerText = `EPOCH ${gameState.epoch}`;
+        document.getElementById('hudEpoch').innerText = `EP ${gameState.epoch}`;
         document.getElementById('hudCombo').innerText = `${gameState.combo.toFixed(1)}x`;
 
         const kmh = Math.round(gameState.speedMps * 3.6);
@@ -2513,17 +2818,17 @@
         const warnBadge = document.getElementById('hudWarningBadge');
         if (warnBadge) {
             if (riskPct >= 85) {
-                warnBadge.innerText = "IMMEDIATE WARNING";
-                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
+                warnBadge.innerText = "CRITICAL";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
             } else if (riskPct >= 65) {
-                warnBadge.innerText = "HAZARD AHEAD";
-                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
+                warnBadge.innerText = "WARNING";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
             } else if (riskPct >= 35) {
                 warnBadge.innerText = "CAUTION";
-                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
             } else {
-                warnBadge.innerText = "NO WARNING";
-                warnBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
+                warnBadge.innerText = "CLEAR";
+                warnBadge.className = "px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
             }
         }
 
@@ -2536,7 +2841,7 @@
                 leadTtcEl.innerText = `${leadHazard.ttc.toFixed(1)}s`;
                 leadDgiEl.innerText = String(leadHazard.dgi);
             } else {
-                leadNameEl.innerText = "CLEAR CORRIDOR";
+                leadNameEl.innerText = "CLEAR";
                 leadTtcEl.innerText = "STABLE";
                 leadDgiEl.innerText = "0.00";
             }
@@ -2549,7 +2854,7 @@
         const cx = w * 0.5, cy = h - 8;
 
         [15, 30, 45].forEach(d => {
-            const r = d * 1.5;
+            const r = d * 1.45;
             rCtx.beginPath();
             rCtx.arc(cx, cy, r, Math.PI, 0, false);
             rCtx.strokeStyle = '#1e2638';
@@ -2564,14 +2869,14 @@
         if (radarAngle > Math.PI * 2) radarAngle = Math.PI;
         rCtx.beginPath();
         rCtx.moveTo(cx, cy);
-        rCtx.lineTo(cx + Math.cos(radarAngle) * 72, cy + Math.sin(radarAngle) * 72);
+        rCtx.lineTo(cx + Math.cos(radarAngle) * 70, cy + Math.sin(radarAngle) * 70);
         rCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
         rCtx.stroke();
 
         for (const hz of gameState.hazards) {
             if (hz.z > 55) continue;
-            const bx = cx + (hz.lane - gameState.egoLaneX) * 10;
-            const by = cy - hz.z * 1.3;
+            const bx = cx + (hz.lane - gameState.egoLaneX) * 9.5;
+            const by = cy - hz.z * 1.25;
             if (by > 2 && by < h) {
                 rCtx.beginPath();
                 rCtx.arc(bx, by, 2.8, 0, Math.PI * 2);
@@ -2585,7 +2890,7 @@
         const W = gameState.viewW || window.innerWidth;
         const H = gameState.viewH || window.innerHeight;
         const theme = BIOME_THEMES[biomeIdx];
-        const horizonY = H * 0.43;
+        const horizonY = H * 0.42;
 
         ctx.save();
         if (gameState.screenShake > 0 && gfxSettings.shake) {
@@ -2636,16 +2941,17 @@
         ctx.fillRect(0, horizonY, W, H - horizonY);
 
         const roadCurve = Math.sin(gameState.distanceM * 0.012) * 0.65;
-        const totalSlices = 38;
+        const totalSlices = 40;
 
         const voidHue = (now * 0.14) % 360;
         const activeRailColor = currentPilot.isVoidChroma
             ? `hsl(${voidHue}, 95%, 60%)`
             : currentPilot.railColor;
 
+        // Start zNear at 1.05m so the highway extends cleanly to ~92% of the screen height (leaving a balanced bottom margin)
         for (let i = totalSlices; i >= 1; i--) {
-            const zNear = 1.4 + (i - 1) * 1.5;
-            const zFar = 1.4 + i * 1.5;
+            const zNear = 1.05 + (i - 1) * 1.45;
+            const zFar = 1.05 + i * 1.45;
 
             const pNearLeft  = project3DPoint(-2.6, zNear, 0, W, H, roadCurve);
             const pNearRight = project3DPoint( 2.6, zNear, 0, W, H, roadCurve);
@@ -2801,9 +3107,11 @@
             }
         }
 
+        // Ego Interceptor positioned with balanced bottom spacing above the controls bar on both PC and Mobile
         const egoCenter = project3DPoint(gameState.egoLaneX, 2.2, 0, W, H, roadCurve);
+        const egoY = isMobileHardware ? H * 0.80 : H * 0.825;
         ctx.save();
-        ctx.translate(egoCenter.x, H * 0.84);
+        ctx.translate(egoCenter.x, egoY);
         ctx.rotate(gameState.egoRoll);
 
         if (gfxSettings.bloom) {
@@ -2922,7 +3230,7 @@
     }
 
     // =========================================================================
-    // MODULE 9: EVENT LISTENERS & BOOTSTRAP
+    // MODULE 9: EVENT LISTENERS, LANDSCAPE GYRO & BOOTSTRAP
     // =========================================================================
     window.addEventListener('resize', resizeGameCanvas);
 
@@ -2938,13 +3246,41 @@
         }
     });
 
+    // True Physical Landscape Steering-Wheel Gyro Handler (Works even if Android OS Auto-Rotate is OFF)
     window.addEventListener('deviceorientation', (e) => {
-        const tiltVal = (window.innerWidth > window.innerHeight) ? (e.beta || 0) : (e.gamma || 0);
-        lastRawTilt = tiltVal;
+        if (e.beta === null && e.gamma === null) return;
+
+        // When holding a phone horizontally in landscape like a steering wheel,
+        // tilting left/right rotates around the device's physical Y-axis (e.beta).
+        const screenAngle = (screen.orientation && typeof screen.orientation.angle === 'number')
+            ? screen.orientation.angle
+            : (typeof window.orientation === 'number' ? window.orientation : 0);
+
+        let rawLandscapeAngle = e.beta || 0;
+        if (screenAngle === 270 || screenAngle === -90) {
+            rawLandscapeAngle = -rawLandscapeAngle;
+        }
+        if (controlConfig.invertGyro) {
+            rawLandscapeAngle = -rawLandscapeAngle;
+        }
+
+        lastRawLandscapeTilt = rawLandscapeAngle;
+        const calibratedDelta = rawLandscapeAngle - controlConfig.tiltCenterOffset;
+
+        // Update Live Tilt Meter in Controls Tab whenever Gyro Mode is selected
+        if (controlConfig.mobileMode === 'tilt') {
+            const angleLbl = document.getElementById('gyroLiveAngleLabel');
+            if (angleLbl) {
+                const sign = calibratedDelta > 0.2 ? '+' : '';
+                angleLbl.innerText = `${sign}${calibratedDelta.toFixed(1)}°`;
+            }
+        }
+
         if (!gameState.running || gameState.paused || controlConfig.mobileMode !== 'tilt') return;
-        const delta = tiltVal - controlConfig.tiltCenterGamma;
-        const mappedLane = Math.max(-2, Math.min(2, delta / 9.5));
-        gameState.targetLane = mappedLane;
+
+        // Map landscape steering angle to discrete integer lanes [-2, -1, 0, 1, 2]
+        const discreteGyroLane = Math.max(-2, Math.min(2, Math.round(calibratedDelta / 7.5)));
+        setDiscreteTargetLane(discreteGyroLane);
     });
 
     canvas.addEventListener('pointerdown', (e) => {
@@ -2999,6 +3335,12 @@
 
         if (!gameState.running || gameState.paused) return;
 
+        if (controlConfig.binds.hideui && controlConfig.binds.hideui.includes(keyLower)) {
+            e.preventDefault();
+            toggleGameHudVisibility();
+            return;
+        }
+
         if (controlConfig.binds.left.includes(keyLower)) steerLane(-1);
         else if (controlConfig.binds.right.includes(keyLower)) steerLane(1);
         else if (controlConfig.binds.nitro.includes(keyLower)) setBoosting(true);
@@ -3020,9 +3362,11 @@
     const savedPilotId = localStorage.getItem('roadSense_overdrive_pilotId') || "GUEST";
     applyPilotProfile(savedPilotId);
     setDifficulty('easy');
+    setMobileControlMode('buttons');
     refreshKeybindLabels();
     buildBiomeSelectorGrid();
     updateTopLeaderBanner();
+    connectRealtimeCloudStream();
 
     let lastFrameTime = performance.now();
     function mainLoop(now) {
