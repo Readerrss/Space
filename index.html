@@ -59,15 +59,24 @@
             display: none !important;
         }
 
-        /* Clean HUD Hide Mode (Hides telemetry panels, keeps mobile unhide button accessible) */
+        /* Clean HUD Hide Mode: Hides telemetry panels AND completely collapses Pause button & container background */
         #gameViewportWrapper.hud-hidden .hud-collapsible {
             opacity: 0 !important;
             pointer-events: none !important;
             transform: translateY(-4px);
         }
+        #gameViewportWrapper.hud-hidden #mobilePauseBtn {
+            display: none !important;
+        }
+        #gameViewportWrapper.hud-hidden #mobileTopRightPill {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
 
         .hud-collapsible {
-            transition: opacity 0.18s ease, transform 0.18s ease;
+            transition: opacity 0.15s ease, transform 0.15s ease;
         }
 
         .mono-num {
@@ -80,17 +89,20 @@
         }
 
         .hardware-panel {
-            background-color: rgba(13, 16, 24, 0.92);
-            backdrop-filter: blur(10px);
+            background-color: rgba(13, 16, 24, 0.94);
             border: 1px solid var(--border-subtle);
             border-top-color: var(--border-highlight);
-            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.85);
+        }
+
+        /* Enable backdrop blur only on PC to keep older mobile GPUs 100% lag-free */
+        body.is-pc .hardware-panel {
+            backdrop-filter: blur(8px);
         }
 
         .recessed-well {
             background-color: var(--surface-recessed);
             border: 1px solid #1b202b;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
         }
 
         .btn-launch {
@@ -98,8 +110,8 @@
             color: #03150e;
             font-weight: 800;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 6px 22px rgba(16, 185, 129, 0.35);
-            transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+            transition: transform 0.15s ease, filter 0.15s ease;
         }
         .btn-launch:hover {
             transform: translateY(-1px);
@@ -143,7 +155,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 5;
-            background: radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.62) 100%);
+            background: radial-gradient(circle at center, transparent 65%, rgba(0, 0, 0, 0.55) 100%);
         }
         #atmosphereOverlay.scanlines-active::after {
             content: "";
@@ -161,9 +173,9 @@
            VOID PRISMATIC GLOW & CORE MEMBER LEADERBOARD AURAS
            ========================================================= */
         @keyframes voidPrismaticShift {
-            0% { background-position: 0% 50%; box-shadow: 0 0 16px rgba(0, 245, 212, 0.5); border-color: #00f5d4; }
-            50% { background-position: 100% 50%; box-shadow: 0 0 22px rgba(255, 0, 127, 0.6); border-color: #ff007f; }
-            100% { background-position: 0% 50%; box-shadow: 0 0 16px rgba(0, 245, 212, 0.5); border-color: #00f5d4; }
+            0% { background-position: 0% 50%; box-shadow: 0 0 14px rgba(0, 245, 212, 0.45); border-color: #00f5d4; }
+            50% { background-position: 100% 50%; box-shadow: 0 0 18px rgba(255, 0, 127, 0.55); border-color: #ff007f; }
+            100% { background-position: 0% 50%; box-shadow: 0 0 14px rgba(0, 245, 212, 0.45); border-color: #00f5d4; }
         }
         .void-leaderboard-card {
             background: linear-gradient(120deg, rgba(10, 14, 26, 0.95) 0%, rgba(36, 12, 58, 0.85) 35%, rgba(8, 45, 62, 0.85) 70%, rgba(10, 14, 26, 0.95) 100%);
@@ -180,10 +192,10 @@
             font-weight: 800;
         }
 
-        .core-glow-ritam { border: 1px solid rgba(245, 158, 11, 0.7); box-shadow: 0 0 14px rgba(245, 158, 11, 0.25); }
-        .core-glow-meraj { border: 1px solid rgba(239, 68, 68, 0.7); box-shadow: 0 0 14px rgba(239, 68, 68, 0.25); }
-        .core-glow-sourajita { border: 1px solid rgba(16, 185, 129, 0.7); box-shadow: 0 0 14px rgba(16, 185, 129, 0.25); }
-        .core-glow-debankita { border: 1px solid rgba(168, 85, 247, 0.7); box-shadow: 0 0 14px rgba(168, 85, 247, 0.25); }
+        .core-glow-ritam { border: 1px solid rgba(245, 158, 11, 0.7); box-shadow: 0 0 12px rgba(245, 158, 11, 0.22); }
+        .core-glow-meraj { border: 1px solid rgba(239, 68, 68, 0.7); box-shadow: 0 0 12px rgba(239, 68, 68, 0.22); }
+        .core-glow-sourajita { border: 1px solid rgba(16, 185, 129, 0.7); box-shadow: 0 0 12px rgba(16, 185, 129, 0.22); }
+        .core-glow-debankita { border: 1px solid rgba(168, 85, 247, 0.7); box-shadow: 0 0 12px rgba(168, 85, 247, 0.22); }
 
         @keyframes eqBounce {
             0%, 100% { height: 4px; }
@@ -198,8 +210,8 @@
         .touch-paddle {
             background: linear-gradient(180deg, rgba(24, 31, 46, 0.96) 0%, rgba(12, 16, 25, 0.96) 100%);
             border: 1px solid rgba(56, 189, 248, 0.42);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-            transition: transform 0.06s ease, background 0.06s ease, border-color 0.06s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+            transition: transform 0.05s ease, background 0.05s ease;
         }
         .touch-paddle:active, .touch-paddle.active-press {
             transform: scale(0.93);
@@ -212,7 +224,7 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .modal-anim {
-            animation: modalPop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: modalPop 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         input::placeholder {
@@ -237,10 +249,17 @@
         <canvas id="gameCanvas" class="filter-standard"></canvas>
         <div id="atmosphereOverlay"></div>
 
+        <!-- EPOCH 249 / 250 SINGULARITY WARNING BANNER -->
+        <div id="singularityAlertBanner" style="display: none;" class="hud-collapsible absolute top-14 inset-x-0 z-25 flex justify-center pointer-events-none px-3">
+            <div class="px-4 py-1.5 rounded-xl bg-red-950/95 border border-red-500 text-red-200 mono-num text-[10px] sm:text-xs font-extrabold tracking-wider uppercase shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse text-center">
+                ⚠️ ANOMALY DETECTED: EPOCH 250 SINGULARITY — VOID MAX OVERDRIVE ACTIVE ⚠️
+            </div>
+        </div>
+
         <!-- =====================================================
-             1. MAIN MENU OVERLAY (z-[50] — SHAPED TO FIT MOBILE WITH ZERO SCROLLING)
+             1. MAIN MENU OVERLAY (z-[50] — FITS MOBILE WITH ZERO SCROLLING)
              ===================================================== -->
-        <div id="startModal" style="display: flex;" class="absolute inset-0 bg-[#04060a]/90 z-[50] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+        <div id="startModal" style="display: flex;" class="absolute inset-0 bg-[#04060a]/90 z-[50] flex items-center justify-center p-2 sm:p-4">
             <div class="hardware-panel modal-anim px-3.5 py-2.5 sm:p-5 rounded-2xl max-w-xl w-full space-y-2 sm:space-y-3 border border-[#2d364a] shadow-2xl">
                 
                 <!-- Top Header & Live #1 Leader Banner -->
@@ -260,7 +279,7 @@
                     </div>
                 </div>
 
-                <!-- Compact Single-Block Pilot ID & Optional Name Bar -->
+                <!-- Compact Pilot Account Bar (Hides ID & Name after login; shows '⇄ Switch Account') -->
                 <div class="recessed-well p-2 sm:p-3 rounded-xl border border-[#232b3e] space-y-1.5">
                     <!-- Active Pilot Status Row -->
                     <div class="flex items-center justify-between gap-2 text-xs">
@@ -269,12 +288,12 @@
                             <span class="text-gray-300 truncate text-[11px] sm:text-xs">Pilot: <strong id="activePilotLabel" class="text-white">Guest Pilot</strong></span>
                             <span id="activeLiveryBadge" class="px-2 py-0.5 text-[9.5px] mono-num rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">Tactical Steel</span>
                         </div>
-                        <button type="button" id="logoutAccountBtn" onclick="logoutCurrentPilot()" class="hidden px-2 py-0.5 rounded-lg bg-red-950/80 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-[9.5px] mono-num font-bold transition cursor-pointer shrink-0">
-                            ⇄ Switch ID
+                        <button type="button" id="switchAccountBtn" onclick="openSwitchAccountRow()" class="hidden px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[10px] mono-num font-bold transition cursor-pointer shrink-0">
+                            ⇄ Switch Account
                         </button>
                     </div>
 
-                    <!-- Combined 1-Row ID Login & Optional Name Input (Fits mobile landscape with zero scrolling) -->
+                    <!-- Combined 1-Row ID Login & Optional Name Input (Hidden once logged in!) -->
                     <div id="pilotLoginInputRow" class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-1.5 border-t border-[#181d29]">
                         <div class="flex items-center gap-1.5">
                             <span class="text-[10px] mono-num font-bold text-sky-400 shrink-0">🔑 ID:</span>
@@ -286,7 +305,10 @@
 
                         <div id="guestNameInputRow" class="flex items-center gap-1.5 flex-1 min-w-[140px]">
                             <span class="text-[10px] mono-num text-gray-400 shrink-0">NAME:</span>
-                            <input type="text" id="guestCallsignInput" maxlength="16" autocomplete="off" placeholder="John Doe" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                            <input type="text" id="guestCallsignInput" maxlength="16" autocomplete="off" placeholder="John Doe" onkeydown="if(event.key==='Enter') confirmGuestAccountLogin()" oninput="updateGuestCallsign(this.value)" class="w-full bg-[#07090e] border border-[#252d40] focus:border-emerald-400 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                            <button type="button" onclick="confirmGuestAccountLogin()" class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer shrink-0">
+                                ✓ Set
+                            </button>
                         </div>
                     </div>
 
@@ -330,7 +352,7 @@
         <!-- =====================================================
              2. GAME OVER / RUN DEBRIEF MODAL (z-[55])
              ===================================================== -->
-        <div id="gameOverModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[55] flex items-center justify-center p-2.5 sm:p-5 backdrop-blur-md">
+        <div id="gameOverModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[55] flex items-center justify-center p-2.5 sm:p-5">
             <div class="hardware-panel modal-anim p-3.5 sm:p-5 rounded-2xl max-w-md w-full space-y-2.5 border border-red-500/40 shadow-2xl text-center">
                 <span class="px-2.5 py-0.5 text-[9.5px] mono-num font-bold uppercase bg-red-500/20 text-red-300 border border-red-500/40 rounded-full">
                     CRITICAL COLLISION // HULL 0%
@@ -349,7 +371,7 @@
                         <div id="finalBestVal" class="text-base sm:text-lg font-extrabold text-amber-300">0</div>
                     </div>
                     <div class="recessed-well p-2 rounded-xl">
-                        <div class="text-[9.5px] text-gray-400">EPOCH &amp; BIOME</div>
+                        <div class="text-[9.5px] text-gray-400">EPOCH &amp; DIMENSION</div>
                         <div id="finalEpochVal" class="text-xs font-bold text-sky-300 truncate">Epoch 1</div>
                     </div>
                     <div class="recessed-well p-2 rounded-xl">
@@ -378,7 +400,7 @@
         <!-- =====================================================
              3. PAUSE & MODULAR SETTINGS HUB MODAL (z-[65])
              ===================================================== -->
-        <div id="pauseSettingsModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[65] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+        <div id="pauseSettingsModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[65] flex items-center justify-center p-2 sm:p-4">
             <div class="hardware-panel modal-anim w-full max-w-2xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[94%] overflow-hidden">
                 
                 <!-- Modal Header -->
@@ -405,8 +427,8 @@
                     </div>
                 </div>
 
-                <!-- 4-Tab Settings Navigation Bar -->
-                <div class="px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-4 gap-1.5 shrink-0">
+                <!-- Settings Navigation Bar (4 Tabs + 5th Dev Tab for ID 1117) -->
+                <div id="settingsTabNavGrid" class="px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-4 gap-1.5 shrink-0">
                     <button type="button" id="setTabBtn_game" onclick="switchSettingsTab('game')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate">
                         🎮 Game
                     </button>
@@ -419,15 +441,18 @@
                     <button type="button" id="setTabBtn_graphics" onclick="switchSettingsTab('graphics')" class="py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate">
                         🖥️ Graphics
                     </button>
+                    <button type="button" id="setTabBtn_dev" onclick="switchSettingsTab('dev')" class="hidden py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-cyan-300 border border-cyan-500/30 cursor-pointer text-center truncate">
+                        🛠️ Dev (1117)
+                    </button>
                 </div>
 
                 <!-- Tab Content Area -->
                 <div class="flex-1 p-3 sm:p-4 overflow-y-auto space-y-2.5 text-xs">
 
-                    <!-- TAB 1: GAME SETTINGS -->
+                    <!-- TAB 1: GAME SETTINGS (DIFFICULTY + LOCKED DIMENSIONS + EPOCH 250 WORLD) -->
                     <div id="setTab_game" class="space-y-2.5">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Difficulty &amp; Biome Selection</span>
+                            <span class="text-[10px] mono-num uppercase text-gray-400 font-bold">Endless Difficulty &amp; Dimension Progression</span>
                             <button type="button" onclick="resetGameSettingsOnly()" class="px-2.5 py-1 rounded-lg bg-[#171c28] hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] mono-num font-bold cursor-pointer">
                                 ↺ Reset Game Settings
                             </button>
@@ -435,33 +460,36 @@
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Difficulty Mode</span>
+                                <span class="font-bold text-white uppercase text-[11px] mono-num">⚡ Endless Difficulty Mode</span>
                                 <span id="diffCurrentLabel" class="text-[10px] mono-num text-emerald-400 font-bold">🟢 Assisted Easy</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                                 <button type="button" onclick="setDifficulty('easy')" id="diffBtn_easy" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-emerald-500 text-black cursor-pointer">
-                                    🟢 Easy (Smooth)
+                                    🟢 Easy (Fast Fill)
                                 </button>
                                 <button type="button" onclick="setDifficulty('normal')" id="diffBtn_normal" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
                                     🔵 Normal (1.2x)
                                 </button>
                                 <button type="button" onclick="setDifficulty('hard')" id="diffBtn_hard" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
-                                    🟠 Overdrive (1.6x)
+                                    🟠 Overdrive (1.5x)
                                 </button>
                                 <button type="button" onclick="setDifficulty('void')" id="diffBtn_void" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-[#151a26] text-gray-300 border border-[#262f45] cursor-pointer">
-                                    🔮 Void Max (2.2x)
+                                    🔮 Void Max (2.0x)
                                 </button>
                             </div>
                         </div>
 
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-white uppercase text-[11px] mono-num">🌍 Highway Biome (13 Biomes)</span>
-                                <button type="button" id="autoBiomeToggleBtn" onclick="toggleAutoBiomeCycle()" class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="font-bold text-white uppercase text-[11px] mono-num">🌍 Dimension Selector (Unlocks by Epoch)</span>
+                                    <p class="text-[10px] text-gray-400">Auto-Cycle shifts dimensions every Epoch. Manual lock requires reaching that Epoch first (Epoch 250 unlocks after surviving Ep 250).</p>
+                                </div>
+                                <button type="button" id="autoBiomeToggleBtn" onclick="toggleAutoBiomeCycle()" class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer shrink-0">
                                     🔄 Auto-Cycle: ON
                                 </button>
                             </div>
-                            <div id="biomeGridSelector" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-28 overflow-y-auto pr-1"></div>
+                            <div id="biomeGridSelector" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-32 overflow-y-auto pr-1"></div>
                         </div>
                     </div>
 
@@ -530,7 +558,7 @@
                         </div>
                     </div>
 
-                    <!-- TAB 3: CONTROLS (STRICTLY SEPARATED: MOBILE-ONLY ON PHONE, PC-ONLY ON PC) -->
+                    <!-- TAB 3: CONTROLS -->
                     <div id="setTab_controls" class="hidden space-y-2.5">
                         <div class="flex items-center justify-between px-1">
                             <span id="ctrlPlatformHeaderLabel" class="text-[10px] mono-num uppercase text-gray-400 font-bold">Platform Controls</span>
@@ -539,7 +567,7 @@
                             </button>
                         </div>
 
-                        <!-- PHONE / ANDROID CONTROLS SECTION (Hidden on PC via .mobile-only-ui) -->
+                        <!-- PHONE / ANDROID CONTROLS SECTION -->
                         <div class="mobile-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2">
                             <div class="font-bold text-white uppercase text-[11px] mono-num">
                                 📱 Steering Mode
@@ -557,7 +585,6 @@
                                 </button>
                             </div>
 
-                            <!-- Landscape Gyro Calibration & Live Tilt Meter (Greyed out unless Gyro Mode is active) -->
                             <div id="gyroCalibrationBox" class="p-2 rounded-lg bg-[#0d111a] border border-[#1f273a] flex flex-wrap items-center justify-between gap-2 opacity-40 pointer-events-none transition">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] mono-num text-gray-300">TILT ANGLE:</span>
@@ -573,7 +600,6 @@
                                 </div>
                             </div>
 
-                            <!-- Active Mode Control Map Reference -->
                             <div class="p-2 rounded-lg bg-[#0c0f17] border border-[#1c2333] space-y-1 text-[10px] mono-num">
                                 <div class="text-sky-300 font-bold uppercase" id="mobileModeMapTitle">ACTIVE CONTROL MAP // ARROW PADDLES</div>
                                 <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-300">
@@ -592,7 +618,7 @@
                             </div>
                         </div>
 
-                        <!-- PC KEYBOARD CONTROLS SECTION (Hidden on Phone via .pc-only-ui) -->
+                        <!-- PC KEYBOARD CONTROLS SECTION -->
                         <div class="pc-only-ui recessed-well p-2.5 sm:p-3 rounded-xl space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-white uppercase text-[11px] mono-num">⌨️ PC Keyboard Remapper (Click Box to Rebind)</span>
@@ -662,7 +688,6 @@
                             </div>
                         </div>
 
-                        <!-- Graphics Scalability & Effects -->
                         <div class="recessed-well p-2.5 sm:p-3 rounded-xl space-y-2 mono-num">
                             <div>
                                 <div class="flex justify-between text-[11px]">
@@ -689,15 +714,55 @@
                         </div>
                     </div>
 
+                    <!-- TAB 5: ARCHITECT DEV CONTROLS (VISIBLE ONLY FOR ID 1117 MITADRU / VOID) -->
+                    <div id="setTab_dev" class="hidden space-y-2.5">
+                        <div class="recessed-well p-3 rounded-xl border border-cyan-500/40 space-y-3">
+                            <div class="flex items-center justify-between border-b border-[#1f293d] pb-2">
+                                <div>
+                                    <div class="text-xs font-extrabold text-cyan-300 mono-num uppercase">👑 ARCHITECT VOID // DEV OVERRIDE CONSOLE (ID 1117)</div>
+                                    <p class="text-[10px] text-gray-400">Exclusive developer tools for Mitadru Karmakar (Void)</p>
+                                </div>
+                                <span class="px-2 py-0.5 text-[9px] mono-num font-bold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">ROOT ACCESS</span>
+                            </div>
+
+                            <!-- Start / Warp to Any Epoch -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 bg-[#0c1018] p-2.5 rounded-lg border border-[#1d2638]">
+                                <div>
+                                    <div class="text-[11px] font-bold text-white mono-num">🚀 Warp / Start at Any Epoch</div>
+                                    <p class="text-[10px] text-gray-400">Type any Epoch number (e.g., 249 or 250) to jump directly:</p>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <input type="number" id="devEpochInput" min="1" max="99999" placeholder="250" class="bg-[#07090e] border border-cyan-500/50 rounded-lg px-2.5 py-1.5 text-xs mono-num text-white w-24 text-center focus:outline-none">
+                                    <button type="button" onclick="devStartAtCustomEpoch()" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs cursor-pointer">
+                                        ▶ Warp Epoch
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Dev Quick Actions & Relocated Leaderboard Reset -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                                <button type="button" onclick="devUnlockAllDimensions()" class="p-2.5 rounded-xl bg-purple-950/70 hover:bg-purple-800/80 text-purple-200 border border-purple-500/40 text-[11px] mono-num font-bold cursor-pointer text-center">
+                                    🔓 Unlock All Dimensions (Incl. Ep 250)
+                                </button>
+                                <button type="button" onclick="devRefillAllSystems()" class="p-2.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-800/80 text-emerald-200 border border-emerald-500/40 text-[11px] mono-num font-bold cursor-pointer text-center">
+                                    ⚡ Full Hull + Nitro + EMP
+                                </button>
+                                <button type="button" onclick="adminResetAllLeaderboardScores()" class="p-2.5 rounded-xl bg-red-950/80 hover:bg-red-800 text-red-200 border border-red-500/50 text-[11px] mono-num font-bold cursor-pointer text-center">
+                                    🗑️ Reset Leaderboard Scores
+                                </button>
+                            </div>
+                            <div id="devConsoleFeedback" class="hidden text-[10.5px] mono-num text-cyan-300 font-bold px-2 py-1 rounded bg-cyan-950/50 border border-cyan-500/30"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
         <!-- =====================================================
              4. REAL-TIME GLOBAL LEADERBOARD MODAL (z-[75])
-                (Single Pulsing Dot, Yellow Subtitle, Auto-Sync Only)
              ===================================================== -->
-        <div id="leaderboardModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[75] flex items-center justify-center p-2 sm:p-4 backdrop-blur-md">
+        <div id="leaderboardModal" style="display: none;" class="absolute inset-0 bg-black/85 z-[75] flex items-center justify-center p-2 sm:p-4">
             <div class="hardware-panel modal-anim w-full max-w-xl rounded-2xl border border-[#2e384e] shadow-2xl flex flex-col max-h-[92%] overflow-hidden">
                 <div class="px-4 py-2.5 bg-[#0c0f16] border-b border-[#232836] flex items-center justify-between gap-2 shrink-0">
                     <div>
@@ -712,9 +777,6 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button type="button" id="adminResetLbBtn" onclick="adminResetAllLeaderboardScores()" class="hidden px-2.5 py-1.5 rounded-lg bg-red-950 hover:bg-red-800 text-red-200 border border-red-500/50 text-[10px] mono-num font-bold cursor-pointer">
-                            🗑️ Reset (1117)
-                        </button>
                         <button type="button" onclick="closeLeaderboardModal()" class="px-3.5 py-1.5 rounded-lg bg-[#1f2738] hover:bg-[#2b354b] text-white border border-gray-600/40 text-xs font-bold cursor-pointer">
                             ← Back
                         </button>
@@ -734,7 +796,7 @@
                 <!-- Left Telemetry Cluster: Callsign, Score, Epoch, Combo, and HULL -->
                 <div class="hud-collapsible hardware-panel px-2.5 py-1 rounded-xl flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
                     <div class="flex items-center gap-1">
-                        <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                        <span id="hudPilotDot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
                         <span id="hudPilotCallsign" class="text-[9.5px] sm:text-[11px] font-bold text-white tracking-tight truncate max-w-[68px] sm:max-w-[120px]">GUEST</span>
                     </div>
 
@@ -750,11 +812,11 @@
                         <span id="hudCombo" class="text-amber-300 font-bold">1.0x</span>
                     </div>
 
-                    <!-- Hull Integrity Bar (Visible on Mobile & PC) -->
+                    <!-- Hull Integrity Bar -->
                     <div class="flex items-center gap-1 recessed-well px-1.5 py-0.5 rounded-lg">
                         <span class="text-[8px] sm:text-[9px] mono-num text-gray-400">HULL</span>
                         <div class="w-9 sm:w-14 h-1.5 bg-[#1a202c] rounded-full overflow-hidden">
-                            <div id="hudArmorBar" class="h-full bg-emerald-400 transition-all duration-150" style="width: 100%;"></div>
+                            <div id="hudArmorBar" class="h-full bg-emerald-400" style="width: 100%;"></div>
                         </div>
                         <span id="hudArmorPct" class="text-[9px] sm:text-[10px] mono-num font-bold text-emerald-400">100%</span>
                     </div>
@@ -771,7 +833,7 @@
                     <span class="hidden md:inline text-amber-300">👑 <strong id="hudLeaderMini">Unclaimed</strong></span>
                 </div>
 
-                <!-- Right Cluster: PC Hints + Unified Mobile Top-Right Control Pill -->
+                <!-- Right Cluster: PC Hints + Mobile Top-Right Control Pill -->
                 <div class="flex items-center gap-1.5 pointer-events-auto">
                     <!-- PC ONLY Equalizer & Hints -->
                     <div class="pc-only-ui hud-collapsible hardware-panel px-2.5 py-1 rounded-xl flex items-center gap-2">
@@ -788,12 +850,12 @@
                         </span>
                     </div>
 
-                    <!-- MOBILE ONLY Unified Top-Right Control Pill (Larger & Cleanly Grouped) -->
-                    <div class="mobile-only-ui hardware-panel p-1 rounded-xl flex items-center gap-1.5">
-                        <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="hud-collapsible px-3 py-1.5 rounded-lg bg-sky-500/20 border border-sky-400/50 text-[11px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
+                    <!-- MOBILE ONLY Top-Right Control Pill (Pause completely disappears with display:none when UI is hidden!) -->
+                    <div id="mobileTopRightPill" class="mobile-only-ui hardware-panel p-1 rounded-xl flex items-center gap-1.5">
+                        <button type="button" id="mobilePauseBtn" onclick="openPauseSettingsModal('game')" class="px-3 py-1.5 rounded-lg bg-[#142030] border border-sky-400/50 text-[11px] font-extrabold text-sky-200 active:scale-95 transition cursor-pointer">
                             ⏸ Pause
                         </button>
-                        <button type="button" id="mobileHideUiBtn" onclick="toggleGameHudVisibility()" class="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-400/50 text-[11px] mono-num font-extrabold text-purple-200 active:scale-95 transition cursor-pointer">
+                        <button type="button" id="mobileHideUiBtn" onclick="toggleGameHudVisibility()" class="px-3 py-1.5 rounded-lg bg-[#1e1533] border border-purple-400/60 text-[11px] mono-num font-extrabold text-purple-200 active:scale-95 transition cursor-pointer shadow-lg">
                             👁️ UI
                         </button>
                     </div>
@@ -812,7 +874,7 @@
                     <span id="hudSpeedKmh" class="text-[8.5px] mono-num font-bold text-emerald-400">100 km/h</span>
                 </div>
                 <div class="recessed-well rounded-xl overflow-hidden w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                    <canvas id="miniRadarCanvas" width="84" height="84" class="w-full h-full"></canvas>
+                    <canvas id="miniRadarCanvas" width="80" height="80" class="w-full h-full"></canvas>
                 </div>
             </div>
 
@@ -823,7 +885,7 @@
                         <span id="hudNitroPct" class="text-amber-300 font-bold">100%</span>
                     </div>
                     <div class="w-full h-1.5 bg-[#090b10] rounded-full overflow-hidden mt-0.5">
-                        <div id="hudNitroBar" class="h-full bg-amber-400 transition-all duration-100" style="width: 100%;"></div>
+                        <div id="hudNitroBar" class="h-full bg-amber-400" style="width: 100%;"></div>
                     </div>
                 </div>
 
@@ -833,7 +895,7 @@
                         <span id="hudEmpPct" class="text-sky-300 font-bold">100%</span>
                     </div>
                     <div class="w-full h-1.5 bg-[#090b10] rounded-full overflow-hidden mt-0.5">
-                        <div id="hudEmpBar" class="h-full bg-sky-400 transition-all duration-100" style="width: 100%;"></div>
+                        <div id="hudEmpBar" class="h-full bg-sky-400" style="width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -911,7 +973,7 @@
     // MODULE 0: HARDWARE DETECTION, VIEWPORT LOCK & CORE STATE INITIALIZATION
     // =========================================================================
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
     const radarCanvas = document.getElementById('miniRadarCanvas');
     const rCtx = radarCanvas.getContext('2d');
 
@@ -966,7 +1028,7 @@
         nitroFuel: 100,
         empCharge: 100,
         distanceM: 0,
-        speedMps: 28,
+        speedMps: 25,
         targetLane: 0,
         egoLaneX: 0,
         egoRoll: 0,
@@ -983,12 +1045,15 @@
         stars: []
     };
 
-    for (let i = 0; i < 75; i++) {
+    // Pre-allocated starfield with color tint for Deep Space Epoch 250
+    const STAR_COLORS = ["#ffffff", "#7dd3fc", "#f472b6", "#c084fc", "#fde68a"];
+    for (let i = 0; i < 60; i++) {
         gameState.stars.push({
             x: Math.random(),
-            y: Math.random() * 0.42,
-            s: Math.random() * 1.8 + 0.5,
-            sp: Math.random() * 0.3 + 0.1
+            y: Math.random() * 0.41,
+            s: Math.random() * 1.7 + 0.6,
+            sp: Math.random() * 0.25 + 0.06,
+            col: STAR_COLORS[i % STAR_COLORS.length]
         });
     }
 
@@ -997,9 +1062,28 @@
     let radarAngle = Math.PI;
     let lastRawLandscapeTilt = 0;
     let awaitingRebindAction = null;
+    let lastHudUpdateTime = 0;
+
+    // Cached DOM & Canvas Gradients for zero-lag mobile rendering
+    const domCache = {};
+    let cachedGradients = { key: '', sky: null, sun: null, ground: null };
+
+    function setTextCached(id, val) {
+        if (domCache[id] === val) return;
+        domCache[id] = val;
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+    }
+    function setStyleWidthCached(id, widthStr) {
+        const key = id + '_w';
+        if (domCache[key] === widthStr) return;
+        domCache[key] = widthStr;
+        const el = document.getElementById(id);
+        if (el) el.style.width = widthStr;
+    }
 
     // =========================================================================
-    // MODULE 1: PILOT PROFILES (5 CORE + CUSTOM 4-DIGIT GUEST IDs + GUEST)
+    // MODULE 1: PILOT PROFILES, ACCOUNT LOCK & 'SWITCH ACCOUNT' FLOW
     // =========================================================================
     const PILOT_PROFILES = {
         "1117": {
@@ -1100,12 +1184,14 @@
         }
     };
 
-    const ACCOUNTS_DB_KEY = 'roadSense_overdrive_accounts_db_v6';
-    const DELETED_GUESTS_KEY = 'roadSense_overdrive_deleted_guests_v6';
+    const ACCOUNTS_DB_KEY = 'roadSense_overdrive_accounts_db_v7';
+    const DELETED_GUESTS_KEY = 'roadSense_overdrive_deleted_guests_v7';
 
     let currentPilot = PILOT_PROFILES["GUEST"];
     let customGuestId = localStorage.getItem('roadSense_overdrive_customGuestId') || "";
     let customGuestName = localStorage.getItem('roadSense_overdrive_guestName') || "";
+    let isAccountSessionLocked = localStorage.getItem('roadSense_overdrive_accountLocked') === 'true';
+    let devAllDimensionsUnlocked = false;
 
     function getAccountsDatabase() {
         try {
@@ -1150,21 +1236,23 @@
     function getActiveAccountStats() {
         const db = getAccountsDatabase();
         const key = getActiveAccountStorageKey();
-        return db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0 };
+        return db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0, completedEpoch250: false };
     }
 
     function saveActiveAccountStats(scoreVal, epochVal, flashesVal) {
         const db = getAccountsDatabase();
         const key = getActiveAccountStorageKey();
-        const prev = db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0 };
+        const prev = db[key] || { bestScore: 0, bestEpoch: 1, totalFlashes: 0, completedEpoch250: false };
         const dispName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
+        const maxEp = Math.max(prev.bestEpoch || 1, epochVal);
         db[key] = {
             id: currentPilot.isCore ? currentPilot.id : key,
             name: dispName,
             isCore: currentPilot.isCore,
             bestScore: Math.max(prev.bestScore || 0, scoreVal),
-            bestEpoch: Math.max(prev.bestEpoch || 1, epochVal),
+            bestEpoch: maxEp,
             totalFlashes: (prev.totalFlashes || 0) + flashesVal,
+            completedEpoch250: Boolean(prev.completedEpoch250 || maxEp > 250),
             updatedAt: Date.now()
         };
         saveAccountsDatabase(db);
@@ -1200,6 +1288,9 @@
             return;
         }
 
+        isAccountSessionLocked = true;
+        localStorage.setItem('roadSense_overdrive_accountLocked', 'true');
+
         if (PILOT_PROFILES[raw] && raw !== "GUEST") {
             customGuestId = "";
             localStorage.removeItem('roadSense_overdrive_customGuestId');
@@ -1218,20 +1309,35 @@
             }
             applyPilotProfile("GUEST");
             if (input) input.value = '';
-            showLoginBanner(`✓ Pilot ID #${customGuestId} Active! Optional name available.`, true);
+            showLoginBanner(`✓ Account #${customGuestId} Logged In!`, true);
             playGameSfx('pickup');
         }
     }
 
-    function logoutCurrentPilot() {
+    function confirmGuestAccountLogin() {
+        const gInput = document.getElementById('guestCallsignInput');
+        if (gInput) updateGuestCallsign(gInput.value);
+        isAccountSessionLocked = true;
+        localStorage.setItem('roadSense_overdrive_accountLocked', 'true');
+        applyPilotProfile(currentPilot.id);
+        showLoginBanner(`✓ Logged in as ${getEffectiveGuestDisplayName()}`, true);
+        playGameSfx('pickup');
+    }
+
+    // Clicking '⇄ Switch Account' reveals the ID and Name input row again
+    function openSwitchAccountRow() {
+        isAccountSessionLocked = false;
+        localStorage.setItem('roadSense_overdrive_accountLocked', 'false');
         customGuestId = "";
         customGuestName = "";
         localStorage.removeItem('roadSense_overdrive_customGuestId');
         localStorage.removeItem('roadSense_overdrive_guestName');
         const gInput = document.getElementById('guestCallsignInput');
+        const idInput = document.getElementById('pilotIdInput');
         if (gInput) gInput.value = "";
+        if (idInput) idInput.value = "";
         applyPilotProfile("GUEST");
-        showLoginBanner("⇄ Switched to Guest Pilot session.", true);
+        showLoginBanner("⇄ Enter a 4-digit Pilot ID or Optional Name below.", true);
     }
 
     function updateGuestCallsign(val) {
@@ -1257,6 +1363,11 @@
         currentPilot = PILOT_PROFILES[idKey] || PILOT_PROFILES["GUEST"];
         localStorage.setItem('roadSense_overdrive_pilotId', currentPilot.id);
 
+        if (currentPilot.isCore) {
+            isAccountSessionLocked = true;
+            localStorage.setItem('roadSense_overdrive_accountLocked', 'true');
+        }
+
         const dispName = currentPilot.isCore ? currentPilot.name : getEffectiveGuestDisplayName();
         const dispLabel = (!currentPilot.isCore && customGuestId) ? `${dispName} (#${customGuestId})` : dispName;
         const displayCallsign = currentPilot.isCore ? currentPilot.callsign : dispName.toUpperCase();
@@ -1269,17 +1380,15 @@
         document.getElementById('hudPilotDot').style.backgroundColor = currentPilot.dotColor;
 
         const loginRow = document.getElementById('pilotLoginInputRow');
-        const logoutBtn = document.getElementById('logoutAccountBtn');
+        const switchBtn = document.getElementById('switchAccountBtn');
 
-        if (currentPilot.isCore) {
+        // Hide ID & Name inputs whenever logged into an account; show '⇄ Switch Account' instead
+        if (isAccountSessionLocked || currentPilot.isCore) {
             if (loginRow) loginRow.classList.add('hidden');
-            if (logoutBtn) logoutBtn.classList.remove('hidden');
+            if (switchBtn) switchBtn.classList.remove('hidden');
         } else {
             if (loginRow) loginRow.classList.remove('hidden');
-            if (logoutBtn) {
-                if (customGuestId || customGuestName) logoutBtn.classList.remove('hidden');
-                else logoutBtn.classList.add('hidden');
-            }
+            if (switchBtn) switchBtn.classList.add('hidden');
             const gInput = document.getElementById('guestCallsignInput');
             if (gInput) gInput.value = customGuestName;
         }
@@ -1288,10 +1397,17 @@
             selectOstMode('synth');
         }
 
-        const adminBtn = document.getElementById('adminResetLbBtn');
-        if (adminBtn) {
-            if (currentPilot.id === "1117") adminBtn.classList.remove('hidden');
-            else adminBtn.classList.add('hidden');
+        // Toggle Architect Dev Tab (ID 1117 Only)
+        const devTabBtn = document.getElementById('setTabBtn_dev');
+        const navGrid = document.getElementById('settingsTabNavGrid');
+        if (devTabBtn && navGrid) {
+            if (currentPilot.id === "1117") {
+                devTabBtn.classList.remove('hidden');
+                navGrid.className = "px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-5 gap-1.5 shrink-0";
+            } else {
+                devTabBtn.classList.add('hidden');
+                navGrid.className = "px-3 py-1.5 bg-[#090b10] border-b border-[#232836] grid grid-cols-4 gap-1.5 shrink-0";
+            }
         }
 
         const ostBadge = document.getElementById('mitadruOstBadge');
@@ -1300,50 +1416,78 @@
         }
 
         refreshAccountStatsUI();
+        buildBiomeSelectorGrid();
     }
 
     // =========================================================================
-    // MODULE 2: 13 INTERCHANGEABLE BIOMES (3 CORE + 10 NEW)
+    // MODULE 2: 14 DIMENSIONS (13 PROGRESSIVE BIOMES + EPOCH 250 DEEP SPACE)
     // =========================================================================
     const BIOME_THEMES = [
-        { label: "🌌 Cyber Void",          skyTop: "#03050a", skyBot: "#0d1b38", roadDark: "#0b0e17", roadLight: "#111624", curb: "#38bdf8", sun: "#38bdf8", weather: "none" },
-        { label: "🌧️ Monsoon Glare",       skyTop: "#04080e", skyBot: "#132a2e", roadDark: "#080d12", roadLight: "#0e161f", curb: "#10b981", sun: "#10b981", weather: "rain" },
-        { label: "🔥 Solar Overdrive",     skyTop: "#14040d", skyBot: "#3b0d24", roadDark: "#140914", roadLight: "#1d0e1e", curb: "#f59e0b", sun: "#f97316", weather: "embers" },
-        { label: "❄️ Cryo-Singularity",    skyTop: "#020b18", skyBot: "#0c3559", roadDark: "#0a1626", roadLight: "#102138", curb: "#7dd3fc", sun: "#e0f2fe", weather: "snow" },
-        { label: "☣️ Bio-Luminescent",     skyTop: "#021008", skyBot: "#0a2e1c", roadDark: "#07140e", roadLight: "#0c2117", curb: "#4ade80", sun: "#22c55e", weather: "spores" },
-        { label: "🩸 Crimson Eclipse",     skyTop: "#090204", skyBot: "#2d0610", roadDark: "#120508", roadLight: "#1c090e", curb: "#f43f5e", sun: "#e11d48", weather: "embers" },
-        { label: "⚡ Tachyon Storm",       skyTop: "#090418", skyBot: "#261054", roadDark: "#0e081c", roadLight: "#160d2b", curb: "#c084fc", sun: "#eab308", weather: "rain" },
-        { label: "🏜️ Dune Mirage 2077",    skyTop: "#1c0d02", skyBot: "#452108", roadDark: "#1a1109", roadLight: "#26190d", curb: "#fbbf24", sun: "#f59e0b", weather: "spores" },
-        { label: "🌸 Neo-Tokyo Sakura",    skyTop: "#0d0417", skyBot: "#2e0c38", roadDark: "#12091c", roadLight: "#1b0e29", curb: "#f472b6", sun: "#ec4899", weather: "petals" },
-        { label: "🟢 Matrix Kernel",       skyTop: "#000802", skyBot: "#03220a", roadDark: "#020d05", roadLight: "#05180a", curb: "#22c55e", sun: "#4ade80", weather: "matrix" },
-        { label: "🪐 Saturn Rings Orbit",  skyTop: "#020308", skyBot: "#111833", roadDark: "#080b14", roadLight: "#101526", curb: "#818cf8", sun: "#6366f1", weather: "none", rings: true },
-        { label: "🌋 Magma Caldera",       skyTop: "#140300", skyBot: "#3d0e02", roadDark: "#170704", roadLight: "#240c06", curb: "#fb923c", sun: "#ef4444", weather: "embers" },
-        { label: "⚪ Astral Monolith",     skyTop: "#090b10", skyBot: "#1e2433", roadDark: "#0e1117", roadLight: "#171b24", curb: "#e2e8f0", sun: "#f8fafc", weather: "snow" }
+        { label: "🌌 Cyber Void",          unlockEpoch: 1,   skyTop: "#03050a", skyBot: "#0d1b38", roadDark: "#0b0e17", roadLight: "#111624", curb: "#38bdf8", sun: "#38bdf8", weather: "none" },
+        { label: "🌧️ Monsoon Glare",       unlockEpoch: 2,   skyTop: "#04080e", skyBot: "#132a2e", roadDark: "#080d12", roadLight: "#0e161f", curb: "#10b981", sun: "#10b981", weather: "rain" },
+        { label: "🔥 Solar Overdrive",     unlockEpoch: 3,   skyTop: "#14040d", skyBot: "#3b0d24", roadDark: "#140914", roadLight: "#1d0e1e", curb: "#f59e0b", sun: "#f97316", weather: "embers" },
+        { label: "❄️ Cryo-Singularity",    unlockEpoch: 4,   skyTop: "#020b18", skyBot: "#0c3559", roadDark: "#0a1626", roadLight: "#102138", curb: "#7dd3fc", sun: "#e0f2fe", weather: "snow" },
+        { label: "☣️ Bio-Luminescent",     unlockEpoch: 5,   skyTop: "#021008", skyBot: "#0a2e1c", roadDark: "#07140e", roadLight: "#0c2117", curb: "#4ade80", sun: "#22c55e", weather: "spores" },
+        { label: "🩸 Crimson Eclipse",     unlockEpoch: 6,   skyTop: "#090204", skyBot: "#2d0610", roadDark: "#120508", roadLight: "#1c090e", curb: "#f43f5e", sun: "#e11d48", weather: "embers" },
+        { label: "⚡ Tachyon Storm",       unlockEpoch: 7,   skyTop: "#090418", skyBot: "#261054", roadDark: "#0e081c", roadLight: "#160d2b", curb: "#c084fc", sun: "#eab308", weather: "rain" },
+        { label: "🏜️ Dune Mirage 2077",    unlockEpoch: 8,   skyTop: "#1c0d02", skyBot: "#452108", roadDark: "#1a1109", roadLight: "#26190d", curb: "#fbbf24", sun: "#f59e0b", weather: "spores" },
+        { label: "🌸 Neo-Tokyo Sakura",    unlockEpoch: 9,   skyTop: "#0d0417", skyBot: "#2e0c38", roadDark: "#12091c", roadLight: "#1b0e29", curb: "#f472b6", sun: "#ec4899", weather: "petals" },
+        { label: "🟢 Matrix Kernel",       unlockEpoch: 10,  skyTop: "#000802", skyBot: "#03220a", roadDark: "#020d05", roadLight: "#05180a", curb: "#22c55e", sun: "#4ade80", weather: "matrix" },
+        { label: "🪐 Saturn Rings Orbit",  unlockEpoch: 11,  skyTop: "#020308", skyBot: "#111833", roadDark: "#080b14", roadLight: "#101526", curb: "#818cf8", sun: "#6366f1", weather: "none", rings: true },
+        { label: "🌋 Magma Caldera",       unlockEpoch: 12,  skyTop: "#140300", skyBot: "#3d0e02", roadDark: "#170704", roadLight: "#240c06", curb: "#fb923c", sun: "#ef4444", weather: "embers" },
+        { label: "⚪ Astral Monolith",     unlockEpoch: 13,  skyTop: "#090b10", skyBot: "#1e2433", roadDark: "#0e1117", roadLight: "#171b24", curb: "#e2e8f0", sun: "#f8fafc", weather: "snow" },
+        // Index 13: Special Epoch 250 World (Locked in Settings until completing Epoch 250!)
+        { label: "✨ Cosmic Singularity (Ep 250)", unlockEpoch: 251, isEpoch250Special: true, rings: true, skyTop: "#010008", skyBot: "#1b0538", roadDark: "#050212", roadLight: "#0d0626", curb: "#00f5d4", sun: "#c084fc", weather: "cosmic" }
     ];
 
+    const EPOCH_250_INDEX = 13;
     let biomeIdx = 0;
     let autoCycleBiomes = true;
+
+    function isBiomeUnlockedForPilot(idx) {
+        if (devAllDimensionsUnlocked || currentPilot.id === "1117") return true;
+        const b = BIOME_THEMES[idx];
+        if (!b) return false;
+        const st = getActiveAccountStats();
+        const maxReached = Math.max(st.bestEpoch || 1, gameState.epoch || 1);
+        if (b.isEpoch250Special) {
+            return Boolean(st.completedEpoch250 || maxReached >= 251);
+        }
+        return maxReached >= (b.unlockEpoch || 1);
+    }
 
     function buildBiomeSelectorGrid() {
         const container = document.getElementById('biomeGridSelector');
         if (!container) return;
-        container.innerHTML = BIOME_THEMES.map((b, idx) => `
-            <button type="button" onclick="selectManualBiome(${idx})" class="biome-btn px-2 py-1.5 rounded-lg text-[10px] font-semibold text-left truncate cursor-pointer border ${idx === biomeIdx ? 'bg-sky-500/25 border-sky-400 text-white' : 'bg-[#121621] border-[#22293a] text-gray-400 hover:text-white'}">
-                ${b.label}
-            </button>
-        `).join('');
+        container.innerHTML = BIOME_THEMES.map((b, idx) => {
+            const unlocked = isBiomeUnlockedForPilot(idx);
+            const active = (idx === biomeIdx);
+            const lockText = b.isEpoch250Special ? "🔒 Survive Ep 250" : `🔒 Ep ${b.unlockEpoch}`;
+            if (!unlocked) {
+                return `
+                    <button type="button" disabled class="px-2 py-1.5 rounded-lg text-[10px] font-semibold text-left truncate border bg-[#0b0d14] border-[#1b202e] text-gray-600 opacity-60 cursor-not-allowed">
+                        ${lockText} • ${b.label}
+                    </button>
+                `;
+            }
+            return `
+                <button type="button" onclick="selectManualBiome(${idx})" class="biome-btn px-2 py-1.5 rounded-lg text-[10px] font-semibold text-left truncate cursor-pointer border ${active ? 'bg-sky-500/25 border-sky-400 text-white' : 'bg-[#121621] border-[#22293a] text-gray-300 hover:text-white'}">
+                    ${b.label}
+                </button>
+            `;
+        }).join('');
     }
 
     function selectManualBiome(idx) {
+        if (!isBiomeUnlockedForPilot(idx)) return;
         biomeIdx = idx % BIOME_THEMES.length;
         autoCycleBiomes = false;
         const btn = document.getElementById('autoBiomeToggleBtn');
         if (btn) {
             btn.innerText = "🔄 Auto-Cycle: OFF";
-            btn.className = "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
+            btn.className = "px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer shrink-0";
         }
-        const hudBiome = document.getElementById('hudBiomeName');
-        if (hudBiome) hudBiome.innerText = BIOME_THEMES[biomeIdx].label;
+        setTextCached('hudBiomeName', BIOME_THEMES[biomeIdx].label);
         buildBiomeSelectorGrid();
     }
 
@@ -1353,8 +1497,8 @@
         if (btn) {
             btn.innerText = autoCycleBiomes ? "🔄 Auto-Cycle: ON" : "🔄 Auto-Cycle: OFF";
             btn.className = autoCycleBiomes
-                ? "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer"
-                : "px-2.5 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer";
+                ? "px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer shrink-0"
+                : "px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-600 text-[10px] mono-num font-bold cursor-pointer shrink-0";
         }
     }
 
@@ -1658,13 +1802,13 @@
     // =========================================================================
     // MODULE 4: AUTOMATIC REAL-TIME LEADERBOARD ENGINE (NON-OVERWHELMING)
     // =========================================================================
-    const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v6';
-    const CLOUD_SYNC_TOPIC = 'roadsense_overdrive_global_lb_sync_v6';
+    const LB_STORAGE_KEY = 'roadSense_overdrive_leaderboard_v7';
+    const CLOUD_SYNC_TOPIC = 'roadsense_overdrive_global_lb_sync_v7';
     const CLOUD_SYNC_URL = `https://ntfy.sh/${CLOUD_SYNC_TOPIC}`;
-    const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v6') : null;
+    const lbChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('roadsense_overdrive_lb_v7') : null;
     let cloudEventSource = null;
     let isPullingCloud = false;
-    let lastCloudResetTs = Number(localStorage.getItem('roadSense_overdrive_resetTs_v6') || 0);
+    let lastCloudResetTs = Number(localStorage.getItem('roadSense_overdrive_resetTs_v7') || 0);
 
     function getLocalLeaderboard() {
         try {
@@ -1696,7 +1840,7 @@
 
         if (packet.resetTs && Number(packet.resetTs) > lastCloudResetTs) {
             lastCloudResetTs = Number(packet.resetTs);
-            localStorage.setItem('roadSense_overdrive_resetTs_v6', String(lastCloudResetTs));
+            localStorage.setItem('roadSense_overdrive_resetTs_v7', String(lastCloudResetTs));
             localStorage.setItem(LB_STORAGE_KEY, JSON.stringify([]));
         }
 
@@ -1741,7 +1885,7 @@
 
     async function pushCloudLeaderboardPacket(extraProps = {}) {
         const payload = {
-            type: 'lb_sync_v6',
+            type: 'lb_sync_v7',
             resetTs: lastCloudResetTs,
             entries: getLocalLeaderboard().slice(0, 35),
             deletedGuests: getDeletedGuestKeys(),
@@ -1774,7 +1918,7 @@
                         const wrapper = JSON.parse(line);
                         if (wrapper && wrapper.event === 'message' && wrapper.message) {
                             const packet = JSON.parse(wrapper.message);
-                            if (packet && packet.type === 'lb_sync_v6') {
+                            if (packet && packet.type === 'lb_sync_v7') {
                                 mergeRemoteLeaderboardPacket(packet);
                             }
                         }
@@ -1798,7 +1942,7 @@
                         const data = JSON.parse(ev.data);
                         if (data && data.message) {
                             const packet = JSON.parse(data.message);
-                            if (packet && packet.type === 'lb_sync_v6') {
+                            if (packet && packet.type === 'lb_sync_v7') {
                                 mergeRemoteLeaderboardPacket(packet);
                             }
                         }
@@ -1806,15 +1950,14 @@
                 };
             } catch (e) {}
         }
-        // Lightweight non-overlapping background sync check every 10s
         setInterval(() => {
-            if (!document.hidden) pullGlobalCloudLeaderboard();
-        }, 10000);
+            if (!document.hidden && !gameState.running) pullGlobalCloudLeaderboard();
+        }, 12000);
     }
 
     if (lbChannel) {
         lbChannel.onmessage = (ev) => {
-            if (ev.data && ev.data.type === 'lb_sync_v6') {
+            if (ev.data && ev.data.type === 'lb_sync_v7') {
                 mergeRemoteLeaderboardPacket(ev.data);
             }
         };
@@ -1983,11 +2126,60 @@
         });
         saveAccountsDatabase(db);
         lastCloudResetTs = Date.now();
-        localStorage.setItem('roadSense_overdrive_resetTs_v6', String(lastCloudResetTs));
+        localStorage.setItem('roadSense_overdrive_resetTs_v7', String(lastCloudResetTs));
         saveLocalLeaderboard([]);
         pushCloudLeaderboardPacket({ resetTs: lastCloudResetTs, entries: [] });
         renderLeaderboardList();
         refreshAccountStatsUI();
+        showDevConsoleFeedback("✓ All Global Leaderboard Scores Reset.");
+    }
+
+    // DEV CONTROLS (ID 1117 ONLY)
+    function showDevConsoleFeedback(msg) {
+        const fb = document.getElementById('devConsoleFeedback');
+        if (!fb) return;
+        fb.innerText = msg;
+        fb.classList.remove('hidden');
+    }
+
+    function getDistanceForEpoch(targetEpoch) {
+        const ep = Math.max(1, Math.floor(targetEpoch));
+        if (ep <= 250) return (ep - 1) * 70;
+        // Epoch 250 is 3x longer (210m instead of 70m)
+        return 249 * 70 + 210 + (ep - 251) * 70;
+    }
+
+    function getEpochFromDistance(distM) {
+        const d250Start = 249 * 70; // 17,430m
+        const d250End = d250Start + 210; // 17,640m (3x length for Epoch 250)
+        if (distM < d250Start) return 1 + Math.floor(distM / 70);
+        if (distM < d250End) return 250;
+        return 251 + Math.floor((distM - d250End) / 70);
+    }
+
+    function devStartAtCustomEpoch() {
+        if (currentPilot.id !== '1117') return;
+        const inp = document.getElementById('devEpochInput');
+        const targetEp = Math.max(1, Math.min(99999, parseInt(inp ? inp.value : '250', 10) || 250));
+        startGameSession(targetEp);
+    }
+
+    function devUnlockAllDimensions() {
+        if (currentPilot.id !== '1117') return;
+        devAllDimensionsUnlocked = true;
+        buildBiomeSelectorGrid();
+        showDevConsoleFeedback("✓ All 14 Dimensions (including Epoch 250 Cosmic Singularity) Unlocked!");
+        playGameSfx('pickup');
+    }
+
+    function devRefillAllSystems() {
+        if (currentPilot.id !== '1117') return;
+        gameState.armor = 100;
+        gameState.nitroFuel = 100;
+        gameState.empCharge = 100;
+        updateHudDOM(true);
+        showDevConsoleFeedback("✓ Hull, Nitro & EMP Restored to 100%!");
+        playGameSfx('pickup');
     }
 
     function openLeaderboardModal() {
@@ -2003,13 +2195,13 @@
     }
 
     // =========================================================================
-    // MODULE 5: DIFFICULTY, GRAPHICS, CONTROLS & LANDSCAPE GYRO CALIBRATION
+    // MODULE 5: REASONABLE ENDLESS DIFFICULTY & PICKUP / PASSIVE SCALING
     // =========================================================================
     const DIFFICULTY_PRESETS = {
-        easy:   { label: "🟢 Assisted Easy",      speedMul: 0.76, spawnMeters: 30.0, hitboxScale: 0.85, scoreMul: 1.0 },
-        normal: { label: "🔵 Telemetry Normal",   speedMul: 0.92, spawnMeters: 23.5, hitboxScale: 0.94, scoreMul: 1.2 },
-        hard:   { label: "🟠 Overdrive Hard",     speedMul: 1.10, spawnMeters: 18.5, hitboxScale: 1.00, scoreMul: 1.6 },
-        void:   { label: "🔮 Void Max",           speedMul: 1.28, spawnMeters: 14.5, hitboxScale: 1.05, scoreMul: 2.2 }
+        easy:   { label: "🟢 Assisted Easy",    speedMul: 0.72, spawnMeters: 32.0, hitboxScale: 0.78, scoreMul: 1.0, nitroRegen: 6.8, empRegen: 4.8, pickupSpacing: 21.0, pickupScale: 1.00 },
+        normal: { label: "🔵 Telemetry Normal", speedMul: 0.84, spawnMeters: 26.5, hitboxScale: 0.84, scoreMul: 1.2, nitroRegen: 4.2, empRegen: 3.0, pickupSpacing: 25.0, pickupScale: 0.86 },
+        hard:   { label: "🟠 Overdrive Hard",   speedMul: 0.95, spawnMeters: 22.5, hitboxScale: 0.89, scoreMul: 1.5, nitroRegen: 2.3, empRegen: 1.6, pickupSpacing: 29.0, pickupScale: 0.74 },
+        void:   { label: "🔮 Void Max",         speedMul: 1.06, spawnMeters: 19.0, hitboxScale: 0.93, scoreMul: 2.0, nitroRegen: 1.1, empRegen: 0.7, pickupSpacing: 34.0, pickupScale: 0.62 }
     };
     let currentDiffKey = 'easy';
 
@@ -2177,7 +2369,6 @@
         applyDoubleTapNitroState(!controlConfig.doubleTapNitro);
     }
 
-    // INDIVIDUAL SETTING SECTION RESET FUNCTIONS
     function resetGameSettingsOnly() {
         setDifficulty('easy');
         biomeIdx = 0;
@@ -2185,10 +2376,9 @@
         const btn = document.getElementById('autoBiomeToggleBtn');
         if (btn) {
             btn.innerText = "🔄 Auto-Cycle: ON";
-            btn.className = "px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer";
+            btn.className = "px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] mono-num font-bold cursor-pointer shrink-0";
         }
-        const hudBiome = document.getElementById('hudBiomeName');
-        if (hudBiome) hudBiome.innerText = BIOME_THEMES[0].label;
+        setTextCached('hudBiomeName', BIOME_THEMES[0].label);
         buildBiomeSelectorGrid();
         playGameSfx('pickup');
     }
@@ -2236,7 +2426,7 @@
             const dir = clamped > prevLane ? 1 : -1;
             gameState.targetLane = clamped;
             playGameSfx('steer');
-            gameState.egoRoll = dir * 0.22;
+            gameState.egoRoll = dir * 0.14;
             checkPhantomFlashNearMiss(prevLane);
         }
     }
@@ -2345,18 +2535,20 @@
         updateEngineSoundPitch();
         updateEqVisuals(false);
 
+        document.getElementById('singularityAlertBanner').style.display = 'none';
         document.getElementById('pauseSettingsModal').style.display = 'none';
         document.getElementById('gameOverModal').style.display = 'none';
         document.getElementById('leaderboardModal').style.display = 'none';
         document.getElementById('startModal').style.display = 'flex';
 
+        applyPilotProfile(currentPilot.id);
         refreshAccountStatsUI();
         updateTopLeaderBanner();
         syncCursorVisibility();
     }
 
     function switchSettingsTab(tabName) {
-        ['game', 'sounds', 'controls', 'graphics'].forEach(t => {
+        ['game', 'sounds', 'controls', 'graphics', 'dev'].forEach(t => {
             const panel = document.getElementById(`setTab_${t}`);
             const btn = document.getElementById(`setTabBtn_${t}`);
             if (panel) {
@@ -2364,26 +2556,36 @@
                 else panel.classList.add('hidden');
             }
             if (btn) {
-                btn.className = (t === tabName)
-                    ? "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate"
-                    : "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate";
+                if (t === 'dev' && currentPilot.id !== '1117') {
+                    btn.classList.add('hidden');
+                } else {
+                    btn.className = (t === tabName)
+                        ? "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-bold bg-sky-500 text-black cursor-pointer text-center truncate"
+                        : "py-1.5 px-2 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-[#131722] text-gray-300 border border-[#232836] cursor-pointer text-center truncate";
+                }
             }
         });
     }
 
     // =========================================================================
-    // MODULE 7: 8 IDD ROAD HAZARD CLASSES, FULLSCREEN LANDSCAPE LOCK & PHYSICS
+    // MODULE 7: 8 IDD ROAD HAZARD CLASSES, ENDLESS PHYSICS & 3 PICKUP TYPES
     // =========================================================================
     const IDD_HAZARD_CLASSES = [
         { id: 0, name: "auto_rickshaw", h: 1.75, w: 1.45, speedMul: 0.55, color: "#f59e0b", roof: "#1e293b", points: 120 },
-        { id: 1, name: "bus_truck",     h: 2.85, w: 2.25, speedMul: 0.45, color: "#ef4444", roof: "#7f1d1d", points: 180 },
-        { id: 2, name: "car",           h: 1.50, w: 1.72, speedMul: 0.65, color: "#38bdf8", roof: "#0c4a6e", points: 140 },
+        { id: 1, name: "bus_truck",     h: 2.85, w: 2.15, speedMul: 0.45, color: "#ef4444", roof: "#7f1d1d", points: 180 },
+        { id: 2, name: "car",           h: 1.50, w: 1.70, speedMul: 0.65, color: "#38bdf8", roof: "#0c4a6e", points: 140 },
         { id: 3, name: "two_wheeler",   h: 1.55, w: 0.82, speedMul: 0.75, color: "#a855f7", roof: "#4c1d95", points: 160, weaves: true },
         { id: 4, name: "pedestrian",    h: 1.70, w: 0.65, speedMul: 0.12, color: "#fb7185", roof: "#881337", points: 200 },
         { id: 5, name: "stray_animal",  h: 0.95, w: 1.05, speedMul: 0.08, color: "#fbbf24", roof: "#78350f", points: 190 },
         { id: 6, name: "pothole",       h: 0.15, w: 1.45, speedMul: 0.00, color: "#64748b", roof: "#0f172a", points: 100, flat: true },
-        { id: 7, name: "speed_bump",    h: 0.18, w: 2.05, speedMul: 0.00, color: "#eab308", roof: "#422006", points: 90,  flat: true }
+        { id: 7, name: "speed_bump",    h: 0.18, w: 1.95, speedMul: 0.00, color: "#eab308", roof: "#422006", points: 90,  flat: true }
     ];
+
+    // Exact 3D depth of the Ego Interceptor on the road so visual position, lane centering & hitbox match 1:1
+    const EGO_Z_REAR = 1.24;
+    const EGO_Z_CENTER = 1.45;
+    const EGO_Z_FRONT = 1.70;
+    const EGO_HALF_LANE_W = 0.35;
 
     function resizeGameCanvas() {
         detectDeviceHardware();
@@ -2394,7 +2596,6 @@
         let w = winW;
         let h = winH;
 
-        // Exact pixel sizing for portrait-locked mobile browsers so address bars never clip UI edges
         if (isMobileHardware && winH > winW) {
             w = winH;
             h = winW;
@@ -2415,17 +2616,17 @@
             wrapper.style.transform = 'none';
         }
 
-        const maxDpr = isMobileHardware ? 1.25 : 1.5;
+        // Cap DPR at 1.0 on mobile for locked 60 FPS even on older phones
+        const maxDpr = isMobileHardware ? 1.0 : 1.35;
         const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         canvas.width = Math.max(1, Math.floor(w * dpr));
         canvas.height = Math.max(1, Math.floor(h * dpr));
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         gameState.viewW = w;
         gameState.viewH = h;
+        cachedGradients.key = '';
     }
 
-    // Enters Fullscreen (navigationUI: 'hide') and locks orientation to 'landscape'
-    // so Android hides the floating auto-rotate suggestion button over the corner docks
     async function enterFullscreenAndLockLandscape() {
         if (!isMobileHardware) return;
         try {
@@ -2442,27 +2643,33 @@
         setTimeout(resizeGameCanvas, 120);
     }
 
-    function startGameSession() {
+    function startGameSession(startEpochOverride = 1) {
         ensureAudioEngine();
         enterFullscreenAndLockLandscape();
         resizeGameCanvas();
+
+        // Lock in the pilot account session when launching a run
+        isAccountSessionLocked = true;
+        localStorage.setItem('roadSense_overdrive_accountLocked', 'true');
 
         document.getElementById('startModal').style.display = 'none';
         document.getElementById('pauseSettingsModal').style.display = 'none';
         document.getElementById('leaderboardModal').style.display = 'none';
         document.getElementById('gameOverModal').style.display = 'none';
 
+        const initEpoch = Math.max(1, Math.floor(startEpochOverride || 1));
+
         gameState.running = true;
         gameState.paused = false;
         gameState.score = 0;
-        gameState.epoch = 1;
+        gameState.epoch = initEpoch;
         gameState.combo = 1.0;
         gameState.nearMisses = 0;
         gameState.armor = 100;
         gameState.nitroFuel = 100;
         gameState.empCharge = 100;
-        gameState.distanceM = 0;
-        gameState.speedMps = 27;
+        gameState.distanceM = getDistanceForEpoch(initEpoch);
+        gameState.speedMps = 25;
         gameState.targetLane = 0;
         gameState.egoLaneX = 0;
         gameState.egoRoll = 0;
@@ -2474,6 +2681,8 @@
         gameState.hazards = [];
         gameState.pickups = [];
         gameState.FloatingTexts = [];
+
+        syncBiomeForCurrentEpoch(true);
 
         startProceduralSynthLoop();
         if (audioSettings.ostMode === 'mitadru') {
@@ -2487,8 +2696,42 @@
         }
         updateEngineSoundPitch();
         updateEqVisuals(true);
-        updateHudDOM();
+        updateHudDOM(true);
+        renderMiniRadar();
         syncCursorVisibility();
+    }
+
+    function syncBiomeForCurrentEpoch(isInitial = false) {
+        const alertBanner = document.getElementById('singularityAlertBanner');
+        if (gameState.epoch === 249) {
+            if (alertBanner) {
+                alertBanner.style.display = 'flex';
+                alertBanner.firstElementChild.innerText = "⚠️ ANOMALY WARNING: EPOCH 250 SINGULARITY APPROACHING — PREPARE FOR VOID MAX ⚠️";
+            }
+            if (!isInitial) spawnFloatingText("⚠️ WARNING: EPOCH 250 SINGULARITY NEXT!", "#ef4444", 0, -55);
+        } else if (gameState.epoch === 250) {
+            biomeIdx = EPOCH_250_INDEX;
+            if (alertBanner) {
+                alertBanner.style.display = 'flex';
+                alertBanner.firstElementChild.innerText = "🌌 EPOCH 250 SINGULARITY ACTIVE — MAXIMUM OVERDRIVE ENGAGED 🌌";
+            }
+            if (!isInitial) spawnFloatingText("🌌 EPOCH 250: DEEP SPACE SINGULARITY (3X LENGTH)", "#00f5d4", 0, -55);
+        } else {
+            if (alertBanner) alertBanner.style.display = 'none';
+            if (gameState.epoch === 251 && !isInitial) {
+                saveActiveAccountStats(gameState.score, 251, 0);
+                spawnFloatingText("🏆 EPOCH 250 COMPLETED! COSMIC SINGULARITY UNLOCKED!", "#fbbf24", 0, -60);
+            }
+            if (autoCycleBiomes) {
+                // Cycle through standard 13 dimensions (or all 14 once Ep 250 is unlocked)
+                const poolCount = isBiomeUnlockedForPilot(EPOCH_250_INDEX) ? 14 : 13;
+                biomeIdx = (gameState.epoch - 1) % poolCount;
+                if (!isInitial) {
+                    spawnFloatingText(`🌍 DIMENSION SHIFT: ${BIOME_THEMES[biomeIdx].label.toUpperCase()}`, "#38bdf8", 0, -50);
+                }
+            }
+        }
+        setTextCached('hudBiomeName', BIOME_THEMES[biomeIdx].label);
     }
 
     function exitGamePortal() {
@@ -2508,16 +2751,17 @@
     }
 
     function checkPhantomFlashNearMiss(prevLane) {
-        for (const h of gameState.hazards) {
-            if (!h.nearMissed && Math.abs(h.lane - prevLane) < 0.65 && h.z > 1.8 && h.z < 9.8) {
+        for (let i = 0; i < gameState.hazards.length; i++) {
+            const h = gameState.hazards[i];
+            if (!h.nearMissed && Math.abs(h.lane - prevLane) < 0.65 && h.z > EGO_Z_REAR && h.z < 9.5) {
                 h.nearMissed = true;
                 gameState.nearMisses++;
                 gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
                 const bonus = Math.round(250 * gameState.combo);
                 gameState.score += bonus;
-                gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 24);
-                gameState.empCharge = Math.min(100, gameState.empCharge + 18);
-                if (gfxSettings.transitions) gameState.slowMoTimer = 0.48;
+                gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 18);
+                gameState.empCharge = Math.min(100, gameState.empCharge + 14);
+                if (gfxSettings.transitions) gameState.slowMoTimer = 0.42;
                 playGameSfx('phantom');
                 spawnFloatingText(`⚡ PHANTOM FLASH +${bonus}`, "#00f5d4", 0, -45);
                 break;
@@ -2551,7 +2795,7 @@
         }
         gameState.empCharge = 0;
         gameState.empWaveRadius = 1;
-        if (gfxSettings.shake) gameState.screenShake = 10;
+        if (gfxSettings.shake) gameState.screenShake = 8;
         playGameSfx('emp');
 
         const clearedCount = gameState.hazards.length;
@@ -2559,11 +2803,12 @@
         gameState.score += empBonus;
         gameState.hazards = [];
         spawnFloatingText(`⚡ NEURAL EMP VAPORIZED ${clearedCount} HAZARDS! +${empBonus}`, "#38bdf8", 0, -60);
-        updateHudDOM();
+        updateHudDOM(true);
     }
 
     function spawnFloatingText(text, color, offsetX = 0, offsetY = 0) {
         if (!gfxSettings.transitions) return;
+        if (gameState.FloatingTexts.length > 4) gameState.FloatingTexts.shift();
         gameState.FloatingTexts.push({
             text,
             color,
@@ -2574,56 +2819,57 @@
     }
 
     // =========================================================================
-    // MODULE 8: 3D PROJECTION & FULL-BLEED CURVED EGO-CORRIDOR RENDERER
-    //           (Extends 100% to bottom edge so zero black clipping occurs)
+    // MODULE 8: FAST ZERO-GC 3D PROJECTION & OPTIMIZED SCENE RENDERER
     // =========================================================================
-    function project3DPoint(laneOffset, zMeters, yMeters, W, H, roadCurve) {
-        const horizonY = H * 0.42;
-        const camHeight = 1.72;
-        const fovFocal = H * 0.85;
-        const zSafe = Math.max(0.45, zMeters);
-        const scale = fovFocal / zSafe;
-
+    function projectX(laneOffset, zSafe, W, H, roadCurve) {
+        const scale = (H * 0.85) / zSafe;
         const zNorm = zSafe * 0.0181818;
         const curveShift = roadCurve * (zNorm * zNorm) * (W * 0.22);
         const worldX = (laneOffset - gameState.egoLaneX * 0.32) * LANE_WIDTH_M;
-
-        const screenX = W * 0.5 + worldX * scale * 0.24 + curveShift;
-        const screenY = horizonY + (camHeight - yMeters) * scale * 0.36;
-        return { x: screenX, y: screenY, scale };
+        return W * 0.5 + worldX * scale * 0.24 + curveShift;
     }
 
-    function updateGamePhysics(dt) {
+    function projectY(zSafe, yMeters, H) {
+        const scale = (H * 0.85) / zSafe;
+        return (H * 0.42) + (1.72 - yMeters) * scale * 0.36;
+    }
+
+    function updateGamePhysics(dt, now) {
         if (!gameState.running || gameState.paused) return;
 
-        const diff = DIFFICULTY_PRESETS[currentDiffKey] || DIFFICULTY_PRESETS.easy;
+        // In Epoch 250, force hardest difficulty ('void') regardless of selected difficulty!
+        const activeDiffKey = (gameState.epoch === 250) ? 'void' : currentDiffKey;
+        const diff = DIFFICULTY_PRESETS[activeDiffKey] || DIFFICULTY_PRESETS.easy;
 
         let timeScale = 1.0;
         if (gameState.slowMoTimer > 0) {
             gameState.slowMoTimer = Math.max(0, gameState.slowMoTimer - dt);
-            timeScale = 0.48;
+            timeScale = 0.50;
         }
         const effDt = dt * timeScale;
 
+        // Endless Epoch progression (Epoch 250 is 3x longer = 210m)
         const prevEpoch = gameState.epoch;
-        gameState.epoch = Math.min(250, 1 + Math.floor(gameState.distanceM / 68));
-        if (gameState.epoch !== prevEpoch && autoCycleBiomes) {
-            biomeIdx = (gameState.epoch - 1) % BIOME_THEMES.length;
-            const hudBiome = document.getElementById('hudBiomeName');
-            if (hudBiome) hudBiome.innerText = BIOME_THEMES[biomeIdx].label;
-            spawnFloatingText(`🌍 BIOME SHIFT: ${BIOME_THEMES[biomeIdx].label.toUpperCase()}`, "#38bdf8", 0, -55);
+        gameState.epoch = getEpochFromDistance(gameState.distanceM);
+        if (gameState.epoch !== prevEpoch) {
+            syncBiomeForCurrentEpoch(false);
         }
+
+        // Level decay factor: passive regen & pickup amounts gradually scale down at higher epochs, while staying fair
+        const levelScale = Math.max(0.55, 1.0 - Math.min(0.45, (gameState.epoch - 1) * 0.0025));
 
         if (gameState.boosting) {
-            gameState.nitroFuel = Math.max(0, gameState.nitroFuel - dt * 25);
+            gameState.nitroFuel = Math.max(0, gameState.nitroFuel - dt * 24);
             if (gameState.nitroFuel <= 0) gameState.boosting = false;
         } else {
-            gameState.nitroFuel = Math.min(100, gameState.nitroFuel + dt * 5.8);
+            gameState.nitroFuel = Math.min(100, gameState.nitroFuel + dt * diff.nitroRegen * levelScale);
         }
+        gameState.empCharge = Math.min(100, gameState.empCharge + dt * diff.empRegen * levelScale);
 
-        const baseCruise = (26 + Math.min(26, gameState.epoch * 0.17)) * diff.speedMul;
+        const endlessSpeedBonus = Math.min(15, Math.log2(1 + gameState.epoch) * 2.1);
+        const baseCruise = (24 + endlessSpeedBonus) * diff.speedMul;
         const targetSpeed = gameState.boosting
-            ? baseCruise * 1.48
+            ? baseCruise * 1.44
             : (gameState.braking ? baseCruise * 0.52 : baseCruise);
 
         gameState.speedMps += (targetSpeed - gameState.speedMps) * Math.min(1, dt * 6);
@@ -2632,10 +2878,16 @@
 
         updateEngineSoundPitch();
 
+        // Snap to integer lane and settle straight
         gameState.targetLane = Math.max(-2, Math.min(2, Math.round(gameState.targetLane)));
         const laneDiff = gameState.targetLane - gameState.egoLaneX;
-        gameState.egoLaneX += laneDiff * Math.min(1, dt * 15);
-        gameState.egoRoll += (laneDiff * 0.18 - gameState.egoRoll) * Math.min(1, dt * 11);
+        if (Math.abs(laneDiff) < 0.006) {
+            gameState.egoLaneX = gameState.targetLane;
+            gameState.egoRoll = 0;
+        } else {
+            gameState.egoLaneX += laneDiff * Math.min(1, dt * 15);
+            gameState.egoRoll += (laneDiff * 0.12 - gameState.egoRoll) * Math.min(1, dt * 12);
+        }
 
         if (gameState.screenShake > 0) {
             gameState.screenShake = Math.max(0, gameState.screenShake - dt * 28);
@@ -2643,64 +2895,76 @@
 
         if (gameState.empWaveRadius > 0) {
             gameState.empWaveRadius += dt * 1400;
-            if (gameState.empWaveRadius > 1600) gameState.empWaveRadius = 0;
+            if (gameState.empWaveRadius > 1500) gameState.empWaveRadius = 0;
         }
 
-        gameState.empCharge = Math.min(100, gameState.empCharge + dt * 3.8);
-
+        // Reasonable endless hazard spawning (never blocks all lanes at once)
         spawnAccumulator += gameState.speedMps * effDt;
-        const spawnIntervalMeters = Math.max(13.0, diff.spawnMeters - gameState.epoch * 0.05);
+        const endlessDensityReduction = Math.min(8.5, Math.log2(1 + gameState.epoch) * 1.25);
+        const spawnIntervalMeters = Math.max(17.0, diff.spawnMeters - endlessDensityReduction);
         if (spawnAccumulator >= spawnIntervalMeters) {
             spawnAccumulator = 0;
-            const cls = IDD_HAZARD_CLASSES[Math.floor(Math.random() * IDD_HAZARD_CLASSES.length)];
-            const lane = LANES[Math.floor(Math.random() * LANES.length)];
-            const dgiVal = +(Math.random() * 0.18 + 0.02).toFixed(2);
-            gameState.hazards.push({
-                cls,
-                lane,
-                baseLane: lane,
-                z: 62.0,
-                speedMps: cls.speedMul * baseCruise * 0.52,
-                dgi: dgiVal,
-                phase: Math.random() * Math.PI * 2,
-                nearMissed: false
-            });
+            const occupiedNearSpawn = new Set();
+            for (let i = 0; i < gameState.hazards.length; i++) {
+                if (gameState.hazards[i].z > 46) occupiedNearSpawn.add(Math.round(gameState.hazards[i].lane));
+            }
+            const availableLanes = LANES.filter(l => !occupiedNearSpawn.has(l));
+            if (availableLanes.length >= 2) {
+                const cls = IDD_HAZARD_CLASSES[Math.floor(Math.random() * IDD_HAZARD_CLASSES.length)];
+                const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+                const dgiVal = +(Math.random() * 0.18 + 0.02).toFixed(2);
+                gameState.hazards.push({
+                    cls,
+                    lane,
+                    baseLane: lane,
+                    z: 60.0,
+                    speedMps: cls.speedMul * baseCruise * 0.52,
+                    dgi: dgiVal,
+                    phase: Math.random() * Math.PI * 2,
+                    nearMissed: false
+                });
+            }
         }
 
+        // 3 Equal-RNG Pickup Particles (Yellow = Nitro, Blue = EMP, Green = Hull), Non-Cluttered (Max 2 active)
         pickupAccumulator += gameState.speedMps * effDt;
-        if (pickupAccumulator >= 25.0) {
+        const dynamicPickupSpacing = diff.pickupSpacing / levelScale;
+        if (pickupAccumulator >= dynamicPickupSpacing && gameState.pickups.length < 2) {
             pickupAccumulator = 0;
             const freeLane = LANES[Math.floor(Math.random() * LANES.length)];
-            const isGoldEpochOrb = Math.random() < 0.35;
+            const rng = Math.random();
+            const pType = rng < 0.3333 ? 'nitro' : (rng < 0.6667 ? 'emp' : 'hull');
             gameState.pickups.push({
                 lane: freeLane,
-                z: 60.0,
-                isGold: isGoldEpochOrb,
+                z: 58.0,
+                type: pType,
                 spin: 0
             });
         }
 
+        // Hazard movement & exact 1:1 hitbox collision at EGO_Z_REAR..EGO_Z_FRONT
         for (let i = gameState.hazards.length - 1; i >= 0; i--) {
             const h = gameState.hazards[i];
             const relClosingSpeed = Math.max(4, gameState.speedMps - h.speedMps);
             h.z -= relClosingSpeed * effDt;
 
             if (h.cls.weaves) {
-                h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(performance.now() * 0.0028 + h.phase) * 0.42));
+                h.lane = Math.max(-2, Math.min(2, h.baseLane + Math.sin(now * 0.0025 + h.phase) * 0.34));
             }
 
-            if (h.z <= 3.5 && h.z >= 1.55) {
+            if (h.z <= EGO_Z_FRONT + 0.35 && h.z >= EGO_Z_REAR - 0.20) {
                 const latDist = Math.abs(h.lane - gameState.egoLaneX);
-                const baseHitHalfWidth = (h.cls.id === 1 ? 0.68 : 0.58);
-                const hitThreshold = baseHitHalfWidth * diff.hitboxScale;
+                const hazardHalfLaneW = (h.cls.w / LANE_WIDTH_M) * 0.42;
+                const hitThreshold = (EGO_HALF_LANE_W + hazardHalfLaneW) * diff.hitboxScale;
                 if (latDist < hitThreshold) {
                     playGameSfx('hit');
-                    if (gfxSettings.shake) gameState.screenShake = 12;
+                    if (gfxSettings.shake) gameState.screenShake = 9;
                     gameState.combo = 1.0;
-                    const dmg = Math.round((h.cls.flat ? 14 : 25) * diff.hitboxScale);
+                    const dmg = Math.round((h.cls.flat ? 12 : 19) * diff.hitboxScale);
                     gameState.armor = Math.max(0, gameState.armor - dmg);
                     spawnFloatingText(`💥 IMPACT: ${h.cls.name.toUpperCase()} (-${dmg}% HULL)`, "#ef4444", 0, -30);
                     gameState.hazards.splice(i, 1);
+                    updateHudDOM(true);
 
                     if (gameState.armor <= 0) {
                         triggerGameOver();
@@ -2710,37 +2974,43 @@
                 }
             }
 
-            if (h.z < 1.1) {
+            if (h.z < 0.70) {
                 gameState.score += Math.round(h.cls.points * gameState.combo * diff.scoreMul);
                 gameState.hazards.splice(i, 1);
             }
         }
 
+        // 3 Separate Pickup Particles: Yellow -> Nitro | Blue -> EMP | Green -> Hull
+        const fillMultiplier = diff.pickupScale * levelScale;
         for (let i = gameState.pickups.length - 1; i >= 0; i--) {
             const p = gameState.pickups[i];
             p.z -= gameState.speedMps * effDt;
-            p.spin += dt * 5;
+            p.spin += dt * 4.5;
 
-            if (p.z <= 4.2 && p.z >= 1.3 && Math.abs(p.lane - gameState.egoLaneX) < 0.72) {
+            if (p.z <= EGO_Z_FRONT + 0.8 && p.z >= EGO_Z_REAR - 0.35 && Math.abs(p.lane - gameState.egoLaneX) < 0.65) {
                 playGameSfx('pickup');
-                if (p.isGold) {
-                    gameState.combo = Math.min(8.0, +(gameState.combo + 0.5).toFixed(1));
-                    gameState.armor = Math.min(100, gameState.armor + 18);
-                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 40);
-                    gameState.score += Math.round(450 * gameState.combo);
-                    spawnFloatingText(`🟨 NITRO CORE! +40% NITRO & +18% HULL`, "#fbbf24", 0, -40);
+                if (p.type === 'nitro') {
+                    const gain = Math.max(15, Math.round(42 * fillMultiplier));
+                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + gain);
+                    gameState.score += Math.round(280 * gameState.combo);
+                    spawnFloatingText(`🟨 NITRO CORE +${gain}% NITRO`, "#fbbf24", 0, -38);
+                } else if (p.type === 'emp') {
+                    const gain = Math.max(14, Math.round(38 * fillMultiplier));
+                    gameState.empCharge = Math.min(100, gameState.empCharge + gain);
+                    gameState.score += Math.round(280 * gameState.combo);
+                    spawnFloatingText(`🟦 EMP CORE +${gain}% EMP`, "#38bdf8", 0, -38);
                 } else {
-                    gameState.empCharge = Math.min(100, gameState.empCharge + 28);
-                    gameState.nitroFuel = Math.min(100, gameState.nitroFuel + 25);
-                    const pts = Math.round(220 * gameState.combo);
-                    gameState.score += pts;
-                    spawnFloatingText(`🟦 TF32 CORE +${pts} (+25% NITRO & EMP)`, "#38bdf8", 0, -35);
+                    const gain = Math.max(10, Math.round(26 * fillMultiplier));
+                    gameState.armor = Math.min(100, gameState.armor + gain);
+                    gameState.score += Math.round(280 * gameState.combo);
+                    spawnFloatingText(`🟩 HULL NANITES +${gain}% HULL`, "#10b981", 0, -38);
                 }
                 gameState.pickups.splice(i, 1);
+                updateHudDOM(true);
                 continue;
             }
 
-            if (p.z < 1.1) {
+            if (p.z < 0.70) {
                 gameState.pickups.splice(i, 1);
             }
         }
@@ -2752,7 +3022,12 @@
             if (ft.life <= 0) gameState.FloatingTexts.splice(i, 1);
         }
 
-        updateHudDOM();
+        // Throttle DOM & Mini-Radar updates to 10 Hz (every 100ms) for zero lag on older phones
+        if (now - lastHudUpdateTime >= 100) {
+            lastHudUpdateTime = now;
+            updateHudDOM(false);
+            if (!isHudHidden) renderMiniRadar();
+        }
     }
 
     function triggerGameOver() {
@@ -2771,33 +3046,32 @@
         syncCursorVisibility();
     }
 
-    function updateHudDOM() {
-        document.getElementById('hudScore').innerText = String(gameState.score).padStart(6, '0');
-        document.getElementById('hudEpoch').innerText = `EP ${gameState.epoch}`;
-        document.getElementById('hudCombo').innerText = `${gameState.combo.toFixed(1)}x`;
+    function updateHudDOM(force = false) {
+        if (isHudHidden && !force) return;
+
+        setTextCached('hudScore', String(gameState.score).padStart(6, '0'));
+        setTextCached('hudEpoch', `EP ${gameState.epoch}`);
+        setTextCached('hudCombo', `${gameState.combo.toFixed(1)}x`);
 
         const kmh = Math.round(gameState.speedMps * 3.6);
-        document.getElementById('hudSpeedKmh').innerText = `${kmh} km/h`;
+        setTextCached('hudSpeedKmh', `${kmh} km/h`);
 
-        const armorBar = document.getElementById('hudArmorBar');
-        const armorPct = document.getElementById('hudArmorPct');
-        if (armorBar && armorPct) {
-            armorBar.style.width = `${gameState.armor}%`;
-            armorPct.innerText = `${gameState.armor}%`;
-        }
+        setStyleWidthCached('hudArmorBar', `${gameState.armor}%`);
+        setTextCached('hudArmorPct', `${gameState.armor}%`);
 
         const nitroPct = Math.floor(gameState.nitroFuel);
-        document.getElementById('hudNitroPct').innerText = `${nitroPct}%`;
-        document.getElementById('hudNitroBar').style.width = `${nitroPct}%`;
+        setTextCached('hudNitroPct', `${nitroPct}%`);
+        setStyleWidthCached('hudNitroBar', `${nitroPct}%`);
 
         const empPct = Math.floor(gameState.empCharge);
-        document.getElementById('hudEmpPct').innerText = empPct >= 100 ? "READY!" : `${empPct}%`;
-        document.getElementById('hudEmpBar').style.width = `${empPct}%`;
+        setTextCached('hudEmpPct', empPct >= 100 ? "READY!" : `${empPct}%`);
+        setStyleWidthCached('hudEmpBar', `${empPct}%`);
 
         let leadHazard = null;
         let maxRisk = 0;
 
-        for (const h of gameState.hazards) {
+        for (let i = 0; i < gameState.hazards.length; i++) {
+            const h = gameState.hazards[i];
             const latDiff = Math.abs(h.lane - gameState.egoLaneX);
             const distRisk = Math.max(0, Math.min(1, 1 - (h.z - 2) / 50));
             const overlap = Math.max(0, 1 - latDiff / 1.2);
@@ -2815,392 +3089,439 @@
         }
 
         const riskPct = Math.round(maxRisk * 100);
-        const warnBadge = document.getElementById('hudWarningBadge');
-        if (warnBadge) {
-            if (riskPct >= 85) {
-                warnBadge.innerText = "CRITICAL";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
-            } else if (riskPct >= 65) {
-                warnBadge.innerText = "WARNING";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
-            } else if (riskPct >= 35) {
-                warnBadge.innerText = "CAUTION";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
-            } else {
-                warnBadge.innerText = "CLEAR";
-                warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
+        const warnTier = riskPct >= 85 ? 'CRITICAL' : (riskPct >= 65 ? 'WARNING' : (riskPct >= 35 ? 'CAUTION' : 'CLEAR'));
+        if (domCache.warnTier !== warnTier) {
+            domCache.warnTier = warnTier;
+            const warnBadge = document.getElementById('hudWarningBadge');
+            if (warnBadge) {
+                warnBadge.innerText = warnTier;
+                if (warnTier === 'CRITICAL') {
+                    warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-red-950 text-red-400 border border-red-500";
+                } else if (warnTier === 'WARNING') {
+                    warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-orange-950 text-orange-400 border border-orange-500";
+                } else if (warnTier === 'CAUTION') {
+                    warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-500";
+                } else {
+                    warnBadge.className = "px-1.5 py-0.5 rounded text-[8.5px] sm:text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-700";
+                }
             }
         }
 
-        const leadNameEl = document.getElementById('hudLeadName');
-        const leadTtcEl = document.getElementById('hudLeadTtc');
-        const leadDgiEl = document.getElementById('hudLeadDgi');
-        if (leadNameEl && leadTtcEl && leadDgiEl) {
-            if (leadHazard) {
-                leadNameEl.innerText = `${leadHazard.cls.name.toUpperCase()} (${leadHazard.z.toFixed(1)}m)`;
-                leadTtcEl.innerText = `${leadHazard.ttc.toFixed(1)}s`;
-                leadDgiEl.innerText = String(leadHazard.dgi);
-            } else {
-                leadNameEl.innerText = "CLEAR";
-                leadTtcEl.innerText = "STABLE";
-                leadDgiEl.innerText = "0.00";
-            }
+        if (leadHazard) {
+            setTextCached('hudLeadName', `${leadHazard.cls.name.toUpperCase()} (${leadHazard.z.toFixed(1)}m)`);
+            setTextCached('hudLeadTtc', `${leadHazard.ttc.toFixed(1)}s`);
+            setTextCached('hudLeadDgi', String(leadHazard.dgi));
+        } else {
+            setTextCached('hudLeadName', "CLEAR");
+            setTextCached('hudLeadTtc', "STABLE");
+            setTextCached('hudLeadDgi', "0.00");
         }
     }
 
     function renderMiniRadar() {
         const w = radarCanvas.width, h = radarCanvas.height;
         rCtx.clearRect(0, 0, w, h);
-        const cx = w * 0.5, cy = h - 8;
+        const cx = w * 0.5, cy = h - 7;
 
-        [15, 30, 45].forEach(d => {
-            const r = d * 1.45;
-            rCtx.beginPath();
-            rCtx.arc(cx, cy, r, Math.PI, 0, false);
-            rCtx.strokeStyle = '#1e2638';
-            rCtx.lineWidth = 1;
-            rCtx.stroke();
-        });
+        rCtx.strokeStyle = '#1e2638';
+        rCtx.lineWidth = 1;
+        rCtx.beginPath();
+        rCtx.arc(cx, cy, 20, Math.PI, 0, false);
+        rCtx.arc(cx, cy, 40, Math.PI, 0, false);
+        rCtx.arc(cx, cy, 60, Math.PI, 0, false);
+        rCtx.stroke();
 
         rCtx.fillStyle = currentPilot.dotColor;
         rCtx.fillRect(cx - 3, cy - 5, 6, 5);
 
-        radarAngle += 0.045;
+        radarAngle += 0.25;
         if (radarAngle > Math.PI * 2) radarAngle = Math.PI;
         rCtx.beginPath();
         rCtx.moveTo(cx, cy);
-        rCtx.lineTo(cx + Math.cos(radarAngle) * 70, cy + Math.sin(radarAngle) * 70);
+        rCtx.lineTo(cx + Math.cos(radarAngle) * 65, cy + Math.sin(radarAngle) * 65);
         rCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
         rCtx.stroke();
 
-        for (const hz of gameState.hazards) {
+        for (let i = 0; i < gameState.hazards.length; i++) {
+            const hz = gameState.hazards[i];
             if (hz.z > 55) continue;
-            const bx = cx + (hz.lane - gameState.egoLaneX) * 9.5;
-            const by = cy - hz.z * 1.25;
+            const bx = cx + (hz.lane - gameState.egoLaneX) * 9;
+            const by = cy - hz.z * 1.18;
             if (by > 2 && by < h) {
-                rCtx.beginPath();
-                rCtx.arc(bx, by, 2.8, 0, Math.PI * 2);
                 rCtx.fillStyle = (hz.rFinal >= 0.85) ? '#ef4444' : (hz.rFinal >= 0.65 ? '#f97316' : (hz.rFinal >= 0.35 ? '#f59e0b' : '#38bdf8'));
-                rCtx.fill();
+                rCtx.fillRect(bx - 2, by - 2, 4, 4);
             }
         }
+    }
+
+    function ensureCachedBiomeGradients(W, H, horizonY, theme) {
+        const key = `${W}_${H}_${biomeIdx}`;
+        if (cachedGradients.key === key) return;
+        cachedGradients.key = key;
+
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+        skyGrad.addColorStop(0, theme.skyTop);
+        skyGrad.addColorStop(1, theme.skyBot);
+        cachedGradients.sky = skyGrad;
+
+        const sunGrad = ctx.createRadialGradient(W * 0.5, horizonY - 12, 8, W * 0.5, horizonY - 12, H * 0.24);
+        sunGrad.addColorStop(0, "#ffffff");
+        sunGrad.addColorStop(0.28, theme.sun);
+        sunGrad.addColorStop(1, "transparent");
+        cachedGradients.sun = sunGrad;
+
+        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+        groundGrad.addColorStop(0, "#05070d");
+        groundGrad.addColorStop(1, theme.roadDark);
+        cachedGradients.ground = groundGrad;
     }
 
     function renderSceneFrame(now) {
         const W = gameState.viewW || window.innerWidth;
         const H = gameState.viewH || window.innerHeight;
-        const theme = BIOME_THEMES[biomeIdx];
+        const theme = BIOME_THEMES[biomeIdx] || BIOME_THEMES[0];
+        const isCosmic250 = Boolean(theme.isEpoch250Special || gameState.epoch === 250);
         const horizonY = H * 0.42;
+
+        ensureCachedBiomeGradients(W, H, horizonY, theme);
 
         ctx.save();
         if (gameState.screenShake > 0 && gfxSettings.shake) {
             ctx.translate((Math.random() - 0.5) * gameState.screenShake, (Math.random() - 0.5) * gameState.screenShake);
         }
 
-        const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
-        skyGrad.addColorStop(0, theme.skyTop);
-        skyGrad.addColorStop(1, theme.skyBot);
-        ctx.fillStyle = skyGrad;
+        // 1. Sky & Deep Space Starfield
+        ctx.fillStyle = cachedGradients.sky;
         ctx.fillRect(0, 0, W, horizonY + 2);
 
-        const starCount = Math.floor(gameState.stars.length * gfxSettings.particles);
-        ctx.fillStyle = "#e2e8f0";
+        const starLimit = isMobileHardware ? 36 : gameState.stars.length;
+        const starCount = Math.floor(starLimit * gfxSettings.particles);
         for (let i = 0; i < starCount; i++) {
             const st = gameState.stars[i];
             const sx = ((st.x * W - gameState.distanceM * st.sp) % W + W) % W;
             const sy = st.y * H;
-            ctx.fillRect(sx, sy, st.s, st.s);
+            ctx.fillStyle = isCosmic250 ? st.col : "#e2e8f0";
+            const sz = isCosmic250 ? st.s * 1.35 : st.s;
+            ctx.fillRect(sx, sy, sz, sz);
         }
 
-        const sunGrad = ctx.createRadialGradient(W * 0.5, horizonY - 12, 8, W * 0.5, horizonY - 12, H * 0.23);
-        sunGrad.addColorStop(0, "#ffffff");
-        sunGrad.addColorStop(0.28, theme.sun);
-        sunGrad.addColorStop(1, "transparent");
-        ctx.fillStyle = sunGrad;
+        // Cosmic Light Beams & Nebula Glow in Epoch 250
+        const cosmicHue = (now * 0.08) % 360;
+        const dynamicWorldColor = isCosmic250 ? `hsl(${cosmicHue}, 95%, 62%)` : theme.curb;
+
+        ctx.fillStyle = cachedGradients.sun;
         ctx.beginPath();
-        ctx.arc(W * 0.5, horizonY - 12, H * 0.23, Math.PI, 0, false);
+        ctx.arc(W * 0.5, horizonY - 12, H * 0.24, Math.PI, 0, false);
         ctx.fill();
 
-        if (theme.rings) {
-            ctx.strokeStyle = "rgba(129, 140, 248, 0.45)";
-            ctx.lineWidth = 4;
+        if (theme.rings || isCosmic250) {
+            ctx.strokeStyle = isCosmic250 ? dynamicWorldColor : "rgba(129, 140, 248, 0.45)";
+            ctx.lineWidth = isCosmic250 ? 2.5 : 3.5;
             ctx.beginPath();
-            ctx.ellipse(W * 0.5, horizonY - 18, W * 0.26, H * 0.045, -0.12, Math.PI, 0, false);
+            ctx.ellipse(W * 0.5, horizonY - 18, W * 0.28, H * 0.05, -0.10, Math.PI, 0, false);
             ctx.stroke();
         }
 
-        ctx.fillStyle = "#04060c";
-        for (let b = 0; b < 24; b++) {
-            const bw = W / 24 + 2;
-            const bx = b * (W / 24);
-            const bh = 10 + ((b * 37) % 32);
+        // 2. Skyline Silhouette
+        ctx.fillStyle = isCosmic250 ? "#090318" : "#04060c";
+        const bCount = isMobileHardware ? 16 : 22;
+        const bw = W / bCount + 1;
+        for (let b = 0; b < bCount; b++) {
+            const bx = b * (W / bCount);
+            const bh = 10 + ((b * 37) % 28);
             ctx.fillRect(bx, horizonY - bh, bw, bh);
         }
 
-        // Ground apron gradient so outer shoulders blend seamlessly with the biome road
-        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, H);
-        groundGrad.addColorStop(0, "#05070d");
-        groundGrad.addColorStop(1, theme.roadDark);
-        ctx.fillStyle = groundGrad;
+        // 3. Ground Apron & Highly Optimized Batched 3D Road
+        ctx.fillStyle = cachedGradients.ground;
         ctx.fillRect(0, horizonY, W, H - horizonY);
 
         const roadCurve = Math.sin(gameState.distanceM * 0.012) * 0.65;
-        const totalSlices = 42;
+        const totalSlices = isMobileHardware ? 24 : 34;
+        const sliceStep = isMobileHardware ? 2.35 : 1.65;
 
         const voidHue = (now * 0.14) % 360;
         const activeRailColor = currentPilot.isVoidChroma
             ? `hsl(${voidHue}, 95%, 60%)`
             : currentPilot.railColor;
 
-        // Start zNear at 0.55m so the highway and ego corridor extend 100% past the bottom edge of the screen
+        // Draw alternating road surface quads & curb segments
         for (let i = totalSlices; i >= 1; i--) {
-            const zNear = 0.55 + (i - 1) * 1.42;
-            const zFar = 0.55 + i * 1.42;
+            const zNear = 0.55 + (i - 1) * sliceStep;
+            const zFar = 0.55 + i * sliceStep;
 
-            const pNearLeft  = project3DPoint(-2.6, zNear, 0, W, H, roadCurve);
-            const pNearRight = project3DPoint( 2.6, zNear, 0, W, H, roadCurve);
-            const pFarLeft   = project3DPoint(-2.6, zFar,  0, W, H, roadCurve);
-            const pFarRight  = project3DPoint( 2.6, zFar,  0, W, H, roadCurve);
+            const yNear = projectY(zNear, 0, H);
+            const yFar  = projectY(zFar,  0, H);
 
-            const stripeIdx = Math.floor((gameState.distanceM + zNear) / 3.0);
-            const isAlt = stripeIdx % 2 === 0;
+            const xNearLeft  = projectX(-2.6, zNear, W, H, roadCurve);
+            const xNearRight = projectX( 2.6, zNear, W, H, roadCurve);
+            const xFarLeft   = projectX(-2.6, zFar,  W, H, roadCurve);
+            const xFarRight  = projectX( 2.6, zFar,  W, H, roadCurve);
+
+            const stripeIdx = Math.floor((gameState.distanceM + zNear) / 3.2);
+            const isAlt = (stripeIdx & 1) === 0;
 
             ctx.fillStyle = isAlt ? theme.roadLight : theme.roadDark;
             ctx.beginPath();
-            ctx.moveTo(pFarLeft.x, pFarLeft.y);
-            ctx.lineTo(pFarRight.x, pFarRight.y);
-            ctx.lineTo(pNearRight.x, pNearRight.y);
-            ctx.lineTo(pNearLeft.x, pNearLeft.y);
+            ctx.moveTo(xFarLeft, yFar);
+            ctx.lineTo(xFarRight, yFar);
+            ctx.lineTo(xNearRight, yNear);
+            ctx.lineTo(xNearLeft, yNear);
             ctx.closePath();
             ctx.fill();
 
-            if (zFar <= 44.0) {
-                const egoLNear = project3DPoint(gameState.egoLaneX - 0.45, zNear, 0, W, H, roadCurve);
-                const egoRNear = project3DPoint(gameState.egoLaneX + 0.45, zNear, 0, W, H, roadCurve);
-                const egoLFar  = project3DPoint(gameState.egoLaneX - 0.45, zFar,  0, W, H, roadCurve);
-                const egoRFar  = project3DPoint(gameState.egoLaneX + 0.45, zFar,  0, W, H, roadCurve);
-
-                const alphaFade = Math.max(0.03, (1 - zNear / 44.0) * 0.25);
-                ctx.fillStyle = currentPilot.isVoidChroma
-                    ? `hsla(${(voidHue + i * 7) % 360}, 95%, 58%, ${alphaFade})`
-                    : `${activeRailColor}24`;
-                ctx.beginPath();
-                ctx.moveTo(egoLFar.x, egoLFar.y);
-                ctx.lineTo(egoRFar.x, egoRFar.y);
-                ctx.lineTo(egoRNear.x, egoRNear.y);
-                ctx.lineTo(egoLNear.x, egoLNear.y);
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.strokeStyle = activeRailColor;
-                ctx.lineWidth = Math.max(1.2, pNearLeft.scale * 0.008);
-                ctx.beginPath();
-                ctx.moveTo(egoLFar.x, egoLFar.y);
-                ctx.lineTo(egoLNear.x, egoLNear.y);
-                ctx.moveTo(egoRFar.x, egoRFar.y);
-                ctx.lineTo(egoRNear.x, egoRNear.y);
-                ctx.stroke();
-
-                if (isAlt && i % 2 === 0) {
-                    const egoCenterMid = project3DPoint(gameState.egoLaneX, (zNear + zFar) * 0.5, 0, W, H, roadCurve);
-                    ctx.strokeStyle = activeRailColor;
-                    ctx.lineWidth = 1.2;
-                    ctx.beginPath();
-                    ctx.moveTo(egoLNear.x + (egoRNear.x - egoLNear.x) * 0.25, egoLNear.y);
-                    ctx.lineTo(egoCenterMid.x, egoCenterMid.y);
-                    ctx.lineTo(egoLNear.x + (egoRNear.x - egoLNear.x) * 0.75, egoRNear.y);
-                    ctx.stroke();
-                }
-            }
-
-            ctx.strokeStyle = isAlt ? theme.curb : "#1e293b";
-            ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.012);
-            ctx.beginPath();
-            ctx.moveTo(pFarLeft.x, pFarLeft.y);
-            ctx.lineTo(pNearLeft.x, pNearLeft.y);
-            ctx.moveTo(pFarRight.x, pFarRight.y);
-            ctx.lineTo(pNearRight.x, pNearRight.y);
-            ctx.stroke();
-
-            if (stripeIdx % 4 === 0 && i % 2 === 0) {
-                const pylonH = Math.max(4, pNearLeft.scale * 0.45);
-                ctx.strokeStyle = theme.curb;
-                ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.008);
-                ctx.beginPath();
-                ctx.moveTo(pNearLeft.x - 4, pNearLeft.y);
-                ctx.lineTo(pNearLeft.x - 4, pNearLeft.y - pylonH);
-                ctx.moveTo(pNearRight.x + 4, pNearRight.y);
-                ctx.lineTo(pNearRight.x + 4, pNearRight.y - pylonH);
-                ctx.stroke();
-            }
-
             if (isAlt) {
-                ctx.strokeStyle = "rgba(148, 163, 184, 0.25)";
-                ctx.lineWidth = Math.max(1, pNearLeft.scale * 0.005);
-                for (const divLane of [-1.5, -0.5, 0.5, 1.5]) {
-                    const dFar = project3DPoint(divLane, zFar, 0, W, H, roadCurve);
-                    const dNear = project3DPoint(divLane, zNear, 0, W, H, roadCurve);
-                    ctx.beginPath();
-                    ctx.moveTo(dFar.x, dFar.y);
-                    ctx.lineTo(dNear.x, dNear.y);
-                    ctx.stroke();
-                }
+                ctx.strokeStyle = dynamicWorldColor;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(xFarLeft, yFar);
+                ctx.lineTo(xNearLeft, yNear);
+                ctx.moveTo(xFarRight, yFar);
+                ctx.lineTo(xNearRight, yNear);
+                ctx.stroke();
             }
         }
 
-        const sortedPickups = [...gameState.pickups].sort((a, b) => b.z - a.z);
-        for (const pk of sortedPickups) {
-            const pt = project3DPoint(pk.lane, pk.z, 0.6, W, H, roadCurve);
-            const r = Math.max(4, pt.scale * 0.14);
+        // Batched Lane Dividers (Single stroke pass for all 4 lane dividers!)
+        ctx.strokeStyle = isCosmic250 ? `${dynamicWorldColor}55` : "rgba(148, 163, 184, 0.22)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        const divSteps = isMobileHardware ? 12 : 18;
+        const divStepM = 48.0 / divSteps;
+        for (let l = 0; l < 4; l++) {
+            const divLane = -1.5 + l;
+            for (let s = 0; s < divSteps; s += 2) {
+                const z1 = 0.65 + s * divStepM;
+                const z2 = z1 + divStepM * 0.75;
+                ctx.moveTo(projectX(divLane, z1, W, H, roadCurve), projectY(z1, 0, H));
+                ctx.lineTo(projectX(divLane, z2, W, H, roadCurve), projectY(z2, 0, H));
+            }
+        }
+        ctx.stroke();
+
+        // Batched Curved Ego-Lane Corridor (2passes total instead of 80!)
+        const corridorSteps = isMobileHardware ? 14 : 20;
+        const corridorStepM = 42.0 / corridorSteps;
+
+        ctx.fillStyle = `${activeRailColor}1f`;
+        ctx.beginPath();
+        for (let s = 0; s <= corridorSteps; s++) {
+            const z = 0.58 + s * corridorStepM;
+            const xL = projectX(gameState.egoLaneX - 0.46, z, W, H, roadCurve);
+            const y = projectY(z, 0, H);
+            if (s === 0) ctx.moveTo(xL, y);
+            else ctx.lineTo(xL, y);
+        }
+        for (let s = corridorSteps; s >= 0; s--) {
+            const z = 0.58 + s * corridorStepM;
+            const xR = projectX(gameState.egoLaneX + 0.46, z, W, H, roadCurve);
+            const y = projectY(z, 0, H);
+            ctx.lineTo(xR, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = activeRailColor;
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        for (let s = 0; s <= corridorSteps; s++) {
+            const z = 0.58 + s * corridorStepM;
+            const xL = projectX(gameState.egoLaneX - 0.46, z, W, H, roadCurve);
+            const y = projectY(z, 0, H);
+            if (s === 0) ctx.moveTo(xL, y);
+            else ctx.lineTo(xL, y);
+        }
+        for (let s = 0; s <= corridorSteps; s++) {
+            const z = 0.58 + s * corridorStepM;
+            const xR = projectX(gameState.egoLaneX + 0.46, z, W, H, roadCurve);
+            const y = projectY(z, 0, H);
+            if (s === 0) ctx.moveTo(xR, y);
+            else ctx.lineTo(xR, y);
+        }
+        ctx.stroke();
+
+        // 4. Render 3 Distinct Pickup Particles (Yellow = Nitro, Blue = EMP, Green = Hull)
+        for (let i = gameState.pickups.length - 1; i >= 0; i--) {
+            const pk = gameState.pickups[i];
+            const px = projectX(pk.lane, pk.z, W, H, roadCurve);
+            const py = projectY(pk.z, 0.55, H);
+            const scale = (H * 0.85) / Math.max(0.5, pk.z);
+            const r = Math.max(4.5, scale * 0.13);
+
             ctx.save();
-            ctx.translate(pt.x, pt.y);
+            ctx.translate(px, py);
             ctx.rotate(pk.spin);
-            ctx.fillStyle = pk.isGold ? "#fbbf24" : "#38bdf8";
+            ctx.fillStyle = pk.type === 'nitro' ? "#fbbf24" : (pk.type === 'emp' ? "#38bdf8" : "#10b981");
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 1.5;
-            ctx.fillRect(-r, -r, r * 2, r * 2);
-            ctx.strokeRect(-r, -r, r * 2, r * 2);
+
+            if (pk.type === 'hull') {
+                // Green Hull Nanites Cross/Diamond
+                ctx.beginPath();
+                ctx.arc(0, 0, r * 1.1, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.fillRect(-r, -r, r * 2, r * 2);
+                ctx.strokeRect(-r, -r, r * 2, r * 2);
+            }
             ctx.restore();
         }
 
-        const sortedHazards = [...gameState.hazards].sort((a, b) => b.z - a.z);
-        for (const hz of sortedHazards) {
-            const basePt = project3DPoint(hz.lane, hz.z, 0, W, H, roadCurve);
-            const boxW = Math.max(12, hz.cls.w * basePt.scale * 0.24);
-            const boxH = Math.max(8, hz.cls.h * basePt.scale * 0.28);
-            const x1 = basePt.x - boxW * 0.5;
-            const y2 = basePt.y;
+        // 5. Render Hazards (Sorted in-place back-to-front, zero measureText overhead)
+        gameState.hazards.sort((a, b) => b.z - a.z);
+        ctx.font = "bold 10px 'JetBrains Mono', monospace";
+
+        for (let i = 0; i < gameState.hazards.length; i++) {
+            const hz = gameState.hazards[i];
+            const zSafe = Math.max(0.55, hz.z);
+            const scale = (H * 0.85) / zSafe;
+            const bx = projectX(hz.lane, zSafe, W, H, roadCurve);
+            const by = projectY(zSafe, 0, H);
+
+            const boxW = Math.max(12, hz.cls.w * scale * 0.24);
+            const boxH = Math.max(8, hz.cls.h * scale * 0.28);
+            const x1 = bx - boxW * 0.5;
+            const y2 = by;
             const y1 = y2 - boxH;
 
-            ctx.fillStyle = "rgba(0,0,0,0.55)";
-            ctx.fillRect(x1 - 2, y2 - 3, boxW + 4, 5);
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(x1 - 2, y2 - 2, boxW + 4, 4);
 
             ctx.fillStyle = hz.cls.roof;
             ctx.fillRect(x1, y1, boxW, boxH);
 
-            ctx.fillStyle = hz.cls.color;
-            ctx.fillRect(x1 + boxW * 0.07, y1 + boxH * 0.24, boxW * 0.86, boxH * 0.70);
+            ctx.fillStyle = isCosmic250 ? `hsl(${(cosmicHue + hz.cls.id * 45) % 360}, 90%, 58%)` : hz.cls.color;
+            ctx.fillRect(x1 + boxW * 0.08, y1 + boxH * 0.24, boxW * 0.84, boxH * 0.70);
 
             if (!hz.cls.flat && hz.cls.id <= 3) {
                 ctx.fillStyle = "#090d16";
-                ctx.fillRect(x1 + boxW * 0.15, y1 + boxH * 0.12, boxW * 0.70, boxH * 0.22);
+                ctx.fillRect(x1 + boxW * 0.16, y1 + boxH * 0.12, boxW * 0.68, boxH * 0.22);
 
                 ctx.fillStyle = "#ff1e42";
                 const tlW = Math.max(3, boxW * 0.18);
                 const tlH = Math.max(2, boxH * 0.13);
-                ctx.fillRect(x1 + 2, y2 - tlH * 2.1, tlW, tlH);
-                ctx.fillRect(x1 + boxW - tlW - 2, y2 - tlH * 2.1, tlW, tlH);
+                ctx.fillRect(x1 + 2, y2 - tlH * 2, tlW, tlH);
+                ctx.fillRect(x1 + boxW - tlW - 2, y2 - tlH * 2, tlW, tlH);
             }
 
             const tierColor = (hz.rFinal >= 0.85)
                 ? "#ef4444"
-                : (hz.rFinal >= 0.65 ? "#f97316" : (hz.rFinal >= 0.35 ? "#f59e0b" : "#38bdf8"));
+                : (hz.rFinal >= 0.65 ? "#f97316" : (hz.rFinal >= 0.35 ? "#f59e0b" : dynamicWorldColor));
 
             ctx.strokeStyle = tierColor;
-            ctx.lineWidth = hz.rFinal >= 0.65 ? 2.2 : 1.4;
-            ctx.strokeRect(x1 - 3, y1 - 3, boxW + 6, boxH + 6);
+            ctx.lineWidth = hz.rFinal >= 0.65 ? 2.0 : 1.3;
+            ctx.strokeRect(x1 - 2, y1 - 2, boxW + 4, boxH + 4);
 
-            if (hz.z < 38) {
+            if (hz.z < 34) {
                 const label = `${hz.cls.name} ${hz.z.toFixed(1)}m | DGI ${hz.dgi}`;
-                ctx.font = "bold 10px 'JetBrains Mono', monospace";
-                const textW = ctx.measureText(label).width + 8;
-                ctx.fillStyle = "rgba(9, 11, 16, 0.88)";
-                ctx.fillRect(x1 - 3, y1 - 18, textW, 14);
+                const estW = label.length * 6.1 + 8;
+                ctx.fillStyle = "rgba(9, 11, 16, 0.86)";
+                ctx.fillRect(x1 - 2, y1 - 17, estW, 13);
                 ctx.fillStyle = tierColor;
-                ctx.fillText(label, x1 + 1, y1 - 8);
+                ctx.fillText(label, x1 + 2, y1 - 7);
             }
         }
 
-        // Ego Interceptor positioned cleanly above the bottom HUD bar with a contoured elliptical shadow
-        const egoCenter = project3DPoint(gameState.egoLaneX, 2.2, 0, W, H, roadCurve);
-        const egoY = isMobileHardware ? H * 0.775 : H * 0.815;
-        ctx.save();
-        ctx.translate(egoCenter.x, egoY);
-        ctx.rotate(gameState.egoRoll);
+        // 6. True 3D Lane-Perspective Ego Interceptor (100% Straight in All Lanes & 1:1 Hitbox Match!)
+        // Project the car's rear axle (EGO_Z_REAR) and front nose (EGO_Z_FRONT) inside its exact lane bounds
+        const rearLeftX  = projectX(gameState.egoLaneX - EGO_HALF_LANE_W, EGO_Z_REAR,  W, H, roadCurve);
+        const rearRightX = projectX(gameState.egoLaneX + EGO_HALF_LANE_W, EGO_Z_REAR,  W, H, roadCurve);
+        const rearY      = projectY(EGO_Z_REAR, 0, H);
 
-        // Smooth contoured shadow (no rectangular black box clipping)
+        const frontLeftX  = projectX(gameState.egoLaneX - EGO_HALF_LANE_W * 0.82, EGO_Z_FRONT, W, H, roadCurve);
+        const frontRightX = projectX(gameState.egoLaneX + EGO_HALF_LANE_W * 0.82, EGO_Z_FRONT, W, H, roadCurve);
+        const frontY      = projectY(EGO_Z_FRONT, 0.32, H);
+
+        const roofLeftX   = projectX(gameState.egoLaneX - EGO_HALF_LANE_W * 0.56, EGO_Z_CENTER, W, H, roadCurve);
+        const roofRightX  = projectX(gameState.egoLaneX + EGO_HALF_LANE_W * 0.56, EGO_Z_CENTER, W, H, roadCurve);
+        const roofY       = projectY(EGO_Z_CENTER, 0.62, H);
+
+        const carCenterX = (rearLeftX + rearRightX) * 0.5;
+        const carHalfW   = (rearRightX - rearLeftX) * 0.5;
+
+        // Contoured elliptical ground shadow
         ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
         ctx.beginPath();
-        ctx.ellipse(0, 15, 48, 7, 0, 0, Math.PI * 2);
+        ctx.ellipse(carCenterX, rearY + 4, carHalfW * 1.04, 6, 0, 0, Math.PI * 2);
         ctx.fill();
 
+        // Hardware-fast outer aura glow (Zero lag on mobile GPUs!)
         if (gfxSettings.bloom) {
-            ctx.shadowColor = activeRailColor;
-            ctx.shadowBlur = gameState.boosting ? 22 : 12;
+            ctx.strokeStyle = gameState.boosting ? "rgba(251, 191, 36, 0.38)" : `${activeRailColor}55`;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(rearLeftX, rearY);
+            ctx.lineTo(frontLeftX, frontY);
+            ctx.lineTo( roofLeftX, roofY);
+            ctx.lineTo(roofRightX, roofY);
+            ctx.lineTo(frontRightX, frontY);
+            ctx.lineTo(rearRightX, rearY);
+            ctx.closePath();
+            ctx.stroke();
         }
 
+        // Main Interceptor Chassis (Follows exact 3D lane perspective so it's straight in every lane)
         ctx.fillStyle = currentPilot.chassisBase;
         ctx.strokeStyle = gameState.boosting ? "#fbbf24" : activeRailColor;
         ctx.lineWidth = 2.2;
         ctx.beginPath();
-        ctx.moveTo(-48, 14);
-        ctx.lineTo(-38, -8);
-        ctx.lineTo(-24, -19);
-        ctx.lineTo(24, -19);
-        ctx.lineTo(38, -8);
-        ctx.lineTo(48, 14);
+        ctx.moveTo(rearLeftX, rearY);
+        ctx.lineTo(frontLeftX, frontY);
+        ctx.lineTo(roofLeftX, roofY);
+        ctx.lineTo(roofRightX, roofY);
+        ctx.lineTo(frontRightX, frontY);
+        ctx.lineTo(rearRightX, rearY);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        if (currentPilot.isVoidChroma) {
-            const cGrad = ctx.createLinearGradient(-44, -16, 44, 14);
-            cGrad.addColorStop(0, "#00f5d4");
-            cGrad.addColorStop(0.35, `hsl(${(voidHue + 90) % 360}, 100%, 60%)`);
-            cGrad.addColorStop(0.7, "#ff007f");
-            cGrad.addColorStop(1, "#ffbe0b");
-            ctx.strokeStyle = cGrad;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-34, 10);
-            ctx.lineTo(-20, -14);
-            ctx.lineTo(20, -14);
-            ctx.lineTo(34, 10);
-            ctx.stroke();
-        }
-
+        // Cockpit Canopy
         ctx.fillStyle = currentPilot.canopyColor;
         ctx.beginPath();
-        ctx.moveTo(-22, -4);
-        ctx.lineTo(-14, -15);
-        ctx.lineTo(14, -15);
-        ctx.lineTo(22, -4);
+        ctx.moveTo(frontLeftX + (frontRightX - frontLeftX) * 0.18, frontY - 1);
+        ctx.lineTo(roofLeftX + 3, roofY + 2);
+        ctx.lineTo(roofRightX - 3, roofY + 2);
+        ctx.lineTo(frontRightX - (frontRightX - frontLeftX) * 0.18, frontY - 1);
         ctx.closePath();
         ctx.fill();
 
+        // Dual Rear Thruster Taillights
         const thrusterCol = gameState.braking
             ? "#ef4444"
             : (gameState.boosting ? "#fbbf24" : (currentPilot.isVoidChroma ? activeRailColor : currentPilot.thrusterColor));
         ctx.fillStyle = thrusterCol;
-        ctx.fillRect(-38, 2, 18, 7);
-        ctx.fillRect(20, 2, 18, 7);
+        const tWidth = Math.max(10, carHalfW * 0.38);
+        ctx.fillRect(rearLeftX + 5, rearY - 9, tWidth, 6);
+        ctx.fillRect(rearRightX - tWidth - 5, rearY - 9, tWidth, 6);
 
         if (gameState.boosting) {
             ctx.fillStyle = "#fde68a";
-            ctx.fillRect(-34, 9, 10, 10 + Math.random() * 8);
-            ctx.fillRect(24, 9, 10, 10 + Math.random() * 8);
+            ctx.fillRect(rearLeftX + 8, rearY - 3, tWidth * 0.6, 8 + Math.random() * 6);
+            ctx.fillRect(rearRightX - tWidth * 0.6 - 8, rearY - 3, tWidth * 0.6, 8 + Math.random() * 6);
         }
-        ctx.restore();
 
+        // 7. Neural EMP Shockwave
         if (gameState.empWaveRadius > 0) {
             ctx.strokeStyle = activeRailColor;
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 5;
             ctx.beginPath();
             ctx.arc(W * 0.5, H * 0.75, gameState.empWaveRadius, 0, Math.PI * 2);
             ctx.stroke();
         }
 
+        // 8. Weather & Cosmic Particles (Capped for mobile smoothness)
         if (theme.weather !== 'none' && gfxSettings.particles > 0.05) {
-            const pCount = Math.floor(34 * gfxSettings.particles);
-            ctx.save();
+            const baseP = isMobileHardware ? 18 : 30;
+            const pCount = Math.floor(baseP * gfxSettings.particles);
             for (let r = 0; r < pCount; r++) {
-                const rx = ((r * 97 + now * 0.45) % W);
-                const ry = ((r * 61 + now * 1.1) % H);
+                const rx = ((r * 97 + now * 0.42) % W);
+                const ry = ((r * 61 + now * 1.05) % H);
                 if (theme.weather === 'rain') {
                     ctx.strokeStyle = "rgba(125, 211, 252, 0.28)";
                     ctx.beginPath();
                     ctx.moveTo(rx, ry);
-                    ctx.lineTo(rx - 7, ry + 16);
+                    ctx.lineTo(rx - 6, ry + 14);
                     ctx.stroke();
                 } else if (theme.weather === 'snow') {
                     ctx.fillStyle = "rgba(241, 245, 249, 0.65)";
@@ -3211,15 +3532,19 @@
                 } else if (theme.weather === 'petals') {
                     ctx.fillStyle = "rgba(244, 114, 182, 0.65)";
                     ctx.fillRect(rx, ry, 3, 2);
-                } else if (theme.weather === 'spores' || theme.weather === 'matrix') {
+                } else if (theme.weather === 'cosmic') {
+                    ctx.fillStyle = dynamicWorldColor;
+                    ctx.fillRect(rx, ry, 2.5, 2.5);
+                } else {
                     ctx.fillStyle = "rgba(74, 222, 128, 0.55)";
                     ctx.fillRect(rx, ry, 2, 5);
                 }
             }
-            ctx.restore();
         }
 
-        for (const ft of gameState.FloatingTexts) {
+        // 9. Floating Telemetry Notifications
+        for (let i = 0; i < gameState.FloatingTexts.length; i++) {
+            const ft = gameState.FloatingTexts[i];
             ctx.save();
             ctx.globalAlpha = Math.max(0, ft.life);
             ctx.font = "800 13px 'JetBrains Mono', monospace";
@@ -3230,7 +3555,6 @@
         }
 
         ctx.restore();
-        renderMiniRadar();
     }
 
     function escapeHtml(str) {
@@ -3255,7 +3579,6 @@
         }
     });
 
-    // True Physical Landscape Steering-Wheel Gyro Handler (Works even if Android OS Auto-Rotate is OFF)
     window.addEventListener('deviceorientation', (e) => {
         if (e.beta === null && e.gamma === null) return;
 
@@ -3371,6 +3694,7 @@
     refreshKeybindLabels();
     buildBiomeSelectorGrid();
     updateTopLeaderBanner();
+    renderMiniRadar();
     connectRealtimeCloudStream();
 
     let lastFrameTime = performance.now();
@@ -3378,7 +3702,7 @@
         const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
         lastFrameTime = now;
 
-        updateGamePhysics(dt);
+        updateGamePhysics(dt, now);
         renderSceneFrame(now);
 
         requestAnimationFrame(mainLoop);
